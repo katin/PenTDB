@@ -1,0 +1,57 @@
+SYSTEM_NOTES.txt
+
+HOST type records start with just the session_id and ip_address, and can be used to hold notes, creds found, and other such host information.
+
+Record Type HOST
+----------------
+The HOST record uses the same record layout (table) as test (testinstance), but the fields take on different functions. The changed-function fields are below. Other fields not listed have the same functions/meanings as a test instance.
+
+rectype - varchar(16) - 'HOST'
+
+status - varchar(16) - (empty), SCANNED, SHELL, ROOT
+
+pass_depth - tinyint(4) - 
+port - int(10) - 
+
+service - varchar(127) - hostname, if/when known
+banner - varchar(127) - machine OS version and patch level, if/when known
+
+statustype - varchar(16) - 
+title - varchar(127) - 
+cmd - longtext - 
+process_result_cmd - longtext - 
+ 
+order_weight - tinyint(4) - 
+raw_result - longtext - 
+discovered - longtext - 
+flags - varchar(255) - 
+
+notes - longtext - available for user notes
+
+
+
+
+
+VULNS Table should include:
+---------------------------
+
+vid- int(10) unsigned NOT NULL AUTO_INCREMENT,
+created- timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+session_id- varchar(96) NOT NULL DEFAULT '',
+ip_address- varchar(39) NOT NULL DEFAULT '',
+port- int(10) unsigned NOT NULL DEFAULT '0',
+service- varchar(127) NOT NULL DEFAULT '',
+
+
+rating: 		MATCH, POSSIBLE, UNLIKLEY, EXCLUDED
+status: 		UNTRIED (empty), WORKED, FAILED/EXCLUDE, FAILED/TWEAKABLE, 
+pass_depth: 	n
+
+EDB_ID: 		exploit-db.com number
+type: 			LOCAL, WEBAPP, DOS, REMOTE,
+EDB_verified: 	y/n
+
+
+
+
+

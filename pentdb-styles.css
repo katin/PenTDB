@@ -1,0 +1,148 @@
+/* PenTDB CSS */
+
+body {
+	background-color: #333;
+	color: #ccc;
+	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+	font-size: 13pt;
+}
+
+form {
+	margin-block-end: 0;
+}
+
+a {
+	color: #ddd;
+}
+
+a:visited {
+	color: #bbb;
+}
+a.hover-link {
+	text-decoration: none;
+}
+a.hover-link:hover {
+	color: #e8e8e8;
+	text-decoration: underline;
+}
+
+/* wrapper for each test in the list of port tests */
+.test {
+	margin: 20 20;
+	padding-bottom: 20px;
+}
+
+.test-title {
+	font-size: 130%;
+	margin-bottom: 5px;
+	background-color: #585858;
+	padding-left: 10px;
+}
+
+.status-empty {
+	background-color: #722;
+}
+.status-completed {
+	background-color: #162;
+}
+.status-other {
+	background-color: #117;
+}
+
+.test-cmd, .test-process {
+	margin-left: 80px;
+	font-family: "Lucida Console", Monaco, monospace;
+	font-size: 11pt;
+}
+
+input.cmd-text {
+	background-color: #111;
+	color: #eee;
+	font-family: Courier;
+	border-width: 1px;
+	border-color: #888;
+    width: -webkit-calc(100% - 1500px);
+    width:    -moz-calc(100% - 150px);
+    width:         calc(100% - 150px);
+}
+button.cmd-copy {
+	background-color: #666;
+	color: #fff;
+	border-width: 1px;
+	border-color: #888;
+}
+
+.button-block {
+	float: left;
+	width: 75px;
+
+}
+
+.red-button, .red {
+	background-color: #933;
+}
+.green-button, .green {
+	background-color: green;
+}
+.gray {
+	background-color: gray;
+}
+.blue {
+	background-color: blue;
+}
+.depth-divider {
+	width: 2px;
+	height: 14px;
+	background-color: #446;
+	float: left;
+	display: block;
+	margin: 2px 8px;
+}
+.clear {
+	clear: both;
+}
+
+.ip-link {
+	clear: both;
+	padding-top: 5px;
+}
+
+.port-test-status {
+	clear: both;
+}
+.port-test-status .label {
+	display: block;
+	float: left;
+	margin-right: 3px;
+	margin-left: 20px;
+}
+.indicator {
+	width: 20px;
+	height: 14px;
+	margin: 2px 2px;
+	float: left;
+	display: block;
+}
+
+.bigform {
+	margin-top: 20px;
+}
+.bigform label {
+	width: 200px;
+	display:inline-block;
+	text-align: right;
+}
+.bigform input[type="submit"] {
+	margin-left: 220px;
+	margin-top: 5px;
+}
+
+.inlineform {
+	margin-left: 100px;
+}
+.inlineform input {
+	background-color: #222;
+	color: #ddd;
+	border-color: #555;
+}
+
