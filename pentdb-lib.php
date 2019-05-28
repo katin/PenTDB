@@ -422,6 +422,10 @@ function get_status_color( $statustype, $status, $flags = NULL ) {
 					$status_color = 'red';
 					break;
 
+				case 'IN-PROGRESS':
+					$status_color = 'orange';
+					break;
+
 				default:
 					break;
 			}
@@ -453,8 +457,21 @@ function get_binary_status_button( $status, $rec_id ) {
 		$neg_class = 'class="red-button" ';
 	}
 
+	$progress_class = '';
+	if ($status == 'IN-PROGRESS') {
+		$progress_class = 'class="orange-button" ';
+	}
+
 	$button_form = '
 		<div><FORM action="index.php" method="GET">
+			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+			<INPUT type="hidden" name="cmd" value="set-progress"></INPUT>
+			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
+			<INPUT '.$progress_class.'type="submit" value="InProgress"></INPUT>
+		</FORM></div>
+			<div><FORM action="index.php" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
@@ -608,6 +625,33 @@ function get_set_flags_form( $recid ) {
 		<INPUT type="submit" value="Update Flags"></INPUT>
 		</FORM></div>
 	';
+
+	return $myform;
+}
+
+
+function get_notes_form( $recid, $notes ) {
+	$vars = pentdb_get_page_vars();
+	$myform = '
+		<div class="inlineform"><FORM class="notes-form" action="index.php" method="GET" id="notes-form-'.$recid.'">
+
+		<LABEL for="notes_form">Notes: </LABEL>
+		<textarea wrap="soft" cols="80" rows="8" name="notes" id ="notes">'.$notes.'</textarea><br/>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+
+		<INPUT type="hidden" name="cmd" value="update-notes"></INPUT>
+		<INPUT type="submit" value="Update Notes"></INPUT>
+		</FORM></div>
+
+	';
+
+		// <textarea rows="4" cols="50" name="notes" form="notes-form">'.$notes.'</textarea>
+
 
 	return $myform;
 }

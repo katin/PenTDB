@@ -1,5 +1,24 @@
 SYSTEM_NOTES.txt
 
+BINARY STATUS
+-------------
+An empty status field shows a gray indicator button - no action has been taken yet.
+An "IN-PROGRESS" status shows light orange, that the test is running.
+
+A POS status shows as a green indicator: test completed with a useful data/path forward.
+A NEG status shows as a red indicator: test showed no results / no clues / no path.
+
+Either way, the test is completed with either a POS or NEG status, which marks the test title bar with a GREEN background (completed).
+
+
+DEPTH STATUS
+------------
+
+
+
+
+
+
 HOST type records start with just the session_id and ip_address, and can be used to hold notes, creds found, and other such host information.
 
 Record Type HOST

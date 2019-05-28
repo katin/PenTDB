@@ -80,13 +80,28 @@ function ptdb_process_cmd ( $mycmd ) {
 			break;
 
 
+		case 'update-notes':
+			$up_q = "UPDATE {testinstance} set notes='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['notes'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Notes update query failed. [ERR-881]";
+				die();
+			}
+echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
+
+			return true;
+			break;
+
 		case 'set-pos':
 			ptdb_set_binary_status( 'POS' );
 			break;
 
-
 		case 'set-neg':
 			ptdb_set_binary_status( 'NEG' );
+			break;
+
+		case 'set-progress':
+			ptdb_set_binary_status( 'IN-PROGRESS' );
 			break;
 
 		case 'new-port':

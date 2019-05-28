@@ -28,8 +28,8 @@ a.hover-link:hover {
 
 /* wrapper for each test in the list of port tests */
 .test {
-	margin: 40 20;
-	padding-bottom: 20px;
+	margin: 40 10 20;
+	/*padding-bottom: 20px;*/
 }
 
 .test-title {
@@ -45,6 +45,11 @@ a.hover-link:hover {
 .status-completed {
 	background-color: #162;
 }
+.status-in-progress {
+	background-color: #d94;
+	color: #333;
+}
+
 .status-other {
 	background-color: #117;
 }
@@ -85,6 +90,9 @@ button.cmd-copy {
 }
 .green-button, .green {
 	background-color: green;
+}
+.orange-button, .orange {
+	background-color: orange;
 }
 .gray {
 	background-color: gray;
@@ -154,6 +162,25 @@ button.cmd-copy {
 }
 .inlineform input[type="submit"] {
 	width: 120px;
+}
+
+.notes-form {
+	margin-left: 40px;
+    padding-right: 40px;
+    text-align: left;
+    vertical-align: top;
+}
+.notes-form textarea {
+	background-color: #222;
+	color: #ddd;
+	border-color: #555;
+	vertical-align: top;
+	/* these aren't working */
+/*	scrollbar-base-color: #555; 
+	scrollbar-track-color: #555; 
+	scrollbar-color: red yellow;
+	scrollbar-color: dark;*/
+	/* https://css-tricks.com/the-current-state-of-styling-scrollbars/ */
 }
 
 .flags-display {

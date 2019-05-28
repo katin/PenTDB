@@ -197,6 +197,10 @@ function display_service_page( $session_id, $ip, $service ) {
 						$status_bar = 'status-completed';
 						break;
 
+					case 'IN-PROGRESS':
+						$status_bar = 'status-in-progress';
+						break;
+
 					default:
 						break;
 				}
@@ -226,6 +230,8 @@ function display_service_page( $session_id, $ip, $service ) {
 		}
 		$buttons .= '</div>'."\n";
 
+		$notes_form = get_notes_form( $test['irid'], $test['notes'] );
+
 		$banner_form = '';
 		if ( $test['rectype'] == 'TITLE' ) {
 			$banner_form = get_add_banner_form( $test['irid'] );
@@ -241,7 +247,7 @@ function display_service_page( $session_id, $ip, $service ) {
 			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset($test['process_result_cmd'])).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "</div>\n";
 
-		$test_list .= $banner_form . $flags_form;
+		$test_list .= $notes_form . $banner_form . $flags_form;
 
 		$service = ($service ? $service : $test['service']);
 	}
