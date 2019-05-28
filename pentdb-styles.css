@@ -28,7 +28,7 @@ a.hover-link:hover {
 
 /* wrapper for each test in the list of port tests */
 .test {
-	margin: 20 20;
+	margin: 40 20;
 	padding-bottom: 20px;
 }
 
@@ -53,6 +53,8 @@ a.hover-link:hover {
 	margin-left: 80px;
 	font-family: "Lucida Console", Monaco, monospace;
 	font-size: 11pt;
+	padding-right: 20px;
+	text-align: right;
 }
 
 input.cmd-text {
@@ -90,6 +92,9 @@ button.cmd-copy {
 .blue {
 	background-color: blue;
 }
+.yellow {
+	background-color: #dd5;
+}
 .depth-divider {
 	width: 2px;
 	height: 14px;
@@ -107,13 +112,13 @@ button.cmd-copy {
 	padding-top: 5px;
 }
 
-.port-test-status {
+.service-test-status {
 	clear: both;
 }
-.port-test-status .label {
-	display: block;
+.service-test-status .label {
+	display: inline-block;
 	float: left;
-	margin-right: 3px;
+	margin-right: 10px;
 	margin-left: 20px;
 }
 .indicator {
@@ -139,10 +144,24 @@ button.cmd-copy {
 
 .inlineform {
 	margin-left: 100px;
+    padding-right: 40px;
+    text-align: right;
 }
 .inlineform input {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
+}
+.inlineform input[type="submit"] {
+	width: 120px;
+}
+
+.flags-display {
+	background-color: #dd5;
+	margin: 3px;
+	margin-left: 80px;
+    line-height: 1.5em;
+    padding-left: 3px;
+    color: #222;
 }
 

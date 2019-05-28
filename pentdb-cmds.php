@@ -34,13 +34,13 @@ function ptdb_process_cmd ( $mycmd ) {
 			}
 
 
-		case 'add-port':
+		case 'add-service':
 			if ( empty($_GET['altport'])) {
 				die('You must specify a port number');
 			}
 			$the_ip = pentdb_validate_ip($_GET['ip'] );
 			$the_session = $_GET['session_id'];		// TODO: sanitize session id
-			// $port_select = pentdb_validate_port($_GET['port-select']);
+			// $service_select = pentdb_validate_service($_GET['service-select']);
 			$port = pentdb_validate_port($_GET['altport']);
 			
 			// $service = substr($_GET['service'],0,strpos($_GET['service-select'], ' (' ));
@@ -49,12 +49,12 @@ function ptdb_process_cmd ( $mycmd ) {
 // die( print_r($_GET,true) );
 
 			// [_] TODO: validate service selection
-			$success = pentdb_add_port( $the_ip, $the_session, $port, $service );
+			$success = pentdb_add_service( $the_ip, $the_session, $port, $service );
 			if ( $success ) {
-				$_GET['port'] = $success;
+				$_GET['service'] = $success;
 				break;
 			} else {
-				echo "<div>Add port failed.</div>";
+				echo "<div>Add service failed.</div>";
 				break;
 			}
 
@@ -63,6 +63,17 @@ function ptdb_process_cmd ( $mycmd ) {
 			$up_result = db_query($up_q, $_GET['banner'], $_GET['recid']);
 			if ( !$up_result ) {
 				"Banner update query failed. [ERR-881]";
+				die();
+			}
+			return true;
+			break;
+
+
+		case 'update-flags':
+			$up_q = "UPDATE {testinstance} set flags='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['flags'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Flags update query failed. [ERR-881]";
 				die();
 			}
 			return true;

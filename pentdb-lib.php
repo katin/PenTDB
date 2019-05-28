@@ -35,6 +35,12 @@ function pentdb_validate_port( $port ) {
 	}
 }
 
+function pentdb_validate_service( $service ) {
+	// [_] TODO: write service validator
+	// can't just use db query, since new services can be added per host
+	return $service;
+
+}
 
 // fill_varset
 //
@@ -264,6 +270,10 @@ function pentdb_get_page_vars() {
 	if ( isset($_GET['rec_id']) ) {
 		$vars['rec_id'] = pentdb_clean( $_GET['rec_id'] );
 	}
+	if ( isset($_GET['service']) ) {
+		$vars['service'] = pentdb_clean( $_GET['service'] );
+	}
+
 	return $vars;
 }
 
@@ -278,13 +288,13 @@ function build_ip_status_display( $session_id, $ip ) {
 
 	$output = '<div class="ip-test-status">'."\n";
 
-	$portlist = get_port_list( $session_id, $ip );
+	$servicelist = get_service_list( $session_id, $ip );
 
-// echo "<div><pre>".print_r($portlist,true)."</pre></div>";
+// echo "<div><pre>".print_r($servicelist,true)."</pre></div>";
 // die("check");
 
-	foreach( $portlist as $port ) {
-		$output .= build_port_status_display( $session_id, $ip, $port );
+	foreach( $servicelist as $service ) {
+		$output .= build_service_status_display( $session_id, $ip, $service );
 	}
 
 	$output .= '</div>'."\n";
@@ -293,60 +303,72 @@ function build_ip_status_display( $session_id, $ip ) {
 }
 
 
-function get_port_list( $session_id, $ip ) {
-	$portlist = array();
+function get_service_list( $session_id, $ip ) {
+	$servicelist = array();
 
-	$port_q = "SELECT DISTINCT port FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' ORDER BY port";
-	$port_recs = db_query( $port_q, $session_id, $ip );
-	if ( !$port_recs ) {
-		pentdb_log_error('<div>Ports query failed. [Error-2111]</div>' );
+	$service_q = "SELECT DISTINCT service FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' ORDER BY port";
+
+// echo "<div><pre>".print_r($service_q,true)."</pre></div>";
+// die("check");
+
+	$service_recs = db_query( $service_q, $session_id, $ip );
+	if ( !$service_recs ) {
+		pentdb_log_error('<div>Services query failed. [Error-2111]</div>' );
 		return false;
 	}
-	if ( $port_recs->num_rows == 0 ) {
-		pentdb_log_error('<div>No port records found. [Notice 211]</div>' );
+	if ( $service_recs->num_rows == 0 ) {
+		pentdb_log_error('<div>No service records found. [Notice 211]</div>' );
 		return false;
 	}
 
-	while ( $rec = db_fetch_array( $port_recs) ) {
-		// for now, dont' show port zero 
-		if ($rec['port'] == 0) {
+	while ( $rec = db_fetch_array( $service_recs) ) {
+		// for now, dont' show service zero 
+		if ( empty($rec['service'])) {
 			continue;
 		}
-		$portlist[] = $rec['port'];
+		$servicelist[] = $rec['service'];
 	}
 
-	return $portlist;
+	return $servicelist;
 }
 
 
-function base_link($session_id, $ip, $port, $extra = NULL, $spot = NULL) {
-	return '<a '.$extra.' href="index.php?session_id='.$session_id.'&ip='.$ip.'&port='.$port.($spot ? "#".$spot : '').'">';
+function base_link($session_id, $ip, $service, $extra = NULL, $spot = NULL) {
+	return '<a '.$extra.' href="index.php?session_id='.$session_id.'&ip='.$ip.'&service='.$service.($spot ? "#".$spot : '').'">';
 }
 
-// build_port_status_display
+// build_service_status_display
 //
 // Create HTML for a one-line, simple boxes-and-colors status display 
-//  of the given port for the given ip address in the given session.
+//  of the given service for the given ip address in the given session.
 // This can grow more sophisticated over time, adding visual indicators
 //  for flags, discoveries, and more.
 // Hover-over for more details of the test.
 
-function build_port_status_display( $session_id, $ip, $port ) {
+function build_service_status_display( $session_id, $ip, $service ) {
 
-	$output = '<div class="port-test-status">'."\n";
-	$output .= '<div class="label">Port '.$port.'</div>'."\n";
-	$rec_handle = read_port_records( $session_id, $ip, $port );
+	$output = '<div class="service-test-status">'."\n";
+	$rec_handle = read_service_records( $session_id, $ip, $service );
+
+// echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
 
 	$depth = 0;
+	$title_found = false;
 	while ( $rec = db_fetch_array($rec_handle) ) {
+		if ( !$title_found ) {
+			if ( $rec['rectype'] == 'TITLE' ) {
+				$output .= base_link($session_id,$ip,$service,'class="hover-link"').'<div class="label">'.$rec['service'].' port '.$rec['port'].'</div></a>'."\n";
+				$title_found = true;
+			}
+		}
 		$depth_mark = '';
 		if ( $rec['pass_depth'] > $depth ) {
 			$depth++;
 			$depth_mark = '<div class="depth-divider"></div>'."\n";
 		}
-		$display_color = get_status_color( $rec['statustype'], $rec['status'] );
-		$title = 'title="'.$rec['title'].'"';
-		$link = base_link($session_id,$ip,$port,$title,"test-".$rec['irid']); 
+		$display_color = get_status_color( $rec['statustype'], $rec['status'], $rec['flags'] );
+		$title = 'title="'.$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
+		$link = base_link($session_id,$ip,$service,$title,"test-".$rec['irid']); 
 		$block = $link.'<div class="indicator '.$display_color.'"></div></a>'."\n";
 		$output .= $depth_mark . $block;
 
@@ -363,17 +385,17 @@ function build_port_status_display( $session_id, $ip, $port ) {
 }
 
 
-function read_port_records( $session_id, $ip, $port ) {
+function read_service_records( $session_id, $ip, $service ) {
 
-	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND port='%d' ORDER BY pass_depth, order_weight";
-	$tests_recs = db_query( $tests_q, $session_id, $ip, $port );
+	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' ORDER BY pass_depth, order_weight";
+
+	$tests_recs = db_query( $tests_q, $session_id, $ip, $service );
 	if ( !$tests_recs ) {
 		pentdb_log_error( '<div>Query or DB error. [Error 612]' );
 		return false;
 	}
 	if ( $tests_recs->num_rows == 0 ) {
-		pentdb_log_error( '<div>No records found for port '.$port.' session "'.$session_id.'" [MSG-2118]' );
-// echo "<div><pre>".print_r($tests_recs,true)."</pre></div>";
+		pentdb_log_error( '<div>No records found for service '.$service.' session "'.$session_id.'" [MSG-2118]' );
 		return false;
 	}
 
@@ -381,8 +403,14 @@ function read_port_records( $session_id, $ip, $port ) {
 }
 
 
-function get_status_color( $statustype, $status ) {
+function get_status_color( $statustype, $status, $flags = NULL ) {
 	$status_color = 'gray';
+
+	if ( !empty($flags) ) {
+		$status_color = 'yellow';
+		return $status_color;
+	}
+
 	switch ($statustype) {
 		case 'BINARY':
 			switch ($status) {
@@ -429,7 +457,7 @@ function get_binary_status_button( $status, $rec_id ) {
 		<div><FORM action="index.php" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
-			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="cmd" value="set-pos"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 			<INPUT '.$pos_class.'type="submit" value="POS"></INPUT>
@@ -437,7 +465,7 @@ function get_binary_status_button( $status, $rec_id ) {
 		<div><FORM action="index.php" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
-			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="cmd" value="set-neg"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>		
 			<INPUT '.$neg_class.'type="submit" value="NEG"></INPUT>
@@ -486,6 +514,7 @@ echo "<div>".$newp_q."</div>\n";
 }
 
 function get_add_test_form( $title = "Add a test" ) {
+	$vars = pentdb_get_page_vars();
 	$bigform = '
 		<div class="bigform"><FORM action="index.php" method="GET">
 
@@ -524,16 +553,16 @@ function get_add_test_form( $title = "Add a test" ) {
 		<LABEL for="process_result_cmd">Process result cmd: </LABEL>
 		<INPUT type="text" name="process_result_cmd" id = "process_result_cmd"></INPUT><br/>
 
-		<INPUT type="hidden" name="service" value="'.$service.'"></INPUT>
-		<INPUT type="hidden" name="port" value="'.$port.'"></INPUT>
-
-		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
-		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 		<INPUT type="hidden" name="cmd" value="new-port"></INPUT>
 		<INPUT type="submit" value="Add a test"></INPUT>
 		</FORM></div>
 	';
 	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+		// <INPUT type="hidden" name="port" value="'.$port.'"></INPUT>
 
 	return $bigform;
 }
@@ -548,12 +577,35 @@ function get_add_banner_form( $recid ) {
 
 		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
 
-		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 
 		<INPUT type="hidden" name="cmd" value="update-banner"></INPUT>
 		<INPUT type="submit" value="Update Banner"></INPUT>
+		</FORM></div>
+	';
+
+	return $myform;
+}
+
+
+function get_set_flags_form( $recid ) {
+	$vars = pentdb_get_page_vars();
+	$myform = '
+		<div class="inlineform"><FORM action="index.php" method="GET">
+
+		<LABEL for="flags">Flags: </LABEL>
+		<INPUT type="text" name="flags" id = "flags"></INPUT>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+
+		<INPUT type="hidden" name="cmd" value="update-flags"></INPUT>
+		<INPUT type="submit" value="Update Flags"></INPUT>
 		</FORM></div>
 	';
 

@@ -2,7 +2,7 @@
 
 // penTDB index.php
 //
-// Display a chart specified by the passed parms, "ip" and "port".
+// Display a chart specified by the passed parms, "ip" and "service".
 //
 // 190519 KBI created
 
@@ -42,22 +42,22 @@ if ( empty($_GET['session_id']) ) {
 }
 $session_id = pentdb_clean( $_GET['session_id'] );
 
-if ( isset($_GET['port']) ) {
-	if ( $vport = pentdb_validate_port($_GET['port'] )) {
+if ( isset($_GET['service']) ) {
+	if ( $vservice = pentdb_validate_service($_GET['service'] )) {
 		if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
-			display_port_page( $session_id, $vip, $vport );
+			display_service_page( $session_id, $vip, $vservice );
 		} else {
 			echo '<div class="error">Invalid ip parameter. [Error 427]</div>';
 		}
 	} else {
-		echo '<div class="error">Invalid port parameter. [Error 422]</div>';
+		echo '<div class="error">Invalid service parameter. [Error 422]</div>';
 	}
 	die();
 }
 
 if ( isset($_GET['ip']) ) {
 	if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
-		display_portslist_page( $session_id, $vip );
+		display_serviceslist_page( $session_id, $vip );
 	} else {
 		echo '<div class="error">Invalid ip parameter. [Error 425]</div>';
 	}
@@ -171,20 +171,19 @@ $myform = '
 
 
 	//
-	// display a port test set page
+	// display a service test set page
 	//
-	
-function display_port_page( $session_id, $ip, $port ) {
-	// echo '<h1>Port Test Tracker</h1>';
 
-	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND port='%s' ORDER BY pass_depth, order_weight";
-	$tests_recs = db_query( $tests_q, $session_id, $ip, $port );
+function display_service_page( $session_id, $ip, $service ) {
+
+	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' ORDER BY pass_depth, order_weight";
+	$tests_recs = db_query( $tests_q, $session_id, $ip, $service );
 	if ( !$tests_recs ) {
-		echo '<div>Session ports "'.$session_id.'"not found in database. [Error 611]';
+		echo '<div>Session services "'.$session_id.'"not found in database. [Error 611]';
 		die();
 	}
 
-	// display a list of tests for this port
+	// display a list of tests for this service
 	$test_list = '';
 	$service = '';
 	$passD = 0;
@@ -231,26 +230,28 @@ function display_port_page( $session_id, $ip, $port ) {
 		if ( $test['rectype'] == 'TITLE' ) {
 			$banner_form = get_add_banner_form( $test['irid'] );
 		}
+		$flags_form = get_set_flags_form( $test['irid'] );
 
 		$lineid = "Tcmd".$test['irid'];
 		$test_list .= '<div class="test" id="test-'.$test['irid'].'">'
 			. '<div class="test-title '.$status_bar.'">'.strtoupper($test['rectype']).': &nbsp;&nbsp;'.$test['title'].($test['banner'] ? ' - '.$test['banner'] : '').'</div>'
 			. $buttons
+			. '<div class="flags-display">'.($test['flags'] ? 'Flags: ' : '').$test['flags'].'</div>'."\n"
 			. '<div class="test-cmd">CMD: <input class="cmd-text" type="text" value="'.fill_varset($test['cmd']).'" id="'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button></div>'
 			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset($test['process_result_cmd'])).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "</div>\n";
 
-		$test_list .= $banner_form;
+		$test_list .= $banner_form . $flags_form;
 
 		$service = ($service ? $service : $test['service']);
 	}
 	if ( $test_list ) {
-		$test_list = '<h2>Test Tracker, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, Port '.$port.' / '.$service.':</h2>'."
+		$test_list = '<h2>Test Tracker, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
 		\n" . $test_list;
 		$test_list .= "\n".'<p class="clear"></p>'."\n";
 	} else {
 		$test_list .= "<h2>No tests found.</h2>";
-		$test_list .= "<div>ip ".$ip.", port ".$port."</div>\n";
+		$test_list .= "<div>ip ".$ip.", service ".$service."</div>\n";
 	}
 
 	$mypage = $test_list . get_add_test_form();
@@ -259,54 +260,53 @@ function display_port_page( $session_id, $ip, $port ) {
 
 
 	//
-	// display a ports list page
+	// display a services list page
 	//
 
-	
-function display_portslist_page( $session_id, $ip ) {
+function display_serviceslist_page( $session_id, $ip ) {
 
-	$port_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' ORDER BY port";
-	$port_recs = db_query( $port_q, $session_id, $ip);
-	if ( !$port_recs ) {
+	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' ORDER BY service";
+	$service_recs = db_query( $service_q, $session_id, $ip);
+	if ( !$service_recs ) {
 		echo '<div>Session id "'.$session_id.'"not found in database.';
 		// *** TODO: Add link to add this as new session to db
 		die();
 	}
 
-	// display a list of ports available to test
-	$port_test = '';
-	while ( $port = db_fetch_array( $port_recs ) ) {
+	// display a list of services available to test
+	$service_list = '';
+	while ( $service = db_fetch_array( $service_recs ) ) {
 
-			// port zero is the host record; skip that
-		if ( $port['port'] == 0 ) {
-			continue;
-		}
-		$port_list .= '<div><a href="index.php?session_id='.$session_id.'&ip='.$port['ip_address'].'&port='.$port['port'].'">'.$port['title'].': '.$port['service'].'</a></div>'."\n";
+			// port zero is the HOST record; skip that
+		// if ( $service['port'] == 0 ) {
+		// 	continue;
+		// }
+		$service_list .= '<div><a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$service['ip_address'].'&service='.$service['service'].'">'.$service['title'].': '.$service['service'].'</a></div>'."\n";
 
-// echo "<div><pre>".print_r($port,true)."</pre></div>";
+// echo "<div><pre>".print_r($service,true)."</pre></div>";
 
 	}
-	if ( $port_list ) {
-		$port_list = "<h2>Select port to test:</h2>\n" . $port_list;
-		$port_list .= "\n<p></p>\n";
+	if ( $service_list ) {
+		$service_list = "<h2>Select service to test:</h2>\n" . $service_list;
+		$service_list .= "\n<p></p>\n";
 	}
 
 
 	// display a create test form
-	$tests_q = "SELECT port,title,service FROM {porttest} WHERE rectype='TITLE'";
+	$tests_q = "SELECT service,title,port FROM {porttest} WHERE rectype='TITLE'";
 	$tests_recs = db_query( $tests_q );
 	if ( !$tests_recs ) {
-		echo '<div>Error - failed query of porttest table.</div>';
+		echo '<div>Error - failed query of servicetest table.</div>';
 		die();
 	}
 	if ( $tests_recs->num_rows == 0 ) {
-		echo '<div>No port test templates found in database.</div>';
+		echo '<div>No service test templates found in database.</div>';
 		die();
 	}
 
 	$test_list = '';
 	while ( $test = db_fetch_array( $tests_recs ) ) {
-		$test_list .= '<OPTION value="'.$test['service'].'">'.$test['service'].' (port '.$test['port'].') </OPTION>'."\n";
+		$test_list .= '<OPTION value="'.$test['service'].'">'.$test['service'].' (service '.$test['service'].') </OPTION>'."\n";
 	}
 
 	$myform = '
@@ -318,8 +318,8 @@ function display_portslist_page( $session_id, $ip ) {
 		<INPUT type="text" name="altport" id="altport"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
-		<INPUT type="hidden" name="cmd" value="add-port"></INPUT>
-		<INPUT type="submit" value="Add port set"></INPUT>
+		<INPUT type="hidden" name="cmd" value="add-service"></INPUT>
+		<INPUT type="submit" value="Add service set"></INPUT>
 		</FORM></div>
 	';
 
@@ -362,7 +362,7 @@ function display_portslist_page( $session_id, $ip ) {
 		</FORM></div>
 	';
 
-	$mypage = $port_list . $myform . $bigform;
+	$mypage = $service_list . $myform . $bigform;
 	display_page( $mypage );
 }
 
