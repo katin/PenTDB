@@ -1,0 +1,20 @@
+// Port 80 Tests by Katin
+//
+// NOTES: 
+//		statustype = BINARY, DEPTH, or NONE (case insensitive)
+//		rectype = TITLE, SCAN, TOOL, SCRIPT, HOST, or EXAMINE
+//
+// LOAD DATA LOCAL INFILE '/path/port-80_chart.dat' INTO TABLE porttest FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 9 ROWS;
+//
+// Cols: autoid, port, rectype, statustype, service, title, cmd, process_result_cmd, pass_depth, order_weight
+0,"80","TITLE","BINARY","http","http port $port","nmap -sV $ip -p$port","nmap -sV $ip -p$port | grep open | rev | cut -d" " -f-2 | rev","0","0"
+0,"80","SCAN","BINARY","http","Nikto scan","nikto -host $ip -port $port | tee nikto-scan-$myport.txt","Examine results and check CVEs","1","0"
+0,"80","EXAMINE","DEPTH","http","vuln search","searchsploit $banner; google $banner exploit; http://exploit-db.com $service $progressive_versions","Human disqualification and ranking","1","1"
+0,"80","EXAMINE","DEPTH","http","Examine index page","http://$ip","Check for app, version, and source for vulns","1","2"
+0,"80","EXAMINE","BINARY","http","Examine robots.txt file","wget http://$ip/robots.txt","Examine for subdirectories","1","3"
+0,"80","EXAMINE","BINARY","http","Load site with hostname instead of IP","DNS hostname; add it to /etc/hosts; pull up page","Anything different?","1","4"
+0,"80","EXAMINE","DEPTH","http","Check for file lists in subdirectories","Browse to /","Listing open?","1","4"
+0,"80","SCAN","DEPTH","http","gobuster subdir brute search","gobuster -u http://$ip -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt","Browse any subdirectories found","1","5"
+0,"80","SCAN","DEPTH","http","dirbuster (GUI)","dirbuster","Browse any subdirectories found","2","1"
+0,"80","SCAN","DEPTH","http","nmap scripts","select (all?) and run nmap http scripts","Analyze results.","2","2"
+0,"80","SCAN","DEPTH","http","Metasploit scripts","select and run msf scripts and scans","Analyze results","2","3"
