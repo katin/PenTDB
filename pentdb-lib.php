@@ -6,6 +6,7 @@
 //
 // 190519 KBI - created
 
+global $top_message;
 
 // clean()
 //
@@ -47,6 +48,7 @@ function pentdb_validate_service( $service ) {
 // Fill in any variables that we know about:
 //	$ip = ip address
 //  $port = port
+//  $i4p = forth octet of the current IP address
 
 function fill_varset( $line, $ip = NULL, $port = NULL ) {
 	// by this time, the $_GET parms have been validated
@@ -54,13 +56,44 @@ function fill_varset( $line, $ip = NULL, $port = NULL ) {
 
 	$my_ip = ($ip ? $ip : $_GET['ip']);
 	$my_port = ($port ? $port : $_GET['port']);
+	$my_i4p = substr( $my_ip, strrpos( $my_ip, '.')+1, 99);
 
+// die('i4p='.$my_i4p);
+
+	$line = str_replace ( '$i4p' , $my_i4p , $line );
 	$line = str_replace ( '$ip' , $my_ip , $line );
 	$line = str_replace ( '$port' , $my_port , $line );
 
 	return $line;
 }
 
+// get_session_path
+//
+// Read the session record and return the data path set
+
+function pentdb_get_session_path() {
+	$session_id = pentdb_clean( $_GET['session_id'] );
+	$path_q = "SELECT * FROM {sessions} where session_id='%s'";
+	$session_rec = db_fetch_array( db_query( $path_q, $session_id ) );
+	if ( $session_rec ) {
+		return $session_rec['data_path'];
+	}
+
+}
+
+// get_cmd_path
+//
+// Read the session record and return the data path set
+
+function pentdb_get_cmd_path() {
+	$session_id = pentdb_clean( $_GET['session_id'] );
+	$path_q = "SELECT * FROM {sessions} where session_id='%s'";
+	$session_rec = db_fetch_array( db_query( $path_q, $session_id ) );
+	if ( $session_rec ) {
+		return $session_rec['cmd_path'];
+	}
+
+}
 
 
 // display_page
@@ -81,6 +114,7 @@ function display_page( $content ) {
 // Issue an HTML header with styles, etc.
 
 function display_html_header() {
+global $top_message;
 ?>
 <HTML>
 <HEAD>
@@ -91,9 +125,13 @@ function display_html_header() {
 <BODY>
 	<H1><a class="hover-link" href="index.php">PenTDB Tool by K10</a></H1>
 <?php
+	$path = pentdb_get_session_path();
 	if ( isset($_GET['session_id']) ) {
 		$sid = pentdb_clean( $_GET['session_id'] );
-		echo '<h2>Session ID: <a class="hover-link" href="index.php?session_id='.$sid.'">'.$sid.'</a></h2>'."\n";
+		echo '<span class="session-title">Session ID: <a class="hover-link" href="index.php?session_id='.$sid.'">'.$sid.'</a> </span><span class="dir-path">'.$path.'</span>'."\n";
+	}
+	if ( $top_message ) {
+		echo '<div class="top-message">'.$top_message.'</div>'."\n";
 	}
 }
 
@@ -145,6 +183,18 @@ static $error_log_html;
 // Create a test session - for now, just set the parameter to pass along
 
 function pentdb_create_session( $name ) {
+	$session = pentdb_clean( $name );
+		// [_] *** TODO: sanitize data_path
+	$data_path = $_GET['dir'];		// don't pentdb_clean() this; it removes the slashes!
+	$cmd_path = $_GET['cmd_path'];		// don't pentdb_clean() this; it removes the slashes!
+	$addsess_q = "INSERT into sessions (session_id,data_path,cmd_path) VALUES ('%s','%s','%s')";
+	$addsess_result = db_query( $addsess_q, $session, $data_path, $cmd_path);
+	if ( !$addsess_result ) {
+		echo '<div>Query failed.';
+		echo "<div></pre>".print_r($addsess_result,true)."</pre></div>";
+		return false;
+	}
+
 	return $name;
 }
 
@@ -153,9 +203,9 @@ function pentdb_create_session( $name ) {
 //
 // add an IP address to the testing list for the specified session
 
-function pentdb_add_ip( $ip, $session ) {
+function pentdb_add_ip( $ip, $session, $hostname ) {
 	$addip_q = "INSERT into testinstance (session_id,ip_address,rectype,title) VALUES ('%s','%s','HOST','%s')";
-	$addip_result = db_query( $addip_q, $session, $ip, 'HOST '.$ip);
+	$addip_result = db_query( $addip_q, $session, $ip, 'HOST '.$hostname);
 	if ( !$addip_result ) {
 		echo '<div>Query failed.';
 		echo "<div></pre>".print_r($addip_result,true)."</pre></div>";
@@ -165,11 +215,11 @@ function pentdb_add_ip( $ip, $session ) {
 }
 
 
-// add_port
+// add_service
 //
 // add all the template records for the given port to the testinstance table
 
-function pentdb_add_port( $the_ip, $the_session, $port, $service ) {
+function pentdb_add_service( $the_ip, $the_session, $port, $service ) {
 
 	$ip = pentdb_clean($_GET['ip']);
 	// $port = pentdb_clean($_GET['port']);
@@ -189,14 +239,14 @@ function pentdb_add_port( $the_ip, $the_session, $port, $service ) {
 
 		//echo "<div></pre>".print_r($template,true)."</pre></div>";
 
-
 		// check to see if record aready exists
 		$dup_q = "SELECT irid FROM {testinstance} WHERE "
 			. "session_id='%s' AND "
 			. "ip_address='%s' AND "
+			. "service='%s' AND "
 			. "port='%s' AND "
 			. "title='%s' ";
-		$dup_result = db_fetch_array(db_query( $dup_q, $session_id, $ip, $port, $template['title']));
+		$dup_result = db_fetch_array(db_query( $dup_q, $session_id, $ip, $service, $port, $template['title']));
 		if ( $dup_result ) {
 			echo '<div>Session "'.$session_id.'", record port '.$port.': "'.$template['title'].'" already on file - skipping insert.';
 			continue;
@@ -230,7 +280,7 @@ function pentdb_add_port( $the_ip, $the_session, $port, $service ) {
 	}
 	echo '<div class="status">Instance record set: '.$count.' tests added with '.$errcount.' errors.</div>';
 
-	return $port;
+	return $service;
 }
 
 
@@ -369,7 +419,15 @@ function build_service_status_display( $session_id, $ip, $service ) {
 		$display_color = get_status_color( $rec['statustype'], $rec['status'], $rec['flags'] );
 		$title = 'title="'.$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
 		$link = base_link($session_id,$ip,$service,$title,"test-".$rec['irid']); 
-		$block = $link.'<div class="indicator '.$display_color.'"></div></a>'."\n";
+		$flag_star = '';
+		if ( !empty($rec['flags']) ) {
+			// $flag_star = 'F';
+			$flag_star = '&#9679;';		// round dot
+			$flag_star = '&diams;';		// diamond
+			$flag_star = '&oplus;';		// plus sign in a circle
+		}
+
+		$block = $link.'<div class="indicator '.$display_color.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $depth_mark . $block;
 
 // echo "<div><pre>".print_r($rec,true)."</pre></div>";
@@ -406,10 +464,10 @@ function read_service_records( $session_id, $ip, $service ) {
 function get_status_color( $statustype, $status, $flags = NULL ) {
 	$status_color = 'gray';
 
-	if ( !empty($flags) ) {
-		$status_color = 'yellow';
-		return $status_color;
-	}
+	// if ( !empty($flags) ) {
+	// 	$status_color = 'yellow';
+	// 	// return $status_color;
+	// }
 
 	switch ($statustype) {
 		case 'BINARY':
@@ -635,7 +693,7 @@ function get_notes_form( $recid, $notes ) {
 	$myform = '
 		<div class="inlineform"><FORM class="notes-form" action="index.php" method="GET" id="notes-form-'.$recid.'">
 
-		<LABEL for="notes_form">Notes: </LABEL>
+		<LABEL for="notes_form">Notes: </LABEL><br/>
 		<textarea wrap="soft" cols="80" rows="8" name="notes" id ="notes">'.$notes.'</textarea><br/>
 
 		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>

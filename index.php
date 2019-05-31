@@ -64,7 +64,7 @@ if ( isset($_GET['ip']) ) {
 	die();
 }
 
-	// No port or ip given, soooo...
+	// No service or ip given, soooo...
 
 
 display_iplist_page( $session_id );
@@ -119,7 +119,10 @@ function display_iplist_page( $session_id ) {
 $myform = '
 	<div><FORM action="index.php" method="GET">
 		<LABEL for="ip_addr">IP address: </LABEL>
-		<INPUT type="text" name="ipaddr" id="ip_addr"></INPUT>
+		<INPUT type="text" name="ipaddr" id="ip_addr"></INPUT><br/>
+		<LABEL for="hostname">Host name: </LABEL>
+		<INPUT type="text" name="hostname" id="hostname" value="box-$i4p"></INPUT><br/>
+		<INPUT type="checkbox" name="mktank" value="mktank" id="mktank"><label for="mktank"> Run mktank command</label><br/>
 		<INPUT type="hidden" name="cmd" value="add-ip"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
 		<INPUT type="submit" value="Add IP address"></INPUT>
@@ -136,7 +139,7 @@ $myform = '
 	//	create a new session.
 
 function display_sessions() {
-	$sess_q = "SELECT DISTINCT session_id FROM {testinstance}";
+	$sess_q = "SELECT DISTINCT session_id FROM {sessions}";
 	$sess_recs = db_query( $sess_q );
 	if ( !$sess_recs ) {
 		echo '<div>No sessions found in database.';
@@ -156,11 +159,18 @@ function display_sessions() {
 $myform = '
 	<div><FORM action="index.php" method="GET">
 		<LABEL for="session_name">Session name: </LABEL>
-		<INPUT type="text" name="idname" id="session_name"></INPUT>
-		<INPUT type="hidden" name="cmd" value="create-session"></INPUT>
+		<INPUT type="text" name="idname" id="session_name"></INPUT><br/>
+		<LABEL for="dir">Session directory: </LABEL>
+		<INPUT type="text" name="dir" id="dir"></INPUT> (Include trailing slash)<br/>
+		<LABEL for="cmd_path">Scripts cmd path: </LABEL>
+		<INPUT type="text" name="cmd_path" id="cmd_path"></INPUT> (shell user has minimal path)<br/>
+		<INPUT type="hidden" name="cmd" value="create-session"></INPUT><br/>
 		<INPUT type="submit" value="Create session"></INPUT>
 	</FORM></div>
 ';
+
+// <INPUT type="checkbox" name="mktank" value="1" id="mktank"><label for="mktank"> Run mktank command</label>
+// 
 
 // echo print_r($sess_list,true);
 // die("check1");

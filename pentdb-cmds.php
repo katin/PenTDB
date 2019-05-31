@@ -6,7 +6,12 @@
  * 190525 KBI created as a part of refactoring index.php
  */
 
+global $top_message;
+
 function ptdb_process_cmd ( $mycmd ) {
+global $top_message;
+
+$top_message .= '<div>PROCESSED CMD</div>';
 
 	switch( $mycmd ) {
 
@@ -24,9 +29,19 @@ function ptdb_process_cmd ( $mycmd ) {
 		case 'add-ip':
 			$the_ip = pentdb_validate_ip($_GET['ipaddr'] );
 			$the_session = $_GET['session_id'];		// TODO: sanitize session
-			$success = pentdb_add_ip( $the_ip, $the_session );
+				# run variables on hostname option
+			$_GET['ip'] = $the_ip;
+			$hostname = fill_varset( $_GET['hostname'] );	// TODO santize hostname (keep '$' chars!)
+			$success = pentdb_add_ip( $the_ip, $the_session, $hostname );
 			if ( $success ) {
 				$_GET['ip'] = $success;
+				if ( $_GET['mktank'] == 'mktank' ) {
+					$data_path = pentdb_get_session_path();
+					$cmd_path = pentdb_get_cmd_path();
+					$my_cmd = "cd $data_path & ".$cmd_path.'mktank '.$the_ip.' '.$hostname;
+					$cmd_result = shell_exec( $my_cmd );
+					$top_message .= "CMD: $my_cmd -- RESULT: ".$cmd_result;
+				}
 				break;
 			} else {
 				echo "<div>Add ip failed.</div>";

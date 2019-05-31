@@ -19,8 +19,69 @@ require_once $dru_db_version.'/dru_db_startup.php';
 
 echo '<div>PenTracker Database Initialization</div>';
 
-echo "<div>Creating Table: porttest";
 
+/* create statement:
+
+CREATE TABLE `sessions` (
+  `sid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `session_id` varchar(96) NOT NULL DEFAULT '',
+  `data_path` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`sid`),
+  KEY `main` (`session_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
+
+*/
+
+echo "<div>Creating Table: session";
+
+$schema['session'] = array(
+  'description' => 'PenTesting session',
+  'fields' => array(
+    'sid' => array(
+      'type' => 'serial',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'description' => 'Primary Key: Unique item ID.',
+    ),
+    'created' => array(
+      'mysql_type' => 'timestamp',
+      'not null' => TRUE,
+      'description' => 'Record creation time',
+    ),
+    'session_id' => array(
+      'type' => 'varchar',
+      'length' => 96,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Session ID or handle',
+    ),
+    'data_path' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Data path for tanks and data on local machine',
+    ),
+  'primary key' => array('sid'),
+  'indexes' => array(
+    'main' => array('session_id'),
+  ),
+);
+
+if (!db_table_exists('session')) {
+  db_create_table($my_result, 'session', $schema['session']);
+  echo "<div>my_result:<br/><pre>".print_r($my_result,true)."</pre></div>\n";
+  if ( $my_result[0]['success'] ) {
+    echo '<div>Table created.</div>';
+  } else {
+    echo "<div>".print_r($my_result,true)."</div>";
+    die ('<div>Huh. An issue.</div>');
+  }
+}
+
+
+echo "<div>Creating Table: porttest";
 
 $schema['porttest'] = array(
   'description' => 'PenTesting item template',

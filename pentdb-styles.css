@@ -68,7 +68,7 @@ input.cmd-text {
 	font-family: Courier;
 	border-width: 1px;
 	border-color: #888;
-    width: -webkit-calc(100% - 1500px);
+    width: -webkit-calc(100% - 150px);
     width:    -moz-calc(100% - 150px);
     width:         calc(100% - 150px);
 }
@@ -129,13 +129,19 @@ button.cmd-copy {
 	margin-right: 10px;
 	margin-left: 20px;
 }
+.indicator.red, .indicator.green, .indicator.gray {
+	color: #fff;
+}
 .indicator {
 	width: 20px;
-	height: 14px;
-	margin: 2px 2px;
+	height: 18px;
+	margin: 4px 2px;
 	float: left;
 	display: block;
+	color: #111;
+	text-align: center;
 }
+
 
 .bigform {
 	margin-top: 20px;
@@ -181,6 +187,9 @@ button.cmd-copy {
 	scrollbar-color: red yellow;
 	scrollbar-color: dark;*/
 	/* https://css-tricks.com/the-current-state-of-styling-scrollbars/ */
+    width: -webkit-calc(100% - 85px);
+    width:    -moz-calc(100% - 85px);
+    width:         calc(100% - 85px);
 }
 
 .flags-display {
