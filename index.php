@@ -85,7 +85,7 @@ function display_iplist_page( $session_id ) {
 	$ip_q = "SELECT DISTINCT ip_address FROM {testinstance} WHERE session_id='%s'";
 	$ip_recs = db_query( $ip_q, $session_id);
 	if ( !$ip_recs ) {
-		echo '<div>Query failed.';
+		echo '<div>Query failed. [MSG-2116]';
 		// *** TODO: Add link to add this as new session to db
 		die();
 	}
@@ -95,11 +95,11 @@ function display_iplist_page( $session_id ) {
 			$new_session = true;
 		}
 	}
-	if ( $ip_recs->num_rows == 0 && !$new_session ) {
-		echo '<div>Session id "'.$session_id.'"not found in database.';
-		// *** TODO: Add link to add this as new session to db
-		die();
-	}
+	// if ( $ip_recs->num_rows == 0 && !$new_session ) {
+	// 	echo '<div>Session id "'.$session_id.'" not found in database. [MSG-2116]';
+	// 	// *** TODO: Add link to add this as new session to db
+	// 	die();
+	// }
 
 // echo "<div><pre>".print_r($ip_recs,true)."</pre></div>";
 
@@ -123,6 +123,7 @@ $myform = '
 		<LABEL for="hostname">Host name: </LABEL>
 		<INPUT type="text" name="hostname" id="hostname" value="box-$i4p"></INPUT><br/>
 		<INPUT type="checkbox" name="mktank" value="mktank" id="mktank"><label for="mktank"> Run mktank command</label><br/>
+		<INPUT type="checkbox" name="penscan" value="penscan" id="penscan"><label for="penscan"> Launch penscan command</label><br/>
 		<INPUT type="hidden" name="cmd" value="add-ip"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
 		<INPUT type="submit" value="Add IP address"></INPUT>

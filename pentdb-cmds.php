@@ -38,11 +38,17 @@ $top_message .= '<div>PROCESSED CMD</div>';
 				if ( $_GET['mktank'] == 'mktank' ) {
 					$data_path = pentdb_get_session_path();
 					$cmd_path = pentdb_get_cmd_path();
-					$my_cmd = "cd $data_path & ".$cmd_path.'mktank '.$the_ip.' '.$hostname;
+					$my_cmd = $cmd_path.'mktank '.$the_ip.' '.$hostname.' '.$data_path;
 					$cmd_result = shell_exec( $my_cmd );
 					$top_message .= "CMD: $my_cmd -- RESULT: ".$cmd_result;
 				}
-				break;
+				if ( $_GET['penscan'] == 'penscan' ) {
+					$data_path = pentdb_get_session_path();
+					$cmd_path = pentdb_get_cmd_path();
+					$my_cmd = $cmd_path.'penscan '.$data_path.$the_ip;
+					$cmd_result = exec( $my_cmd );
+					$top_message .= "CMD: $my_cmd -- Launched.";
+				}				break;
 			} else {
 				echo "<div>Add ip failed.</div>";
 				break;
