@@ -2,124 +2,99 @@
 
 // api.php - PenTDB API
 //
+// Serve this file locally only:   php -S 127.0.0.1:8888 api.php
+//									(this command serves IP4 only)
+//
+// 190601 KBI - switch to router file for use with PHP dev web server; runs commands only (no db)
 // 190519 KBI - created
-
-global $dru_db_version;
-
-$dru_db_version = 'dru_dblib-v1.0';
-require_once $dru_db_version.'/dru_db_settings.php';
-require_once $dru_db_version.'/dru_db_glue.php';
-require_once $dru_db_version.'/database.inc';
-require_once $dru_db_version.'/database.mysql.inc';
-require_once $dru_db_version.'/dru_db_startup.php';
-
-require_once "pentdb-lib.php";
 
 date_default_timezone_set('America/Los_Angeles');
 
 
-	//
-	// param checks
-	//
-
-if ( !isset($_GET['cmd']) || !isset($_GET['ticket']) ) {
-	echo '<div class="error"><h2>Missing parameter(s). Ticket and cmd parms are required.</h2></div>';
-	die();
-}
-if ( empty($_GET['cmd']) || empty($_GET['ticket']) ) {
-	echo '<div class="error"><h2>Missing parameter(s). Ticket and cmd parms are required.</h2></div>';
-	die();	
-}
-
-	//
-	// sanitize parms
-	//
-
-	// TODO
-
-	$cmd = $_GET['cmd'];
-	$ticket = $_GET['ticket'];
 
 
-	//
-	// verify ticket
-	//
+//
+// show requests on console
+// 
 
-	// TODO
+$path = $_SERVER["SCRIPT_FILENAME"];
+file_put_contents("php://stdout", "\nRequested: $path");
 
 
 
-	// 
-	// run cmd
-	//
+//
+// get parms
+//
 
-switch ($cmd) {
-	case 'create-instance':
-		$ip = pentdb_clean($_GET['ip']);
-		$port = pentdb_clean($_GET['port']);
-		$session_id = pentdb_clean($_GET['session_id']);
-
-		// fetch the port template
-		$template_q = "SELECT * from {porttest} WHERE port='%s'";
-		$template_recs = db_query( $template_q, $port );
-		if ( !$template_recs ) {
-			echo '<div class="error">Template for port '.$port.' not found in database.</div>';
-			die();
-		}
-
-		$count = 0;
-		$errcount = 0;
-		while ( $template = db_fetch_array($template_recs) ) {
-
-			//echo "<div></pre>".print_r($template,true)."</pre></div>";
+$parms = array();
+parse_str( $_SERVER['QUERY_STRING'], $parms );
 
 
-			// check to see if record aready exists
-			$dup_q = "SELECT irid FROM {testinstance} WHERE "
-				. "session_id='%s' AND "
-				. "ip_address='%s' AND "
-				. "port='%s' AND "
-				. "title='%s' ";
-			$dup_result = db_fetch_array(db_query( $dup_q, $session_id, $ip, $port, $template['title']));
-			if ( $dup_result ) {
-				echo '<div>Session "'.$session_id.'", record port '.$port.': "'.$template['title'].'" already on file - skipping insert.';
-				continue;
-			}
 
-			// Create the instance record
-			$instance_q = "INSERT into {testinstance} (session_id, ip_address, pass_depth, port, service, rectype, statustype, title, cmd, process_result_cmd, order_weight)"
-				. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
-			$result = db_query( $instance_q,
-				$session_id,
-				$ip,
-				$template['pass_depth'],
-				$port,
-				$template['service'],
-				$template['rectype'],
-				$template['statustype'],
-				$template['title'],
-				$template['cmd'],
-				$template['process_result_cmd'],
-				$template['order_weight']
-			);
+//
+// param checks
+//
 
-			if ( !$result ) {
-				$errcount++;
-				echo '<div class="error">Error adding instance record "'.$template['title'].'".</div>';
-				// die();
-			} else {
-				$count++;
-				echo '<div>Adding test "'.$template['title'].'"</div>';
-			}
-		}
-		echo '<div class="status">Instance record set: '.$count.' tests added with '.$errcount.' errors.</div>';
-		break;
 
-	default:
-		echo "Command ".$cmd." not found.";
-		break;
+//
+// sanitize parms
+//
+
+
+
+
+// 
+// run cmds
+//
+
+echo "<div>SERVER: <pre>".print_r($_SERVER,true)."</pre></div>";
+
+echo "<div>parms: <pre>".print_r($parms,true)."</pre></div>";
+
+$result = shell_exec('echo $PATH');
+echo "<div>PATH: <pre>".print_r($result,true)."</pre></div>";
+
+
+switch ( $parms['cmd'] ) {
+	case 'penscan':
+		$datapath = $parms['datapath'];
+		$ip = $parms['ip'];
+		$cmdpath = $parms['cmdpath'];
+		$execcmd = $cmdpath.'penscan '.$datapath.$ip;
+		file_put_contents("php://stdout", "\nExecuting command: $execcmd");
+		exec($execcmd);
+	break;
+
 }
 
 
+
+/* example output of $_SERVER upon run:
+Array
+(
+    [DOCUMENT_ROOT] => /home/katin/Workshop/PenTDB/public_html
+    [REMOTE_ADDR] => 127.0.0.1
+    [REMOTE_PORT] => 47754
+    [SERVER_SOFTWARE] => PHP 7.2.19-1+0~20190531112637.22+stretch~1.gbp75765b Development Server
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [SERVER_NAME] => 127.0.0.1
+    [SERVER_PORT] => 8888
+    [REQUEST_URI] => /?cmd=mktank&path=/home/katin/Documents/bin
+    [REQUEST_METHOD] => GET
+    [SCRIPT_NAME] => /index.php
+    [SCRIPT_FILENAME] => /home/katin/Workshop/PenTDB/public_html/index.php
+    [PHP_SELF] => /index.php
+    [QUERY_STRING] => cmd=mktank&path=/home/katin/Documents/bin
+    [HTTP_HOST] => 127.0.0.1:8888
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_UPGRADE_INSECURE_REQUESTS] => 1
+    [HTTP_USER_AGENT] => Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36
+    [HTTP_ACCEPT] => text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,* /*;q=0.8,application/signed-exchange;v=b3
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br
+    [HTTP_ACCEPT_LANGUAGE] => en-US,en;q=0.9
+    [REQUEST_TIME_FLOAT] => 1559391652.7855
+    [REQUEST_TIME] => 1559391652
+)
+*/
 
 
