@@ -303,6 +303,25 @@ function ptdb_set_binary_status( $status ) {
 }
 
 
+function ptdb_set_depth_status() {
+	$vars = pentdb_get_page_vars();
+
+	if ( !isset( $vars['rec_id']) ) {
+		pentdb_log_error("Can't update status: missing rec_id. ERR-723.");
+		return false;
+	}
+
+	$set_q = "UPDATE testinstance set status='%s' WHERE irid='%d'";
+	$set_result = db_query( $set_q, $vars['status'], $vars['rec_id'] );
+	if ( !$set_result ) {
+		echo '<div>Query failed.';
+		echo "<div></pre>".print_r($addip_result,true)."</pre></div>";
+		return false;
+	}
+	return $status;
+}
+
+
 function pentdb_get_page_vars() {
 	$vars = array();
 	if ( isset($_GET['session_id']) ) {
@@ -323,7 +342,9 @@ function pentdb_get_page_vars() {
 	if ( isset($_GET['service']) ) {
 		$vars['service'] = pentdb_clean( $_GET['service'] );
 	}
-
+	if ( isset($_GET['status']) ) {
+		$vars['status'] = pentdb_clean( $_GET['status'] );
+	}
 	return $vars;
 }
 
@@ -426,6 +447,9 @@ function build_service_status_display( $session_id, $ip, $service ) {
 			$flag_star = '&diams;';		// diamond
 			$flag_star = '&oplus;';		// plus sign in a circle
 		}
+		if ( $rec['statustype'] == 'DEPTH' && $rec['status'] > 0 ) {
+			$flag_star = $rec['status'];
+		}
 
 		$block = $link.'<div class="indicator '.$display_color.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $depth_mark . $block;
@@ -489,6 +513,9 @@ function get_status_color( $statustype, $status, $flags = NULL ) {
 			}
 
 		case 'DEPTH':
+			if ($status > 0) {
+				$status_color = 'blue';
+			}	
 			break;
 
 		case 'NONE':
@@ -521,7 +548,7 @@ function get_binary_status_button( $status, $rec_id ) {
 	}
 
 	$button_form = '
-		<div><FORM action="index.php" method="GET">
+		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
@@ -529,7 +556,7 @@ function get_binary_status_button( $status, $rec_id ) {
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 			<INPUT '.$progress_class.'type="submit" value="InProgress"></INPUT>
 		</FORM></div>
-			<div><FORM action="index.php" method="GET">
+			<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
@@ -537,13 +564,62 @@ function get_binary_status_button( $status, $rec_id ) {
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 			<INPUT '.$pos_class.'type="submit" value="POS"></INPUT>
 		</FORM></div>
-		<div><FORM action="index.php" method="GET">
+		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="cmd" value="set-neg"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>		
 			<INPUT '.$neg_class.'type="submit" value="NEG"></INPUT>
+		</FORM></div>
+	';
+
+	return $button_form;
+}
+
+
+function get_depth_status_button( $status, $rec_id ) {
+	$vars = pentdb_get_page_vars();
+
+	$pos_class = '';
+	if ($status == 'POS') {
+		$pos_class = 'class="green-button" ';
+	}
+
+	$neg_class = '';
+	if ($status == 'NEG') {
+		$neg_class = 'class="red-button" ';
+	}
+
+	$progress_class = '';
+	if ($status == 'IN-PROGRESS') {
+		$progress_class = 'class="orange-button" ';
+	}
+
+	$button_form = '';
+	for ($x=1; $x<4; $x++) {
+		$button_form .= '
+			<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
+				<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+				<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+				<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+				<INPUT type="hidden" name="cmd" value="set-status"></INPUT>
+				<INPUT type="hidden" name="status" value="'.$x.'"></INPUT>
+				<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
+				<INPUT '.($status == $x ? 'class="blue-button"' : '').'type="submit" value="'.$x.'"></INPUT>
+			</FORM></div>
+		';
+	}
+
+	$button_form .= '
+		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
+			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+			<INPUT type="hidden" name="cmd" value="set-status"></INPUT>
+			<INPUT type="hidden" name="status" value="0"></INPUT>
+			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
+			<INPUT type="submit" value="reset"></INPUT>
 		</FORM></div>
 	';
 
@@ -601,12 +677,10 @@ function get_add_test_form( $title = "Add a test" ) {
 
 		<LABEL for="rectype">Record/Test type: </LABEL>
 		<SELECT name="rectype" id="rectype">
-			// <OPTION value="TITLE">TITLE</OPTION>
+			<OPTION value="EXAMINE">EXAMINE</OPTION>
 			<OPTION value="SCAN">SCAN</OPTION>
 			<OPTION value="TOOL">TOOL</OPTION>
 			<OPTION value="SCRIPT">SCRIPT</OPTION>
-			<OPTION value="HOST">HOST</OPTION>
-			<OPTION value="EXAMINE">EXAMINE</OPTION>
 		</SELECT><br/>
 
 		<LABEL for="pass_depth">Pass depth: </LABEL>
@@ -641,6 +715,50 @@ function get_add_test_form( $title = "Add a test" ) {
 
 	return $bigform;
 }
+
+
+function get_add_vuln_form( $title = "Add a vuln" ) {
+	$vars = pentdb_get_page_vars();
+	$bigform = '
+		<div class="bigform"><FORM action="index.php" method="GET">
+
+		<LABEL for="title">Vuln display title: </LABEL>
+		<INPUT type="text" name="title" id = "title"></INPUT><br/>
+
+		<LABEL for="url">Vuln URL: </LABEL>
+		<INPUT type="text" name="url" id = "url"></INPUT><br/>
+
+		<LABEL for="status">Status: </LABEL>
+		<SELECT name="status" id="status">
+			<OPTION value="OPEN">OPEN</OPTION>
+			<OPTION value="ELIMINATED">ELIMINATED</OPTION>
+			<OPTION value="UNLIKELY">UNLIKELY</OPTION>
+			<OPTION value="POSSIBLE">POSSIBLE</OPTION>
+			<OPTION value="MATCH">MATCH</OPTION>
+		</SELECT><br/>
+
+		<LABEL for="code_language">Code language: </LABEL>
+		<INPUT type="text" name="code_language" id="code_language"></INPUT><br/>
+
+		<LABEL for="order_weight">Order Weight: </LABEL>
+		<INPUT type="text" name="order_weight" id="order_weight" value="0"></INPUT><br/>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="cmd" value="new-vuln"></INPUT>
+		<INPUT type="submit" value="Add a vuln"></INPUT>
+		</FORM></div>
+	';
+	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+		// <INPUT type="hidden" name="port" value="'.$port.'"></INPUT>
+
+	return $bigform;
+}
+
+
 
 function get_add_banner_form( $recid ) {
 	$vars = pentdb_get_page_vars();
@@ -713,3 +831,35 @@ function get_notes_form( $recid, $notes ) {
 
 	return $myform;
 }
+
+// load_templates
+//
+// CURRENTLY NOT WORKING - needs troubleshooting: the query works if run at the command line (via sudo),
+//							but doesn't work from inside this program.
+//
+// Read in all the test pattern templates that we know about.
+
+function ptdb_load_templates() {
+
+	$templates_dir = "/home/katin/Workshop/PenTDB/public_html/";
+	$db_name = "pentdb";
+
+	$known_template_files = array(
+		"port-22_chart.dat",
+		"port-53_chart.dat",
+		"port-80_chart.dat",
+		"webapp_chart.dat",
+	);
+
+	foreach( $known_template_files as $file ) {
+		$read_q = "LOAD DATA LOCAL INFILE '%s' INTO TABLE ".$db_name.".porttest FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' IGNORE 9 ROWS";
+		$qresult = db_query( $read_q, $templates_dir.$file );
+		if ( $qresult ) {
+			echo '<div class="status-msg">'.$file.' read into database.</div>'."\n";
+		} else {
+			echo '<div class="status-msg">ERROR '.$file.' import failed. [MSG-12]</div>'."\n";
+		}
+	}
+
+}
+

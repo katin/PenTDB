@@ -5,6 +5,11 @@
 // Serve this file locally only:   php -S 127.0.0.1:8888 api.php
 //									(this command serves IP4 only)
 //
+// A custom API for issuing local commands for running scripts and such for PenTracker.
+// Apache running PHP has many permissions and safeguards to prevent exactly this kind 
+// of service from working, so it's easier to run a PHP development web server locally.
+//
+//
 // 190601 KBI - switch to router file for use with PHP dev web server; runs commands only (no db)
 // 190519 KBI - created
 

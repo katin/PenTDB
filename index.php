@@ -141,9 +141,16 @@ $myform = '
 
 function display_sessions() {
 	$sess_q = "SELECT DISTINCT session_id FROM {sessions}";
-	$sess_recs = db_query( $sess_q );
-	if ( !$sess_recs ) {
-		echo '<div>No sessions found in database.';
+	try {
+		$sess_recs = db_query( $sess_q );
+		if ( !$sess_recs ) {
+			echo '<div>No sessions found in database. [MSG-11]</div>'."\n";
+			echo '<div><em>Do you need to <a href="Pen-db_init.php">intialize the database</a>?</em></div>'."\n";
+			// echo '<div>Error info: <pre>'.print_r($sess_recs,true).'</pre></div>';
+		}
+	}
+	catch ( Exception $e ) {
+		echo '<div>Error info: <pre>'.print_r($e,true).'</pre></div>';
 	}
 
 	// display a list of sessions available to test
@@ -161,10 +168,12 @@ $myform = '
 	<div><FORM action="index.php" method="GET">
 		<LABEL for="session_name">Session name: </LABEL>
 		<INPUT type="text" name="idname" id="session_name"></INPUT><br/>
-		<LABEL for="dir">Session directory: </LABEL>
+		<LABEL for="dir">Data (tanks) path: </LABEL>
 		<INPUT type="text" name="dir" id="dir"></INPUT> (Include trailing slash)<br/>
 		<LABEL for="cmd_path">Scripts cmd path: </LABEL>
 		<INPUT type="text" name="cmd_path" id="cmd_path"></INPUT> (shell user has minimal path)<br/>
+		<LABEL for="api_url">CmdSvr URL: </LABEL>
+		<INPUT type="text" name="api_url" id="api_url" value="http://127.0.0.1:8888"></INPUT><br/>
 		<INPUT type="hidden" name="cmd" value="create-session"></INPUT><br/>
 		<INPUT type="submit" value="Create session"></INPUT>
 	</FORM></div>
@@ -239,6 +248,9 @@ function display_service_page( $session_id, $ip, $service ) {
 		if ( $test['statustype'] == 'BINARY' ) {
 			$buttons .= get_binary_status_button( $test['status'], $test['irid'] );
 		}
+		if ( $test['statustype'] == 'DEPTH' ) {
+			$buttons .= get_depth_status_button( $test['status'], $test['irid'] );
+		}
 		$buttons .= '</div>'."\n";
 
 		$notes_form = get_notes_form( $test['irid'], $test['notes'] );
@@ -263,15 +275,17 @@ function display_service_page( $session_id, $ip, $service ) {
 		$service = ($service ? $service : $test['service']);
 	}
 	if ( $test_list ) {
+			// build page title
 		$test_list = '<h2>Test Tracker, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
-		\n" . $test_list;
+		\n" . build_service_status_display( $session_id, $ip, $service ). "\n<p>&nbsp;</p>\n" . $test_list;
 		$test_list .= "\n".'<p class="clear"></p>'."\n";
 	} else {
 		$test_list .= "<h2>No tests found.</h2>";
 		$test_list .= "<div>ip ".$ip.", service ".$service."</div>\n";
 	}
 
-	$mypage = $test_list . get_add_test_form();
+	$mypage = $test_list . get_add_test_form() . get_add_vuln_form();
+;
 	display_page( $mypage );
 }
 
@@ -298,14 +312,15 @@ function display_serviceslist_page( $session_id, $ip ) {
 		// if ( $service['port'] == 0 ) {
 		// 	continue;
 		// }
-		$service_list .= '<div><a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$service['ip_address'].'&service='.$service['service'].'">'.$service['title'].': '.$service['service'].'</a></div>'."\n";
+		$panel = build_service_status_display( $session_id, $ip, $service['service'] );
+		$service_list .= $panel."\n";
 
 // echo "<div><pre>".print_r($service,true)."</pre></div>";
 
 	}
 	if ( $service_list ) {
 		$service_list = "<h2>Select service to test:</h2>\n" . $service_list;
-		$service_list .= "\n<p></p>\n";
+		$service_list .= "\n".'<p class="clear"></p><p>&nbsp;</p>'."\n";
 	}
 
 
@@ -323,7 +338,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 
 	$test_list = '';
 	while ( $test = db_fetch_array( $tests_recs ) ) {
-		$test_list .= '<OPTION value="'.$test['service'].'">'.$test['service'].' (service '.$test['service'].') </OPTION>'."\n";
+		$test_list .= '<OPTION value="'.$test['service'].'">'.$test['port'].' ('.$test['service'].') </OPTION>'."\n";
 	}
 
 	$myform = '
@@ -378,6 +393,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 		<INPUT type="submit" value="Create port test"></INPUT>
 		</FORM></div>
 	';
+
 
 	$mypage = $service_list . $myform . $bigform;
 	display_page( $mypage );

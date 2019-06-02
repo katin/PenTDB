@@ -79,6 +79,24 @@ $top_message .= '<div>PROCESSED CMD</div>';
 				break;
 			}
 
+		case 'add-vuln':
+			$the_ip = pentdb_validate_ip($_GET['ip'] );
+			$the_session = $_GET['session_id'];		// TODO: sanitize session id
+			$port = pentdb_validate_port($_GET['port']);
+			$service = $_GET['service'];
+
+// die( print_r($_GET,true) );
+
+			// [_] TODO: validate service selection
+			$success = pentdb_add_service( $the_ip, $the_session, $port, $service );
+			if ( $success ) {
+				$_GET['service'] = $success;
+				break;
+			} else {
+				echo "<div>Add service failed.</div>";
+				break;
+			}
+
 		case 'update-banner':
 			$up_q = "UPDATE {testinstance} set banner='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['banner'], $_GET['recid']);
@@ -127,6 +145,14 @@ echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
 
 		case 'new-port':
 			create_port_record();
+			break;
+
+		case 'load_templates':
+			ptdb_load_templates();
+			break;
+
+		case 'set-status':
+			ptdb_set_depth_status();
 			break;
 
 		default:

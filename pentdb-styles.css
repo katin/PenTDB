@@ -37,6 +37,7 @@ a.hover-link:hover {
 	margin-bottom: 5px;
 	background-color: #585858;
 	padding-left: 10px;
+	padding-top: 5px;
 }
 
 .status-empty {
@@ -85,20 +86,28 @@ button.cmd-copy {
 
 }
 
-.red-button, .red {
+
+.red-button, .red, .statusform input.red-button {
 	background-color: #933;
 }
-.green-button, .green {
+.green-button, .green, .statusform input.green-button {
 	background-color: green;
 }
-.orange-button, .orange {
+.orange-button, .orange, .statusform input.orange-button {
 	background-color: orange;
+	color: #333;
 }
 .gray {
 	background-color: gray;
 }
-.blue {
+.blue-button, .blue, .statusform input.blue-button {
 	background-color: blue;
+	border-width: 2px;
+	border-color: #555;
+	color: #eee;
+}
+.indicator.blue {
+	color: #eee;
 }
 .yellow {
 	background-color: #dd5;
@@ -128,6 +137,8 @@ button.cmd-copy {
 	float: left;
 	margin-right: 10px;
 	margin-left: 20px;
+	width: 180px;
+    text-align: right;
 }
 .indicator.red, .indicator.green, .indicator.gray {
 	color: #fff;
@@ -161,7 +172,7 @@ button.cmd-copy {
     padding-right: 40px;
     text-align: right;
 }
-.inlineform input {
+.inlineform input, .statusform input {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
