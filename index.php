@@ -43,9 +43,14 @@ if ( empty($_GET['session_id']) ) {
 $session_id = pentdb_clean( $_GET['session_id'] );
 
 if ( isset($_GET['service']) ) {
+	if ( !isset($_GET['port']) ) {
+		die('Port param is required for this display.');
+	}
 	if ( $vservice = pentdb_validate_service($_GET['service'] )) {
 		if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
-			display_service_page( $session_id, $vip, $vservice );
+			if ( $vport = $_GET['port'] ) {
+				display_service_page( $session_id, $vip, $vservice, $vport );
+			}
 		} else {
 			echo '<div class="error">Invalid ip parameter. [Error 427]</div>';
 		}
@@ -106,7 +111,7 @@ function display_iplist_page( $session_id ) {
 	// display a list of ip addresses available to test
 	$ip_list = '';
 	while ( $ip = db_fetch_array( $ip_recs ) ) {
-		$ip_list .= '<div class="ip-link"><a href="index.php?session_id='.$session_id.'&ip='.$ip['ip_address'].'">'.$ip['ip_address'].'</a></div>'."\n";
+		$ip_list .= '<div class="ip-link"><a href="index.php?'.pentdb_get_urlparms( array( 'ip'=>$ip['ip_address']) ).'">'.$ip['ip_address'].'</a></div>'."\n";
 
 		$ip_list .= build_ip_status_display( $session_id, $ip['ip_address'] );
 
@@ -194,10 +199,10 @@ $myform = '
 	// display a service test set page
 	//
 
-function display_service_page( $session_id, $ip, $service ) {
+function display_service_page( $session_id, $ip, $service, $port ) {
 
-	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' ORDER BY pass_depth, order_weight";
-	$tests_recs = db_query( $tests_q, $session_id, $ip, $service );
+	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight";
+	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
 	if ( !$tests_recs ) {
 		echo '<div>Session services "'.$session_id.'"not found in database. [Error 611]';
 		die();
@@ -277,7 +282,11 @@ function display_service_page( $session_id, $ip, $service ) {
 	if ( $test_list ) {
 			// build page title
 		$test_list = '<h2>Test Tracker, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
-		\n" . build_service_status_display( $session_id, $ip, $service ). "\n<p>&nbsp;</p>\n" . $test_list;
+		\n" 
+		  . build_service_status_display( $session_id, $ip, $service, $port )
+		  . build_vuln_status_display( $session_id, $ip, $service, $port )
+		  . "\n<p>&nbsp;</p>\n" . $test_list;
+
 		$test_list .= "\n".'<p class="clear"></p>'."\n";
 	} else {
 		$test_list .= "<h2>No tests found.</h2>";
@@ -296,7 +305,7 @@ function display_service_page( $session_id, $ip, $service ) {
 
 function display_serviceslist_page( $session_id, $ip ) {
 
-	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' ORDER BY service";
+	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' GROUP BY port ORDER BY service";
 	$service_recs = db_query( $service_q, $session_id, $ip);
 	if ( !$service_recs ) {
 		echo '<div>Session id "'.$session_id.'"not found in database.';
@@ -312,7 +321,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 		// if ( $service['port'] == 0 ) {
 		// 	continue;
 		// }
-		$panel = build_service_status_display( $session_id, $ip, $service['service'] );
+		$panel = build_service_status_display( $session_id, $ip, $service['service'], $service['port'] );
 		$service_list .= $panel."\n";
 
 // echo "<div><pre>".print_r($service,true)."</pre></div>";

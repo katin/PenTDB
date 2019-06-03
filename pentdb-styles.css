@@ -152,8 +152,24 @@ button.cmd-copy {
 	color: #111;
 	text-align: center;
 }
-
-
+.service-vuln-status .indicator {
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px; /* future proofing */
+	-khtml-border-radius: 10px; /* for old Konqueror browsers */
+}
+.vuln-eliminated {
+	background-color: #339;
+}
+.vuln-unlikely {
+	background-color: #44A;
+}
+.vuln-possible {
+	background-color: #55B;
+}
+.vuln-match {
+	background-color: #66C;
+}
 .bigform {
 	margin-top: 20px;
 }
