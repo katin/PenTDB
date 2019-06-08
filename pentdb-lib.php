@@ -115,6 +115,7 @@ function display_page( $content ) {
 
 function display_html_header() {
 global $top_message;
+
 ?>
 <HTML>
 <HEAD>
@@ -123,17 +124,25 @@ global $top_message;
 </HEAD>
 
 <BODY>
-	<H1><a class="hover-link" href="index.php">PenTDB Tool by K10</a></H1>
+	<div id="top">
+	<span class="titlespan"><a class="hover-link" href="index.php">PenTDB Tool by K10</a></span>
 <?php
+	$vars = pentdb_get_page_vars();
 	$path = pentdb_get_session_path();
-	if ( isset($_GET['session_id']) ) {
-		$sid = pentdb_clean( $_GET['session_id'] );
-		echo '<span class="session-title">Session ID: <a class="hover-link" href="index.php?session_id='.$sid.'">'.$sid.'</a> </span><span class="dir-path">'.$path.'</span>'."\n";
+	$output = '';
+	if ( isset($vars['session_id']) ) {
+		$output .= '<span class="session-title">Session ID: <a class="hover-link" href="index.php?session_id='.$vars['session_id'].'">'.$vars['session_id'].'</a> </span><span class="spacer bold">data path: </span><span class="dir-path">'.$path.'</span>'."\n";
 	}
+	$output .= '</div>'."\n";				// close #top
+	$output .= '<div id="page">'."\n";		// open page
+
 	if ( $top_message ) {
-		echo '<div class="top-message">'.$top_message.'</div>'."\n";
+		// $output .= '<div class="top-message">'.$top_message.'</div>'."\n";
 	}
-	pentdb_log_error('','display');
+	$output .= pentdb_log_error('','display');
+
+
+	echo $output;
 }
 
 
@@ -142,6 +151,7 @@ global $top_message;
 // Display footer and end-of-page code
 
 function wrapup_page() {
+	echo '</div>'."\n";		// close #page
 	display_html_footer();
 ?>
 </BODY>
@@ -170,9 +180,13 @@ function display_html_footer() {
 function pentdb_log_error( $msg, $mode='log' ) {
 static $error_log_html;
 
-	if ( $mode == 'display' ) {
-		echo "<hr>\n".$error_log_html;
-		return;
+// $error_log_html = "ALARMZ!";
+
+	if ( $mode == 'display' && !empty( $error_log_html ) ) {
+		$output = '<div class="error-log display">'."\n";
+		$output .= $error_log_html;
+		$output .= '</div>'."\n";
+		return $output;
 	}
 
 	$error_log_html .= '<div>'.$msg.'</div>'."\n";
@@ -564,7 +578,7 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 
 function read_service_records( $session_id, $ip, $service, $port ) {
 
-	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight";
+	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight, irid";
 
 // echo "<div>port: <pre>".print_r($port,true)."</pre></div>";
 // die("check");
@@ -936,10 +950,10 @@ function get_add_test_form( $title = "Add a test" ) {
 		</SELECT><br/>
 
 		<LABEL for="pass_depth">Pass depth: </LABEL>
-		<INPUT type="text" name="pass_depth" id="pass_depth" value="0"></INPUT><br/>
+		<INPUT type="text" name="pass_depth" id="pass_depth" value="1"></INPUT><br/>
 
 		<LABEL for="order_weight">Order Weight: </LABEL>
-		<INPUT type="text" name="order_weight" id="order_weight" value="0"></INPUT><br/>
+		<INPUT type="text" name="order_weight" id="order_weight" value="1"></INPUT><br/>
 
 		<LABEL for="statustype">Status type: </LABEL>
 		<SELECT name="statustype" id="statustype">
@@ -1016,7 +1030,7 @@ function get_add_vuln_form( $title = "Add a vuln" ) {
 function get_add_banner_form( $recid ) {
 	$vars = pentdb_get_page_vars();
 	$myform = '
-		<div class="inlineform"><FORM action="index.php" method="GET">
+		<div class="inlineform"><FORM action="index.php#test-'.$recid.'" method="GET">
 
 		<LABEL for="banner">Banner: </LABEL>
 		<INPUT type="text" name="banner" id = "banner"></INPUT>
@@ -1040,7 +1054,7 @@ function get_add_banner_form( $recid ) {
 function get_set_flags_form( $recid ) {
 	$vars = pentdb_get_page_vars();
 	$myform = '
-		<div class="inlineform"><FORM action="index.php" method="GET">
+		<div class="inlineform"><FORM action="index.php#test-'.$recid.'" method="GET">
 
 		<LABEL for="flags">Flags: </LABEL>
 		<INPUT type="text" name="flags" id = "flags"></INPUT>
@@ -1064,7 +1078,7 @@ function get_set_flags_form( $recid ) {
 function get_notes_form( $recid, $notes ) {
 	$vars = pentdb_get_page_vars();
 	$myform = '
-		<div class="inlineform"><FORM class="notes-form" action="index.php" method="GET" id="notes-form-'.$recid.'">
+		<div class="inlineform"><FORM class="notes-form" action="index.php#test-'.$recid.'" method="GET" id="notes-form-'.$recid.'">
 
 		<LABEL for="notes_form">Notes: </LABEL><br/>
 		<textarea wrap="soft" cols="80" rows="8" name="notes" id ="notes">'.$notes.'</textarea><br/>

@@ -201,7 +201,7 @@ $myform = '
 
 function display_service_page( $session_id, $ip, $service, $port ) {
 
-	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight";
+	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight, irid";
 	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
 	if ( !$tests_recs ) {
 		echo '<div>Session services "'.$session_id.'"not found in database. [Error 611]';
@@ -213,17 +213,23 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 	$service = '';
 	$passD = 0;
 	while ( $test = db_fetch_array( $tests_recs ) ) {
+		$auto_expand = false;
 		$status_bar = 'status-empty';
+		if ( !empty($test['flags']) ) {
+			$status_bar = 'status-flagged';
+		}
 		switch ($test['statustype']) {
 			case 'BINARY':
 				switch ($test['status']) {
 					case 'POS':
+						$auto_expand = true;
 					case 'NEG':
 						$status_bar = 'status-completed';
 						break;
 
 					case 'IN-PROGRESS':
 						$status_bar = 'status-in-progress';
+						$auto_expand = true;
 						break;
 
 					default:
@@ -231,6 +237,9 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 				}
 
 			case 'DEPTH':
+				if ( is_numeric($test['status']) && $test['status'] > 0 ) {
+					$status_bar = 'status-in-depth';
+				}
 				break;
 
 			case 'NONE':
@@ -267,16 +276,32 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		}
 		$flags_form = get_set_flags_form( $test['irid'] );
 
+		// if the last form submit operation was about this test, then keep this test open
+		// [_] *** TODO reconcile $_GET['rec_id'] and $_GET['recid']... can they all be the same?
+		if ( $_GET['recid'] == $test['irid'] || $_GET['rec_id'] == $test['irid'] ) {
+			$auto_expand = true;
+		}
+
+		$summary = 'summary';
+		$details = 'details';
+		if ( $auto_expand ) { 
+			$summary = 'div';
+			$details = 'div';
+		}
 		$lineid = "Tcmd".$test['irid'];
-		$test_list .= '<div class="test" id="test-'.$test['irid'].'">'
-			. '<div class="test-title '.$status_bar.'">'.strtoupper($test['rectype']).': &nbsp;&nbsp;'.$test['title'].($test['banner'] ? ' - '.$test['banner'] : '').'</div>'
+		$test_list .= '<div class="test-wrapper" id="test-'.$test['irid'].'">'."\n";
+		$test_list .= '<'.$details.'>'."\n";
+		$test_list .= '<'.$summary.' class="test-title '.$status_bar.'">'.strtoupper($test['rectype']).': &nbsp;&nbsp;'.$test['title'].($test['banner'] ? ' - '.$test['banner'] : '').'</'.$summary.'>'
 			. $buttons
 			. '<div class="flags-display">'.($test['flags'] ? 'Flags: ' : '').$test['flags'].'</div>'."\n"
 			. '<div class="test-cmd">CMD: <input class="cmd-text" type="text" value="'.fill_varset($test['cmd']).'" id="'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button></div>'
 			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset($test['process_result_cmd'])).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
-			. "</div>\n";
+			. "\n";
 
 		$test_list .= $notes_form . $banner_form . $flags_form;
+		$test_list .= '</'.$details.'>'."\n";
+		$test_list .= '</div>'."\n";	// close test-wrapper
+
 
 		$service = ($service ? $service : $test['service']);
 	}
