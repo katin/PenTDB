@@ -254,7 +254,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			$buttons .= get_binary_status_button( $test['status'], $test['irid'] );
 		}
 		if ( $test['statustype'] == 'DEPTH' ) {
-			$buttons .= get_depth_status_button( $test['status'], $test['irid'] );
+			$buttons .= get_binary_status_button( $test['status'], $test['irid'] )
+					. get_depth_status_button( $test['status'], $test['irid'] );
 		}
 		$buttons .= '</div>'."\n";
 

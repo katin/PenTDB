@@ -116,7 +116,7 @@ $top_message .= '<div>PROCESSED CMD</div>';
 				"Notes update query failed. [ERR-881]";
 				die();
 			}
-echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
+// echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
 
 			return true;
 			break;

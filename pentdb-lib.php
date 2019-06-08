@@ -593,7 +593,7 @@ function read_service_records( $session_id, $ip, $service, $port ) {
 
 function build_vuln_status_display( $session_id, $ip, $service, $port ) {
 
-	$output = '<div class="clear"></div><div class="service-vuln-status">'."\n";
+	$output = '<div class="service-vuln-status">'."\n";
 	$rec_handle = read_vuln_records( $session_id, $ip, $service, $port );
 
 // echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
@@ -609,8 +609,8 @@ function build_vuln_status_display( $session_id, $ip, $service, $port ) {
 		// 	$depth_mark = '<div class="depth-divider"></div>'."\n";
 		// }
 		$display_color = get_vuln_status_color( $rec['status'], $rec['flags'] );
-		$title = 'title="'.$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
-		$link = base_link($session_id,$ip,$service,$port,$title,"test-".$rec['irid']); 
+		$title = 'title="'.($rec['status'] ? $rec['status'].' - ' : '').$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
+		$link = base_link($session_id,$ip,$service,$port,$title,"vuln-".$rec['irid']); 
 		$flag_star = '';
 		if ( !empty($rec['flags']) ) {
 			// $flag_star = 'F';
@@ -689,7 +689,23 @@ function get_status_color( $statustype, $status, $flags = NULL ) {
 			}
 
 		case 'DEPTH':
-			if ($status > 0) {
+			switch ($status) {
+				case 'POS':
+					$status_color = 'green';
+					break;
+
+				case 'NEG':
+					$status_color = 'red';
+					break;
+
+				case 'IN-PROGRESS':
+					$status_color = 'orange';
+					break;
+
+				default:
+					break;
+			}
+			if (is_numeric($status) && $status > 0) {
 				$status_color = 'blue';
 			}	
 			break;
@@ -701,6 +717,8 @@ function get_status_color( $statustype, $status, $flags = NULL ) {
 			pentdb_log_error("NOTE: Unknown statustype: ".$status);
 			break;
 		}
+
+
 	return $status_color;
 }
 
@@ -795,6 +813,8 @@ function get_binary_status_button( $status, $rec_id ) {
 		</FORM></div>
 	';
 
+	$button_form .= pentdb_get_reset_status_form( $vars, $rec_id );
+
 	return $button_form;
 }
 
@@ -832,6 +852,15 @@ function get_depth_status_button( $status, $rec_id ) {
 			</FORM></div>
 		';
 	}
+
+	$button_form .= pentdb_get_reset_status_form( $vars, $rec_id );
+
+	return $button_form;
+}
+
+
+function pentdb_get_reset_status_form( $vars, $rec_id ) {
+
 
 	$button_form .= '
 		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
@@ -928,6 +957,7 @@ function get_add_test_form( $title = "Add a test" ) {
 		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 		<INPUT type="hidden" name="cmd" value="new-port"></INPUT>
 		<INPUT type="submit" value="Add a test"></INPUT>
 		</FORM></div>
@@ -995,6 +1025,7 @@ function get_add_banner_form( $recid ) {
 
 		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 
 		<INPUT type="hidden" name="cmd" value="update-banner"></INPUT>
@@ -1018,6 +1049,7 @@ function get_set_flags_form( $recid ) {
 
 		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 
 		<INPUT type="hidden" name="cmd" value="update-flags"></INPUT>
@@ -1042,6 +1074,7 @@ function get_notes_form( $recid, $notes ) {
 		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 
 		<INPUT type="hidden" name="cmd" value="update-notes"></INPUT>
 		<INPUT type="submit" value="Update Notes"></INPUT>

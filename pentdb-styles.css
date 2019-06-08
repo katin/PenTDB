@@ -129,7 +129,7 @@ button.cmd-copy {
 	padding-top: 5px;
 }
 
-.service-test-status {
+.service-test-status, .service-vuln-status {
 	clear: both;
 }
 .service-test-status .label {
@@ -140,6 +140,10 @@ button.cmd-copy {
 	width: 180px;
     text-align: right;
 }
+.service-vuln-status {
+	margin-left: 220px;
+}	
+
 .indicator.red, .indicator.green, .indicator.gray {
 	color: #fff;
 }
