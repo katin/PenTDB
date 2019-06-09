@@ -21,7 +21,11 @@ a:visited {
 a.hover-link {
 	text-decoration: none;
 }
-a.hover-link:hover {
+#top a.hover-link {
+	text-decoration: none;
+	color: #5d5;
+}
+a.hover-link:hover, #top a.hover-link:hover {
 	color: #e8e8e8;
 	text-decoration: underline;
 }
@@ -32,7 +36,7 @@ a.hover-link:hover {
 	left: 0;
 	z-index: 999;
 	width: 100%;
-	height: 100px;
+	height: 50px;
 	background-color: #222;
 	border-bottom: 1px solid #ccc;
 	padding-left: 10px;
@@ -48,6 +52,9 @@ a.hover-link:hover {
 	margin-block-start: 0.33em;
     margin-block-end: 0.33em;
     padding-right: 2em;
+    color: #5fa7d2;
+}
+#top h1, #top .titlespan a {
     color: #5fa7d2;
 }
 #top .session-title {
@@ -69,6 +76,21 @@ a.hover-link:hover {
 	padding-left: 10px;
 	padding-bottom: 20px;
 }
+.services-links-bar {
+	margin-top: 5px;
+}
+.ip-service-link a {
+	padding: 2px 5px;
+	min-width: 80px;
+	background-color: #555;
+	color: #5d5;
+}
+.ip-service-link.highlight a {
+	padding: 2px 5px;
+	min-width: 80px;
+	background-color: #aaa;
+	color: #222;
+}
 
 .error-log {
 	display: block;
@@ -85,8 +107,8 @@ a.hover-link:hover {
 .test-wrapper::before { 
   display: block; 
   content: " "; 
-  margin-top: -100px; 
-  height: 100px; 
+  margin-top: -60px; 
+  height: 60px; 
   visibility: hidden; 
   pointer-events: none;
 }
@@ -111,6 +133,9 @@ a.hover-link:hover {
 }
 .status-completed {
 	background-color: #162;
+}
+.status-negative {
+	background-color: #933;
 }
 .status-in-progress {
 	background-color: #d94;

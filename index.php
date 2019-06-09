@@ -222,9 +222,11 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			case 'BINARY':
 				switch ($test['status']) {
 					case 'POS':
-						$auto_expand = true;
-					case 'NEG':
 						$status_bar = 'status-completed';
+						$auto_expand = true;
+						break;
+					case 'NEG':
+						$status_bar = 'status-negative';
 						break;
 
 					case 'IN-PROGRESS':
@@ -237,6 +239,23 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 				}
 
 			case 'DEPTH':
+				switch ($test['status']) {
+					case 'POS':
+						$status_bar = 'status-completed';
+						$auto_expand = true;
+						break;
+					case 'NEG':
+						$status_bar = 'status-negative';
+						break;
+
+					case 'IN-PROGRESS':
+						$status_bar = 'status-in-progress';
+						$auto_expand = true;
+						break;
+
+					default:
+						break;
+				}
 				if ( is_numeric($test['status']) && $test['status'] > 0 ) {
 					$status_bar = 'status-in-depth';
 				}

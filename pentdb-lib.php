@@ -133,6 +133,26 @@ global $top_message;
 	if ( isset($vars['session_id']) ) {
 		$output .= '<span class="session-title">Session ID: <a class="hover-link" href="index.php?session_id='.$vars['session_id'].'">'.$vars['session_id'].'</a> </span><span class="spacer bold">data path: </span><span class="dir-path">'.$path.'</span>'."\n";
 	}
+	// build quick-links to other services on this IP address
+	$services_list = get_service_list( $vars['session_id'], $vars['ip'] );
+	$other_services_html = '';
+	if ( isset($vars['ip']) ) {
+		if ( !empty($vars['ip']) ) {
+			$other_services_html .= '<span class="top-ip-addr">'.base_link($vars['session_id'], $vars['ip'], ' ', ' ','class="hover-link"').$vars['ip']."</a></span>\n";
+		}
+	}
+// echo "<div><pre>".print_r($services_list,true)."</pre></div>";
+	foreach ( $services_list as $service ) {
+		$highlite = '';
+		if ( $service['port'] == $vars['port'] && $service['service'] == $vars['service'] ) {
+			$highlite = ' highlight';
+		}
+		$other_services_html .= '<span class="ip-service-link'.$highlite.'">'.base_link($vars['session_id'], $vars['ip'], $service['service'], $service['port']).'('.$service['port'].') '.$service['service']."</a></span>\n";
+// echo "<div><pre>".print_r($service,true)."</pre></div>";
+
+	}
+
+	$output .= '<div class="services-links-bar">' . $other_services_html . "</div>\n";
 	$output .= '</div>'."\n";				// close #top
 	$output .= '<div id="page">'."\n";		// open page
 
@@ -406,7 +426,7 @@ function pentdb_get_page_vars() {
 }
 
 
-function base_link($session_id, $ip, $service, $port = NULL, $extra = NULL, $spot = NULL) {
+function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NULL, $spot = NULL) {
 	return '<a '.$extra.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port) ).($spot ? "#".$spot : '').'">';
 }
 
@@ -555,8 +575,8 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 		}
 		if ( !empty($rec['flags']) ) {
 			// $flag_star = 'F';
-			$flag_star = '&#9679;';		// round dot
-			$flag_star = '&diams;';		// diamond
+			// $flag_star = '&#9679;';		// round dot
+			// $flag_star = '&diams;';		// diamond
 			$flag_star = '&oplus;';		// plus sign in a circle
 		}
 
