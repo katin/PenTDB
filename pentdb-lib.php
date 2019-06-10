@@ -231,7 +231,7 @@ function pentdb_create_session( $name ) {
 	$addsess_q = "INSERT into sessions (session_id,data_path,cmd_path) VALUES ('%s','%s','%s')";
 	$addsess_result = db_query( $addsess_q, $session, $data_path, $cmd_path);
 	if ( !$addsess_result ) {
-		echo '<div>Query failed.';
+		echo '<div>Query failed.</div>';
 		echo "<div></pre>".print_r($addsess_result,true)."</pre></div>";
 		return false;
 	}
@@ -248,7 +248,7 @@ function pentdb_add_ip( $ip, $session, $hostname ) {
 	$addip_q = "INSERT into testinstance (session_id,ip_address,rectype,title) VALUES ('%s','%s','HOST','%s')";
 	$addip_result = db_query( $addip_q, $session, $ip, 'HOST '.$hostname);
 	if ( !$addip_result ) {
-		echo '<div>Query failed.';
+		echo '<div>Query failed.</div>';
 		echo "<div></pre>".print_r($addip_result,true)."</pre></div>";
 		return false;
 	}
@@ -368,12 +368,50 @@ function pentdb_new_vuln() {
 function pentdb_update_vuln() {
 	$vars = pentdb_get_page_vars();
 
+	// validate fname ------
 
+	if ( !isset($_GET['fname']) ) {
+		pentdb_log_error("Feildname param required to update vuln. [MSG-4102]");
+		return false;
+	}
+	$fname = pentdb_clean($_GET['fname']);
 
+	$valid_vuln_fields = pentdb_get_valid_vuln_fields();
+	if ( !in_array($fname, $valid_vuln_fields) ) {
+		pentdb_log_error("Invalid fieldname '".$fname."' passed to update_vuln(). [MSG-4141]");
+		return false;
+	}
 
+	// validate field data -----------
 
+	if ( !isset($_GET[$fname]) ) {
+		pentdb_log_error("Missing field data parm '".$fname."' in update_vuln(). [MSG-4107]");
+		return false;
+	}
 
+	// update db
+
+	$vuln_q = "UPDATE vuln SET ".$fname."='%s' WHERE vid=".$vars['vuln'];
+	$result = db_query( $vuln_q, $_GET[$fname] );
+	if ( !$result ) {
+		pentdb_log_error("Vuln update failed. [MSG-4120]");
+		return false;
+	}
+	return $status;
 }
+
+
+function pentdb_get_valid_vuln_fields() {
+	$form_fields = array( 'title', 'url', 'exploit_type', 'attack_type', 'platform',
+		'edb_verified','target_version_match','tested_version_match','exploit_date',
+		'exploit_engine','credentials_req','cpu_arch', 'core_count','service_pack_match',
+		'has_code','is_poc','code_language','status','cmd','process_result_cmd',
+		'watch_file','order_weight','raw_result','discovered','flags','notes',
+	);
+
+	return $form_fields;
+}
+
 
 
 function ptdb_set_binary_status( $status ) {
@@ -387,7 +425,7 @@ function ptdb_set_binary_status( $status ) {
 	$set_q = "UPDATE testinstance set status='%s' WHERE irid='%d'";
 	$set_result = db_query( $set_q, $status, $vars['rec_id'] );
 	if ( !$set_result ) {
-		echo '<div>Query failed.';
+		echo '<div>Query failed.</div>';
 		echo "<div></pre>".print_r($addip_result,true)."</pre></div>";
 		return false;
 	}
@@ -406,7 +444,7 @@ function ptdb_set_depth_status() {
 	$set_q = "UPDATE testinstance set status='%s' WHERE irid='%d'";
 	$set_result = db_query( $set_q, $vars['status'], $vars['rec_id'] );
 	if ( !$set_result ) {
-		echo '<div>Query failed.';
+		echo '<div>Query failed.</div>';
 		echo "<div></pre>".print_r($addip_result,true)."</pre></div>";
 		return false;
 	}
@@ -425,8 +463,8 @@ function pentdb_get_page_vars() {
 	if ( isset($_GET['ip']) ) {
 		$vars['ip'] = pentdb_clean( $_GET['ip'] );
 	}
-	if ( isset($_GET['cmd']) ) {
-		$vars['cmd'] = pentdb_clean( $_GET['cmd'] );
+	if ( isset($_GET['fcmd']) ) {
+		$vars['fcmd'] = pentdb_clean( $_GET['fcmd'] );
 	}
 	if ( isset($_GET['rec_id']) ) {
 		$vars['rec_id'] = pentdb_clean( $_GET['rec_id'] );
@@ -865,7 +903,7 @@ function get_binary_status_button( $status, $rec_id ) {
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-			<INPUT type="hidden" name="cmd" value="set-progress"></INPUT>
+			<INPUT type="hidden" name="fcmd" value="set-progress"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 			<INPUT '.$progress_class.'type="submit" value="InProgress"></INPUT>
 		</FORM></div>
@@ -874,7 +912,7 @@ function get_binary_status_button( $status, $rec_id ) {
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-			<INPUT type="hidden" name="cmd" value="set-pos"></INPUT>
+			<INPUT type="hidden" name="fcmd" value="set-pos"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 			<INPUT '.$pos_class.'type="submit" value="POS"></INPUT>
 		</FORM></div>
@@ -883,7 +921,7 @@ function get_binary_status_button( $status, $rec_id ) {
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-			<INPUT type="hidden" name="cmd" value="set-neg"></INPUT>
+			<INPUT type="hidden" name="fcmd" value="set-neg"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>		
 			<INPUT '.$neg_class.'type="submit" value="NEG"></INPUT>
 		</FORM></div>
@@ -921,7 +959,7 @@ function get_depth_status_button( $status, $rec_id ) {
 				<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 				<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 				<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-				<INPUT type="hidden" name="cmd" value="set-status"></INPUT>
+				<INPUT type="hidden" name="fcmd" value="set-status"></INPUT>
 				<INPUT type="hidden" name="status" value="'.$x.'"></INPUT>
 				<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 				<INPUT '.($status == $x ? 'class="blue-button"' : '').'type="submit" value="'.$x.'"></INPUT>
@@ -944,7 +982,7 @@ function pentdb_get_reset_status_form( $vars, $rec_id ) {
 			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-			<INPUT type="hidden" name="cmd" value="set-status"></INPUT>
+			<INPUT type="hidden" name="fcmd" value="set-status"></INPUT>
 			<INPUT type="hidden" name="status" value="0"></INPUT>
 			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
 			<INPUT type="submit" value="reset"></INPUT>
@@ -962,12 +1000,14 @@ function create_port_record() {
 	$values = ' VALUES (';
 	$comma = false;
 	foreach( $_GET as $key => $value ) {
-		if ( $key == 'cmd' ) {
+		if ( $key == 'fcmd' ) {
 			continue;
 		}
 		if ( $key == 'ip' ) {
 			$key = 'ip_address';
 		}
+		// [_] *** TODO having switched GET form cmd to fcmd, 
+		//			this 'command' joggle can be fixed/removed
 		if ( $key == 'command' ) {
 			$key = 'cmd';
 		}
@@ -1034,7 +1074,7 @@ function get_add_test_form( $title = "Add a test" ) {
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-		<INPUT type="hidden" name="cmd" value="new-port"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="new-port"></INPUT>
 		<INPUT type="submit" value="Add a test"></INPUT>
 		</FORM></div>
 	';
@@ -1076,7 +1116,7 @@ function get_add_vuln_form( $title = "Add a vuln" ) {
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
-		<INPUT type="hidden" name="cmd" value="new-vuln"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="new-vuln"></INPUT>
 		<INPUT type="submit" value="Add a vuln"></INPUT>
 		</FORM></div>
 	';
@@ -1095,6 +1135,7 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 
 		<LABEL for="'.$name.'">'.$name.': </LABEL>
 		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>
+		<INPUT type="hidden" name="fname" value="'.$name.'"></INPUT>
 
 		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
@@ -1102,7 +1143,7 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 		<INPUT type="hidden" name="vuln" value="'.$vars['vuln'].'"></INPUT>
 
-		<INPUT type="hidden" name="cmd" value="update-vuln"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="update-vuln"></INPUT>
 		<INPUT type="submit" value="Update"></INPUT>
 		</FORM></div>
 	';
@@ -1126,7 +1167,7 @@ function get_add_banner_form( $recid ) {
 		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 
-		<INPUT type="hidden" name="cmd" value="update-banner"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="update-banner"></INPUT>
 		<INPUT type="submit" value="Update Banner"></INPUT>
 		</FORM></div>
 	';
@@ -1150,7 +1191,7 @@ function get_set_flags_form( $recid ) {
 		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 
-		<INPUT type="hidden" name="cmd" value="update-flags"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="update-flags"></INPUT>
 		<INPUT type="submit" value="Update Flags"></INPUT>
 		</FORM></div>
 	';
@@ -1174,7 +1215,7 @@ function get_notes_form( $recid, $notes ) {
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
 
-		<INPUT type="hidden" name="cmd" value="update-notes"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="update-notes"></INPUT>
 		<INPUT type="submit" value="Update Notes"></INPUT>
 		</FORM></div>
 

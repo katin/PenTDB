@@ -9,6 +9,8 @@ TODO LIST
 
 [_] add display & update of raw_result and discovered long text fields
 
+[_] add auto-import of data from exploit-db.com vuln URLs (in add vuln routine)
+
 [_] add caching of vars in pentdb_get_page_vars()
 
 [_] add login point w/creds storage. 

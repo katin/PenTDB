@@ -25,8 +25,8 @@ date_default_timezone_set('America/Los_Angeles');
 	// param checks
 	//
 
-if ( isset($_GET['cmd']) ) {
-	$mycmd = $_GET['cmd'];			// TODO: sanitize cmd
+if ( isset($_GET['fcmd']) ) {
+	$mycmd = $_GET['fcmd'];			// TODO: sanitize cmd
 	ptdb_process_cmd( $mycmd );
 
 
@@ -112,12 +112,7 @@ function display_vuln_page( $session_id, $ip, $vuln_id ) {
 		die();
 	}
 
-	$display_fields = array( 'title', 'url', 'exploit_type', 'attack_type', 'platform',
-		'edb_verified','target_version_match','tested_version_match','exploit_date',
-		'exploit_engine','credentials_req','cpu_arch', 'core_count','service_pack_match',
-		'has_code','is_poc','code_language','status','cmd','process_result_cmd',
-		'watch_file','order_weight','raw_result','discovered','flags','notes',
-	);
+	$display_fields = pentdb_get_valid_vuln_fields();
 
 	// display the vuln info
 	$output = '';
@@ -153,8 +148,8 @@ function display_iplist_page( $session_id ) {
 		die();
 	}
 	$new_session = false;
-	if ( isset($_GET['cmd']) ) {
-		if ( $_GET['cmd'] == 'create-session' ) {
+	if ( isset($_GET['fcmd']) ) {
+		if ( $_GET['fcmd'] == 'create-session' ) {
 			$new_session = true;
 		}
 	}
@@ -187,7 +182,7 @@ $myform = '
 		<INPUT type="text" name="hostname" id="hostname" value="box-$i4p"></INPUT><br/>
 		<INPUT type="checkbox" name="mktank" value="mktank" id="mktank"><label for="mktank"> Run mktank command</label><br/>
 		<INPUT type="checkbox" name="penscan" value="penscan" id="penscan"><label for="penscan"> Launch penscan command</label><br/>
-		<INPUT type="hidden" name="cmd" value="add-ip"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="add-ip"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
 		<INPUT type="submit" value="Add IP address"></INPUT>
 	</FORM></div>
@@ -237,7 +232,7 @@ $myform = '
 		<INPUT type="text" name="cmd_path" id="cmd_path"></INPUT> (shell user has minimal path)<br/>
 		<LABEL for="api_url">CmdSvr URL: </LABEL>
 		<INPUT type="text" name="api_url" id="api_url" value="http://127.0.0.1:8888"></INPUT><br/>
-		<INPUT type="hidden" name="cmd" value="create-session"></INPUT><br/>
+		<INPUT type="hidden" name="fcmd" value="create-session"></INPUT><br/>
 		<INPUT type="submit" value="Create session"></INPUT>
 	</FORM></div>
 ';
@@ -461,7 +456,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 		<INPUT type="text" name="altport" id="altport"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
-		<INPUT type="hidden" name="cmd" value="add-service"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="add-service"></INPUT>
 		<INPUT type="submit" value="Add service set"></INPUT>
 		</FORM></div>
 	';
@@ -500,7 +495,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 		<INPUT type="hidden" name="rectype" value="TITLE"></INPUT>
 		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
-		<INPUT type="hidden" name="cmd" value="new-port"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="new-port"></INPUT>
 		<INPUT type="submit" value="Create port test"></INPUT>
 		</FORM></div>
 	';
