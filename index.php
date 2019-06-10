@@ -28,8 +28,6 @@ date_default_timezone_set('America/Los_Angeles');
 if ( isset($_GET['fcmd']) ) {
 	$mycmd = $_GET['fcmd'];			// TODO: sanitize cmd
 	ptdb_process_cmd( $mycmd );
-
-
 }
 
 
@@ -41,21 +39,6 @@ if ( empty($_GET['session_id']) ) {
 	die();	
 }
 $session_id = pentdb_clean( $_GET['session_id'] );
-
-if ( isset($_GET['vuln']) ) {
-	if ( empty($_GET['vuln']) ) {
-		die('Vuln param is required for this display.');
-	}
-	$vuln = pentdb_clean( $_GET['vuln'] );
-
-	if ( !isset($_GET['ip']) ) {
-		die('IP param is required for this display.');
-	}
-	if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
-		display_vuln_page( $session_id, $vip, $vuln );
-	}
-	die();
-}
 
 if ( isset($_GET['service']) ) {
 	if ( !isset($_GET['port']) ) {

@@ -7,6 +7,12 @@
 // 190519 KBI - created
 
 global $top_message;
+global $webpages_cache_path;
+global $base_path;
+
+	$webpages_cache_path = "../exploit-db-pages/";
+	$base_path = '/'.substr(__FILE__, 1, strrpos(__FILE__,'/'));
+
 
 // clean()
 //
@@ -397,6 +403,11 @@ function pentdb_update_vuln() {
 		pentdb_log_error("Vuln update failed. [MSG-4120]");
 		return false;
 	}
+
+	if ($fname == 'url') {
+		pentdb_auto_populate_vuln( $_GET[$fname], $vars['vuln'] );
+	}
+
 	return $status;
 }
 
@@ -412,6 +423,155 @@ function pentdb_get_valid_vuln_fields() {
 	return $form_fields;
 }
 
+
+function pentdb_curl_fetch_page( $url ) {
+	$ch=curl_init();
+	$timeout=5;
+
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+
+    curl_setopt($ch, CURLOPT_HEADER  ,1);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION  ,1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+
+    // the magic to get past the Securi WAFirewall is to specify a user agent (no more "bad bot")
+	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux i686; rv:52.0) Gecko/20100101 Firefox/52.0");
+
+
+	// Get URL content
+	$page_source=curl_exec($ch);
+	$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+	// close handle to release resources
+	curl_close($ch);
+
+	if ( $httpcode > 399 ) {
+		pentdb_log_error("Error fetching page ".$url." - HTTP CODE ".$httpcode." [MSG-4104]");
+		return false;
+	}
+
+	return $page_source;
+}
+
+
+
+// auto_populate_vuln
+//
+// If the vuln url is at exploit-db.com, then attempt to 
+//   auto-fill as many fields as possible from teh web page
+
+function pentdb_auto_populate_vuln( $url, $vid ) {
+global $top_message;
+global $webpages_cache_path;
+
+	$key_id = 'https://www.exploit-db.com/exploits/';
+	if ( !substr($url, 1, strlen($key_id)) == $key_id ) {
+		return false;
+	}
+	$top_message .= '<div>Processed exploit-db page.</div>'."\n";
+
+	$page_source = pentdb_fetch_cached_page( $url );
+
+	if ( empty($page_source) ) {
+		$page_source = pentdb_curl_fetch_page( $url );
+	}
+
+	// if we get back false, we didn't get the page
+	if ( !$page_source ) {
+		return;
+	}
+
+	// save this page to cache so we don't have to re-read it later
+	pentdb_cache_web_page( $url, $page_source );
+
+// echo "<div><pre>".print_r($page_lines_array,true)."<pre><div>";
+
+	//
+	// process the page
+	//
+
+	$data = array();
+
+	// get verified status
+	$v_pos = strpos($page_source, 'EDB Verified');
+	if ( $v_pos ) { 
+		$v_text = substr($page_source, $v_pos, 500);	// 500 chars - could be lots of spaces
+		$verified = strpos($page_source, 'mdi-check');
+		if ( $verified ) {
+			$data['edb_verified'] = 1;
+		} else {
+			$data['edb_verified'] = -1;
+		}
+	}
+
+// echo "<div><pre>".$page_source."<pre><div>";
+// die('passed');
+
+	$sql_fields = '';
+	$sql_values = '';
+	$sql_series = '';
+	foreach( $data as $key => $value ) {
+		$sql_fields .= ($sql_fields ? ',' : '').$key;
+		$sql_values .= ($sql_values ? ',' : '').$value;
+		$sql_series .= ($sql_series ? ',' : '')."$key=`".$value."`";
+	}
+	if ( $sql_fields ) {
+		$sql_fields = '('.$sql_fields.')';
+		$sql_values = '('.$sql_fields.')';
+		$vuln_q = "UPDATE vuln SET ".$sql_series." WHERE vid=%d";
+
+// die($vuln_q);
+
+		$result = db_query( $vuln_q, $vid );
+		if ( !$result ) {
+			pentdb_log_error("Vuln update failed. [MSG-5188]");
+			return false;
+		}
+	}
+
+}
+
+
+function pentdb_fetch_cached_page( $url ) {
+global $webpages_cache_path;
+global $base_path;
+
+	$page_id = substr($url, strrpos($url, '/')+1).'.html';
+	$filepath = $base_path.$webpages_cache_path.$page_id;
+
+	if ( file_exists( $filepath ) ) {
+// die('got the file');
+		return file_get_contents($filepath);
+	}
+
+// die($filepath);
+
+	return false;
+}
+
+
+function pentdb_cache_web_page( $url, $page_source, $overwrite = false ) {
+global $webpages_cache_path;
+global $base_path;
+
+	// get the page / vuln id
+	$page_id = substr($url, strrpos($url, '/')+1).'.html';
+	$filepath = $base_path.$webpages_cache_path.$page_id;
+
+	// check to see if it exists in our directory already
+	if ( file_exists( $filepath ) && !$overwrite ) {
+		pentdb_log_error("File already exists - skipping caching of ".$filepath);
+// die('says already exits');
+		return false;
+	}
+
+	// write the page out
+	$status = file_put_contents ( $filepath, $page_source ); 
+// die("wrote out the file of length ".strlen($page_source).": ".$filepath." -- status: ".$status);
+	return $status;
+}
 
 
 function ptdb_set_binary_status( $status ) {
@@ -482,8 +642,8 @@ function pentdb_get_page_vars() {
 }
 
 
-function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NULL, $spot = NULL, $vuln = NULL ) {
-	return '<a '.$extra.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port,'vuln'=>$vuln) ).($spot ? "#".$spot : '').'">';
+function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NULL, $spot = NULL, $vuln = NULL, $fcmd = NULL ) {
+	return '<a '.$extra.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port,'vuln'=>$vuln) ).($fcmd ? '&fcmd='.$fcmd : '').($spot ? "#".$spot : '').'">';
 }
 
 
@@ -705,7 +865,7 @@ function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = N
 		// }
 		$display_color = get_vuln_status_color( $rec['status'], $rec['flags'] );
 		$title = 'title="'.($rec['status'] ? $rec['status'].' - ' : '').$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
-		$link = base_link($session_id,$ip,$service,$port,$title,NULL,$rec['vid']); 
+		$link = base_link($session_id,$ip,$service,$port,$title,NULL,$rec['vid'],'display-vuln'); 
 		$flag_star = '';
 		if ( $rec['status'] == "OPEN" ) {
 			$flag_star = '&#9679;';		// round dot
@@ -1130,11 +1290,29 @@ function get_add_vuln_form( $title = "Add a vuln" ) {
 
 function get_add_vuln_datum_form( $name, $value, $recid ) {
 	$vars = pentdb_get_page_vars();
+
+
+	$data = '		<LABEL for="'.$name.'">'.$name.': </LABEL>
+		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>';
+
+	if ( $name == 'status' ) {
+		$data = '		<LABEL for="status">Status: </LABEL>
+		<SELECT name="status" id="status">
+			<OPTION '.($value=="OPEN" ? 'SELECTED ' : '').'value="OPEN">OPEN</OPTION>
+			<OPTION '.($value=="ELIMINATED" ? 'SELECTED ' : '').'value="ELIMINATED">ELIMINATED</OPTION>
+			<OPTION '.($value=="UNLIKELY" ? 'SELECTED ' : '').'value="UNLIKELY">UNLIKELY</OPTION>
+			<OPTION '.($value=="POSSIBLE" ? 'SELECTED ' : '').'value="POSSIBLE">POSSIBLE</OPTION>
+			<OPTION '.($value=="MATCH" ? 'SELECTED ' : '').'value="MATCH">MATCH</OPTION>
+			<OPTION '.($value=="NEG" ? 'SELECTED ' : '').'value="NEG">FAILED! (NEG)</OPTION>
+			<OPTION '.($value=="POS" ? 'SELECTED ' : '').'value="POS">WORKED! (POS)</OPTION>
+		</SELECT><br/>';
+	}
+
+
 	$myform = '
 		<div class="inlineform vuln"><FORM action="index.php" method="GET">
 
-		<LABEL for="'.$name.'">'.$name.': </LABEL>
-		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>
+		'.$data.'
 		<INPUT type="hidden" name="fname" value="'.$name.'"></INPUT>
 
 		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>

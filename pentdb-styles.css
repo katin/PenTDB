@@ -250,7 +250,9 @@ button.cmd-copy {
 	margin-right: 5px;
     font-size: 1.2em;
 }	
-
+.service-vuln-status .indicator.green {
+	background-color: #0a0;
+}
 .indicator.red, .indicator.green, .indicator.gray {
 	color: #eee;
 }
@@ -270,16 +272,21 @@ button.cmd-copy {
 	-khtml-border-radius: 10px; /* for old Konqueror browsers */
 }
 .vuln-eliminated {
-	background-color: #f33;
+	background-color: #000;
+	color: red;
+}
+.vuln-eliminated::after {
+	content: "X";
+	line-height: 1.3em;
 }
 .vuln-unlikely {
 	background-color: #44A;
 }
 .vuln-possible {
-	background-color: #55B;
+	background-color: #48a;
 }
 .vuln-match {
-	background-color: #66C;
+	background-color: #eb2;
 }
 .vuln-worked {
 	background-color: #3f3;
@@ -302,11 +309,11 @@ button.cmd-copy {
     padding-right: 40px;
     text-align: right;
 }
-/*.inlineform.vuln {
-	margin-left: 100px;
-    padding-right: 40px;
-    text-align: left;
-}*/
+.inlineform.vuln select {
+	padding-right: 70%;
+    background-color: #222;
+    color: #eee;
+}
 .inlineform input, .statusform input {
 	background-color: #222;
 	color: #ddd;

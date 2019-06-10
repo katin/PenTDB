@@ -11,7 +11,7 @@ global $top_message;
 function ptdb_process_cmd ( $mycmd ) {
 global $top_message;
 
-$top_message .= '<div>PROCESSED CMD</div>';
+$top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 
 	switch( $mycmd ) {
 
@@ -79,6 +79,21 @@ $top_message .= '<div>PROCESSED CMD</div>';
 				break;
 			}
 
+		case 'display-vuln':
+			if ( empty($_GET['vuln']) ) {
+				die('Vuln param is required for this display.');
+			}
+			$vuln = pentdb_clean( $_GET['vuln'] );
+
+			if ( !isset($_GET['ip']) ) {
+				die('IP param is required for this display.');
+			}
+			if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
+				display_vuln_page( $session_id, $vip, $vuln );
+				die();
+			}
+			break;
+
 		case 'new-vuln':
 			$the_ip = pentdb_validate_ip($_GET['ip'] );
 			$the_session = $_GET['session_id'];		// TODO: sanitize session id
@@ -89,6 +104,7 @@ $top_message .= '<div>PROCESSED CMD</div>';
 
 		case 'update-vuln':
 			$success = pentdb_update_vuln();	// uses $_GET for parms
+			ptdb_process_cmd ( 'display-vuln' );
 			break;
 
 		case 'update-banner':
