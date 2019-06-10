@@ -271,6 +271,9 @@ button.cmd-copy {
 	border-radius: 10px; /* future proofing */
 	-khtml-border-radius: 10px; /* for old Konqueror browsers */
 }
+.indicator.selected {
+	box-shadow: 1px 3px 7px #fff;
+}
 .vuln-eliminated {
 	background-color: #000;
 	color: red;
@@ -357,3 +360,19 @@ button.cmd-copy {
     color: #222;
 }
 
+a.link-button {
+	border: 1px solid #777;
+	background-color: #999;
+	padding: 3px 8px;
+	text-decoration: none;
+	color: #111;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px; /* future proofing */
+	-khtml-border-radius: 4px; /* for old Konqueror browsers */
+}
+a.link-button:hover {
+	border-color: #eee;
+	text-decoration: underline;
+	box-shadow: 1px 1px 5px #aaa;
+}

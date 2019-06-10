@@ -99,17 +99,17 @@ function display_vuln_page( $session_id, $ip, $vuln_id ) {
 
 	// display the vuln info
 	$output = '';
+	$visit_button = '';
 	while ( $vuln = db_fetch_array( $vuln_recs ) ) {
 		foreach ($display_fields as $field) {
 			$output .= get_add_vuln_datum_form( $field, $vuln[$field], $vuln['vid'] );
-
-// echo "<div><pre>".print_r($output,true)."</pre><div>";
-// die('plus');
-
+		}
+		if ( !empty($vuln['url']) ) {
+			$visit_button = '<a class="link-button" href="'.$vuln['url'].'">Visit exploit page</a>'."\n";
 		}
 	}
 	if ( $output ) {
-		$output = "<h2>Vuln info:</h2>\n" . $output;
+		$output = "<h2>Vuln info:</h2>\n" . $visit_button . $output;
 		$output .= "\n".'<p class="clear">. </p>'."\n";
 	}
 

@@ -492,12 +492,24 @@ global $webpages_cache_path;
 	// process the page
 	//
 
+ 	$dom = new domDocument('1.0', 'utf-8'); 
+ 	$dom->loadHTML($page_source); 
+ 	$dom->preserveWhiteSpace = false; 
+
 	$data = array();
 
+	// get exploit title
+ 	$elem = $dom->getElementsByTagName('title'); // here u use your desired tag
+ 	$data['title'] = $elem->item(0)->nodeValue;
+
+
+// die('title:'.$title);
+
 	// get verified status
+	//
 	$v_pos = strpos($page_source, 'EDB Verified');
 	if ( $v_pos ) { 
-		$v_text = substr($page_source, $v_pos, 500);	// 500 chars - could be lots of spaces
+		$v_text = substr($page_source, $v_pos, 300);	// 500 chars - could be lots of spaces
 		$verified = strpos($page_source, 'mdi-check');
 		if ( $verified ) {
 			$data['edb_verified'] = 1;
@@ -506,7 +518,83 @@ global $webpages_cache_path;
 		}
 	}
 
+	// try to find the exploit type
+	//
+	$searchkey = '<a href="/?type=';
+	$endmark = '"';
+	$searchlength = 300;
+	$type = pentdb_search_source( $page_source, $searchkey, $endmark, $searchlength );
+	if ( $type ) {
+		$data['exploit_type'] = $type;
+		if ( strtolower($type) == 'dos' ) {
+			$data['status'] = "ELIMINATED";
+		}
+	}
+
+	// look for platform (linux, windows, PHP, Java, etc.)
+	//
+	$searchkey = '<a href="/?platform=';
+	$endmark = '"';
+	$searchlength = 300;
+	$platform = pentdb_search_source( $page_source, $searchkey, $endmark, $searchlength );
+	if ( $platform ) {
+		$data['platform'] = $platform;
+	}
+
+	// extract exploit published date
+	//
+	$pubdate = '';
+	$searchkey = 'Published:';
+	$endmark = '</div>';
+	$searchlength = 800;
+	$section = pentdb_search_source( $page_source, $searchkey, $endmark, $searchlength );
+	if ( $section ) {
+		$searchkey = '<h6 class="stats-title">';
+		$endmark = '</h6>';
+		$searchlength = 400;
+		$pubdate = pentdb_search_source( $section, $searchkey, $endmark, $searchlength );
+	}
+	if ( $pubdate ) {
+		$data['exploit_date'] = $pubdate;
+	}
+
+	// make some guesses at exploit language
+	//
+	if ( $pos = strpos($page_source, '#include <stdio.h>') ) {
+		$data['code_language'] = 'C';
+	}
+	if ( $pos = strpos($page_source, '#!/usr/bin/perl') ) {
+		$data['code_language'] = 'perl';
+	}
+	if ( $pos = strpos($page_source, '#!/bin/perl') ) {
+		$data['code_language'] = 'perl';
+	}
+	if ( $pos = strpos($page_source, '#!perl') ) {
+		$data['code_language'] = 'perl';
+	}
+	if ( $pos = strpos($page_source, '#!/usr/bin/python') ) {
+		$data['code_language'] = 'python';
+	}
+	if ( $pos = strpos($page_source, '#!/bin/python') ) {
+		$data['code_language'] = 'python';
+	}
+	if ( $pos = strpos($page_source, '#!python') ) {
+		$data['code_language'] = 'python';
+	}
+
+	// if we have a language identified, then we probably have code
+	if ( $data['code_language'] ) {
+		$data['has_code'] = 1;
+	}
+
+	// extract code segment from page -- and maybe compare it to what we have in Kali?
+
+	// compare with:   <pre><code
+
+
+
 // echo "<div><pre>".$page_source."<pre><div>";
+// echo "<div><pre>".$vid."<pre><div>";
 // die('passed');
 
 	$sql_fields = '';
@@ -515,7 +603,7 @@ global $webpages_cache_path;
 	foreach( $data as $key => $value ) {
 		$sql_fields .= ($sql_fields ? ',' : '').$key;
 		$sql_values .= ($sql_values ? ',' : '').$value;
-		$sql_series .= ($sql_series ? ',' : '')."$key=`".$value."`";
+		$sql_series .= ($sql_series ? ',' : '')."`$key`='".addslashes($value)."'";
 	}
 	if ( $sql_fields ) {
 		$sql_fields = '('.$sql_fields.')';
@@ -526,12 +614,32 @@ global $webpages_cache_path;
 
 		$result = db_query( $vuln_q, $vid );
 		if ( !$result ) {
-			pentdb_log_error("Vuln update failed. [MSG-5188]");
+			pentdb_log_error("Vuln update failed: ".$vuln_q." [MSG-5188]");
 			return false;
 		}
 	}
 
 }
+
+
+function pentdb_search_source( $page_source, $searchkey, $endmark, $searchlength, $debug = false ) {
+
+	$s_pos = strpos($page_source, $searchkey);
+	$found = '';
+
+	if ( $s_pos ) { 
+		$subtext = trim(substr($page_source, $s_pos+strlen($searchkey), $searchlength));
+		$endpos = strpos($subtext, $endmark );
+		$found = substr($subtext, 0, $endpos);
+	}
+
+	if ( $debug ) {
+		die('z:'.$found);
+	}
+
+	return $found;
+}
+
 
 
 function pentdb_fetch_cached_page( $url ) {
@@ -562,13 +670,13 @@ global $base_path;
 
 	// check to see if it exists in our directory already
 	if ( file_exists( $filepath ) && !$overwrite ) {
-		pentdb_log_error("File already exists - skipping caching of ".$filepath);
-// die('says already exits');
+		// pentdb_log_error("File already exists - skipping caching of ".$filepath);
 		return false;
 	}
 
 	// write the page out
 	$status = file_put_contents ( $filepath, $page_source ); 
+		pentdb_log_error("Cached file locally: ".$filepath);
 // die("wrote out the file of length ".strlen($page_source).": ".$filepath." -- status: ".$status);
 	return $status;
 }
@@ -880,7 +988,14 @@ function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = N
 			// $flag_star = '&oplus;';		// plus sign in a circle
 		}
 
-		$block = $link.'<div class="indicator '.$display_color.'">'.$flag_star.'</div></a>'."\n";
+		$selected = '';
+		if ( isset( $_GET['vuln']) ) {
+			if ( $rec['vid'] == $_GET['vuln'] ) {
+				$selected = ' selected';
+			}
+		}
+
+		$block = $link.'<div class="indicator '.$display_color.$selected.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $depth_mark . $block;
 
 // echo "<div><pre>".print_r($output,true)."</pre></div>";
