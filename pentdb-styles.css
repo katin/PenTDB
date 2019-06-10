@@ -36,7 +36,7 @@ a.hover-link:hover, #top a.hover-link:hover {
 	left: 0;
 	z-index: 999;
 	width: 100%;
-	height: 50px;
+	height: 75px;
 	background-color: #222;
 	border-bottom: 1px solid #ccc;
 	padding-left: 10px;
@@ -75,6 +75,8 @@ a.hover-link:hover, #top a.hover-link:hover {
 	/*margin-top: 120px;*/
 	padding-left: 10px;
 	padding-bottom: 20px;
+	min-width: 960px;
+	width: 98%;
 }
 .services-links-bar {
 	margin-top: 5px;
@@ -107,8 +109,8 @@ a.hover-link:hover, #top a.hover-link:hover {
 .test-wrapper::before { 
   display: block; 
   content: " "; 
-  margin-top: -60px; 
-  height: 60px; 
+  margin-top: -90px; 
+  height: 90px; 
   visibility: hidden; 
   pointer-events: none;
 }
@@ -228,6 +230,10 @@ button.cmd-copy {
 	padding-top: 5px;
 }
 
+.vulns-links-bar {
+	margin-left: 80px;
+	padding-top: 5px;
+}
 .service-test-status, .service-vuln-status {
 	clear: both;
 }
@@ -239,12 +245,14 @@ button.cmd-copy {
 	width: 180px;
     text-align: right;
 }
-.service-vuln-status {
-	margin-left: 220px;
+.service-vuln-status .indicator {
+	/*margin-left: 220px;*/
+	margin-right: 5px;
+    font-size: 1.2em;
 }	
 
 .indicator.red, .indicator.green, .indicator.gray {
-	color: #fff;
+	color: #eee;
 }
 .indicator {
 	width: 20px;
@@ -262,7 +270,7 @@ button.cmd-copy {
 	-khtml-border-radius: 10px; /* for old Konqueror browsers */
 }
 .vuln-eliminated {
-	background-color: #339;
+	background-color: #f33;
 }
 .vuln-unlikely {
 	background-color: #44A;
@@ -272,6 +280,9 @@ button.cmd-copy {
 }
 .vuln-match {
 	background-color: #66C;
+}
+.vuln-worked {
+	background-color: #3f3;
 }
 .bigform {
 	margin-top: 20px;
@@ -291,10 +302,18 @@ button.cmd-copy {
     padding-right: 40px;
     text-align: right;
 }
+/*.inlineform.vuln {
+	margin-left: 100px;
+    padding-right: 40px;
+    text-align: left;
+}*/
 .inlineform input, .statusform input {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
+}
+.inlineform.vuln input {
+	width: 70%;
 }
 .inlineform input[type="submit"] {
 	width: 120px;

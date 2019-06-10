@@ -87,6 +87,10 @@ $top_message .= '<div>PROCESSED CMD</div>';
 			$success = pentdb_new_vuln();		// uses $_GET for parms
 			break;
 
+		case 'update-vuln':
+			$success = pentdb_update_vuln();	// uses $_GET for parms
+			break;
+
 		case 'update-banner':
 			$up_q = "UPDATE {testinstance} set banner='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['banner'], $_GET['recid']);

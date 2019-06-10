@@ -151,8 +151,14 @@ global $top_message;
 // echo "<div><pre>".print_r($service,true)."</pre></div>";
 
 	}
+// die('here!');
+// $t1 = build_vuln_status_display( $vars['session_id'], $vars['ip'] );
+// echo "<div>t1: <pre>".print_r($t1,true)."</pre></div>";
+// echo "<div>session: <pre>".print_r($vars['session_id'],true)."</pre></div>";
+// echo "<div>ip: <pre>".print_r($vars['ip'],true)."</pre></div>";
 
 	$output .= '<div class="services-links-bar">' . $other_services_html . "</div>\n";
+	$output .= '<div class="vulns-links-bar">'.build_vuln_status_display( $vars['session_id'], $vars['ip'] ). "</div>\n";
 	$output .= '</div>'."\n";				// close #top
 	$output .= '<div id="page">'."\n";		// open page
 
@@ -359,6 +365,15 @@ function pentdb_new_vuln() {
 }
 
 
+function pentdb_update_vuln() {
+	$vars = pentdb_get_page_vars();
+
+
+
+
+
+
+}
 
 
 function ptdb_set_binary_status( $status ) {
@@ -422,12 +437,15 @@ function pentdb_get_page_vars() {
 	if ( isset($_GET['status']) ) {
 		$vars['status'] = pentdb_clean( $_GET['status'] );
 	}
+	if ( isset($_GET['vuln']) ) {
+		$vars['vuln'] = pentdb_clean( $_GET['vuln'] );
+	}
 	return $vars;
 }
 
 
-function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NULL, $spot = NULL) {
-	return '<a '.$extra.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port) ).($spot ? "#".$spot : '').'">';
+function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NULL, $spot = NULL, $vuln = NULL ) {
+	return '<a '.$extra.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port,'vuln'=>$vuln) ).($spot ? "#".$spot : '').'">';
 }
 
 
@@ -446,6 +464,7 @@ function pentdb_get_urlparms( $parms = array() ) {
 		'session_id',
 		'ip',
 		'service',
+		'vuln',
 	);
 
 	// use assignment method that results in zero notices from undefined indexes
@@ -508,7 +527,7 @@ function build_ip_status_display( $session_id, $ip ) {
 function get_service_list( $session_id, $ip ) {
 	$servicelist = array();
 
-	$service_q = "SELECT service,port FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' GROUP BY port ORDER BY port";
+	$service_q = "SELECT service,port FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' GROUP BY port,service ORDER BY port";
 
 // echo "<div><pre>".print_r($service_q,true)."</pre></div>";
 // die("check");
@@ -526,6 +545,9 @@ function get_service_list( $session_id, $ip ) {
 	while ( $rec = db_fetch_array( $service_recs) ) {
 		// for now, dont' show service zero 
 		if ( empty($rec['service'])) {
+			continue;
+		}
+		if ( $rec['port'] == 0) {
 			continue;
 		}
 		$servicelist[] = array( 'service' => $rec['service'], 'port' => $rec['port'] );
@@ -625,11 +647,12 @@ function read_service_records( $session_id, $ip, $service, $port ) {
 //  for flags, discoveries, and more.
 // Hover-over for more details of the vuln.
 
-function build_vuln_status_display( $session_id, $ip, $service, $port ) {
+function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = NULL ) {
 
 	$output = '<div class="service-vuln-status">'."\n";
-	$rec_handle = read_vuln_records( $session_id, $ip, $service, $port );
+	$rec_handle = read_vuln_records( $session_id, $ip );
 
+// die('boo');
 // echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
 
 	$depth = 0;
@@ -644,19 +667,25 @@ function build_vuln_status_display( $session_id, $ip, $service, $port ) {
 		// }
 		$display_color = get_vuln_status_color( $rec['status'], $rec['flags'] );
 		$title = 'title="'.($rec['status'] ? $rec['status'].' - ' : '').$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
-		$link = base_link($session_id,$ip,$service,$port,$title,"vuln-".$rec['irid']); 
+		$link = base_link($session_id,$ip,$service,$port,$title,NULL,$rec['vid']); 
 		$flag_star = '';
+		if ( $rec['status'] == "OPEN" ) {
+			$flag_star = '&#9679;';		// round dot
+		}
+		// if ( $rec['status'] == 'ELIMINATED' ) {
+		// 	$flag_star = 'X';
+		// }
 		if ( !empty($rec['flags']) ) {
 			// $flag_star = 'F';
-			$flag_star = '&#9679;';		// round dot
+			// $flag_star = '&#9679;';		// round dot
 			$flag_star = '&diams;';		// diamond
-			$flag_star = '&oplus;';		// plus sign in a circle
+			// $flag_star = '&oplus;';		// plus sign in a circle
 		}
 
 		$block = $link.'<div class="indicator '.$display_color.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $depth_mark . $block;
 
-// echo "<div><pre>".print_r($rec,true)."</pre></div>";
+// echo "<div><pre>".print_r($output,true)."</pre></div>";
 // die("check");
 
 	}
@@ -669,17 +698,30 @@ function build_vuln_status_display( $session_id, $ip, $service, $port ) {
 }
 
 
-function read_vuln_records( $session_id, $ip, $service, $port ) {
+function read_vuln_records( $session_id, $ip, $service = NULL, $port = NULL ) {
 
-	$vuln_q = "SELECT * FROM {vuln} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY order_weight";
+	$where_service = '';
+	if ( !empty($service) ) {
+		$where_service = " AND service='%s'";
+	}
+	$where_port = '';
+	if ( !empty($port) ) {
+		$where_port = " AND port='%s'";
+	}
+
+	$vuln_q = "SELECT * FROM {vuln} WHERE session_id='%s' AND ip_address='%s'".$where_service.$where_port." ORDER BY order_weight";
 
 // echo "<div>port: <pre>".print_r($port,true)."</pre></div>";
 // echo "<div>session: <pre>".print_r($session_id,true)."</pre></div>";
 // echo "<div>ip: <pre>".print_r($ip,true)."</pre></div>";
 // echo "<div>service: <pre>".print_r($service,true)."</pre></div>";
 // die("check");
+	if ( empty($service) && empty($port) ) {
+		$vuln_recs = db_query( $vuln_q, $session_id, $ip );
+	} else {
+		$vuln_recs = db_query( $vuln_q, $session_id, $ip, $service, $port );
+	}
 
-	$vuln_recs = db_query( $vuln_q, $session_id, $ip, $service, $port );
 	if ( !$vuln_recs ) {
 		pentdb_log_error( '<div>Query or DB error looking for vuln records. [Error 613]' );
 		return false;
@@ -1045,6 +1087,28 @@ function get_add_vuln_form( $title = "Add a vuln" ) {
 	return $bigform;
 }
 
+
+function get_add_vuln_datum_form( $name, $value, $recid ) {
+	$vars = pentdb_get_page_vars();
+	$myform = '
+		<div class="inlineform vuln"><FORM action="index.php" method="GET">
+
+		<LABEL for="'.$name.'">'.$name.': </LABEL>
+		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="vuln" value="'.$vars['vuln'].'"></INPUT>
+
+		<INPUT type="hidden" name="cmd" value="update-vuln"></INPUT>
+		<INPUT type="submit" value="Update"></INPUT>
+		</FORM></div>
+	';
+
+	return $myform;
+}
 
 
 function get_add_banner_form( $recid ) {

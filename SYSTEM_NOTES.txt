@@ -3,6 +3,23 @@ SYSTEM_NOTES.txt
 System notes for the PenTDB pentest tracking tool.
 
 
+TODO LIST
+---------
+[_] add display of watch file
+
+[_] add display & update of raw_result and discovered long text fields
+
+[_] add caching of vars in pentdb_get_page_vars()
+
+[_] add login point w/creds storage. 
+Similar fields to a testinstance, and can have multiple tests per login point (with templates...), but, can't really use the current testinstance record because there could be multiple logins on the same port and protocol... Hmmm, unless we had multiple login protocols, like login1, login2, login3, login4, and login5... then all those could be on the same port.
+
+[_] add data export: session or host (ip), CSV export of the database (for post-test saving).
+
+[_] add a "vuln score" number that we can display: an expression of how many factors (out of 10?) match the target and match a working vuln. Add this display to the hover-title of the vulns status line.
+
+
+
 GENERAL
 -------
 This tool was built quickly, and while it is being continously improved, it isn't an ideal example of a web app.

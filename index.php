@@ -42,6 +42,21 @@ if ( empty($_GET['session_id']) ) {
 }
 $session_id = pentdb_clean( $_GET['session_id'] );
 
+if ( isset($_GET['vuln']) ) {
+	if ( empty($_GET['vuln']) ) {
+		die('Vuln param is required for this display.');
+	}
+	$vuln = pentdb_clean( $_GET['vuln'] );
+
+	if ( !isset($_GET['ip']) ) {
+		die('IP param is required for this display.');
+	}
+	if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
+		display_vuln_page( $session_id, $vip, $vuln );
+	}
+	die();
+}
+
 if ( isset($_GET['service']) ) {
 	if ( !isset($_GET['port']) ) {
 		die('Port param is required for this display.');
@@ -80,6 +95,49 @@ display_html_footer();
 //---------------------------------------------------------------
 //           support functions 
 //---------------------------------------------------------------
+
+	//
+	// display a vuln page
+	//
+
+function display_vuln_page( $session_id, $ip, $vuln_id ) {
+
+	$vars = pentdb_get_urlparms( array( 'session_id'=>$session_id, 'ip'=>$ip) );
+
+	$vuln_q = "SELECT * FROM {vuln} WHERE vid='%s'";
+	$vuln_recs = db_query( $vuln_q, $vuln_id);
+	if ( !$vuln_recs ) {
+		echo '<div>Query failed. [MSG-841]';
+		// *** TODO: Add link to add this as new session to db
+		die();
+	}
+
+	$display_fields = array( 'title', 'url', 'exploit_type', 'attack_type', 'platform',
+		'edb_verified','target_version_match','tested_version_match','exploit_date',
+		'exploit_engine','credentials_req','cpu_arch', 'core_count','service_pack_match',
+		'has_code','is_poc','code_language','status','cmd','process_result_cmd',
+		'watch_file','order_weight','raw_result','discovered','flags','notes',
+	);
+
+	// display the vuln info
+	$output = '';
+	while ( $vuln = db_fetch_array( $vuln_recs ) ) {
+		foreach ($display_fields as $field) {
+			$output .= get_add_vuln_datum_form( $field, $vuln[$field], $vuln['vid'] );
+
+// echo "<div><pre>".print_r($output,true)."</pre><div>";
+// die('plus');
+
+		}
+	}
+	if ( $output ) {
+		$output = "<h2>Vuln info:</h2>\n" . $output;
+		$output .= "\n".'<p class="clear">. </p>'."\n";
+	}
+
+	display_page( $output );
+}
+
 
 	//
 	// display a list of IP addresses under test for this session
@@ -329,7 +387,6 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$test_list = '<h2>Test Tracker, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
 		\n" 
 		  . build_service_status_display( $session_id, $ip, $service, $port )
-		  . build_vuln_status_display( $session_id, $ip, $service, $port )
 		  . "\n<p>&nbsp;</p>\n" . $test_list;
 
 		$test_list .= "\n".'<p class="clear"></p>'."\n";
@@ -350,7 +407,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 function display_serviceslist_page( $session_id, $ip ) {
 
-	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' GROUP BY port ORDER BY service";
+	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' GROUP BY port,service ORDER BY service";
 	$service_recs = db_query( $service_q, $session_id, $ip);
 	if ( !$service_recs ) {
 		echo '<div>Session id "'.$session_id.'"not found in database.';
