@@ -11,6 +11,9 @@ TODO LIST
 
 [_] add auto-import of data from exploit-db.com vuln URLs (in add vuln routine)
 
+[_] add test for presence of the PHPDoc module; skip using XML parser if absent.
+    (use string search instead of the XML Doc for those functions).
+
 [_] add caching of vars in pentdb_get_page_vars()
 
 [_] add login point w/creds storage. 

@@ -237,6 +237,8 @@ $myform = '
 
 function display_service_page( $session_id, $ip, $service, $port ) {
 
+	unset($_GET['vuln']);		// [_] *** TODO: Figure out a better way to do vuln display page
+
 	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight, irid";
 	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
 	if ( !$tests_recs ) {
@@ -385,6 +387,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 function display_serviceslist_page( $session_id, $ip ) {
 
+	unset($_GET['vuln']);		// [_] *** TODO: Figure out a better way to do vuln display page
+
 	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' GROUP BY port,service ORDER BY service";
 	$service_recs = db_query( $service_q, $session_id, $ip);
 	if ( !$service_recs ) {
@@ -484,7 +488,8 @@ function display_serviceslist_page( $session_id, $ip ) {
 	';
 
 
-	$mypage = $service_list . $myform . $bigform;
+
+	$mypage = $service_list . $myform . $bigform . get_add_vuln_form();
 	display_page( $mypage );
 }
 
