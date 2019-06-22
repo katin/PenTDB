@@ -72,15 +72,26 @@ function fill_varset( $line, $ip = NULL, $port = NULL ) {
 	$my_ip = ($ip ? $ip : $_GET['ip']);
 	$my_port = ($port ? $port : $_GET['port']);
 	$my_i4p = substr( $my_ip, strrpos( $my_ip, '.')+1, 99);
+	$my_hostname = pentdb_get_hostname( $my_ip );
 
 // die('i4p='.$my_i4p);
 
-	$line = str_replace ( '$i4p' , $my_i4p , $line );
-	$line = str_replace ( '$ip' , $my_ip , $line );
-	$line = str_replace ( '$port' , $my_port , $line );
+	$line = str_replace ( '$i4p' , $my_i4p, $line );
+	$line = str_replace ( '$ip' , $my_ip, $line );
+	$line = str_replace ( '$port' , $my_port, $line );
+	$line = str_replace ( '$hostname' , $my_hostname, $line );
 
 	return $line;
 }
+
+
+function pentdb_get_hostname( $my_ip ) {
+	$vars = pentdb_get_page_vars();
+	$host_record = pentdb_get_host_record( $vars['session_id'], $my_ip );
+
+	return $host_record['name'];
+}
+
 
 // get_session_path
 //
@@ -296,6 +307,79 @@ function pentdb_add_ip( $ip, $session, $hostname ) {
 	return $ip;
 }
 
+// add_host
+//
+// add a new host to the database,
+// uses the $_GET[] array for values
+
+function pentdb_add_host() {
+
+	$session_id = pentdb_clean($_GET['session_id']);
+
+	// Create the host record
+	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+	$result = db_query( $host_q,
+		$session_id,
+		$_GET['ip_address'],
+		$_GET['name'],
+		$_GET['platform'],
+		$_GET['os_version'],
+		$_GET['patch_version'],
+		$_GET['cpu_arch'],
+		$_GET['core_count'],
+		$_GET['service_pack'],
+		$_GET['status'],
+		$_GET['cmd'],
+		$_GET['process_result_cmd']
+	);
+
+	if ( !$result ) {
+		pentdb_log_error("Error adding host record ".$_GET['ip_address']." [ERR-3021]");
+		return;
+	}
+
+	echo '<div class="status">Host added.</div>'."\n";
+
+	return;
+}
+
+function pentdb_update_host() {
+	$vars = pentdb_get_page_vars();
+
+	// validate fname ------
+
+	if ( !isset($_GET['fname']) ) {
+		pentdb_log_error("Feildname param required to update host. [MSG-4602]");
+		return false;
+	}
+	$fname = pentdb_clean($_GET['fname']);
+
+	$valid_host_fields = pentdb_get_valid_host_fields();
+	if ( !in_array($fname, $valid_host_fields) ) {
+		pentdb_log_error("Invalid fieldname '".$fname."' passed to update_host(). [MSG-4641]");
+		return false;
+	}
+
+	// validate field data -----------
+
+	if ( !isset($_GET[$fname]) ) {
+		pentdb_log_error("Missing field data parm '".$fname."' in update_host(). [MSG-4607]");
+		return false;
+	}
+
+	// update db
+	$host_q = "UPDATE host SET ".$fname."='%s' WHERE session_id='%s' AND ip_address='%s'";
+	$result = db_query( $host_q, $_GET[$fname], $vars['session_id'], $vars['ip'] );
+	if ( !$result ) {
+		pentdb_log_error("Host update failed. [MSG-4620]");
+		return false;
+	}
+
+	return true;
+}
+
+
 
 // add_service
 //
@@ -357,10 +441,10 @@ function pentdb_add_service( $the_ip, $the_session, $port, $service ) {
 			// die();
 		} else {
 			$count++;
-			echo '<div>Adding test "'.$template['title'].'"</div>';
+			pentdb_top_msg("Adding test ".$template['title']);
 		}
 	}
-	echo '<div class="status">Instance record set: '.$count.' tests added with '.$errcount.' errors.</div>';
+	pentdb_top_msg("Instance record set: $count tests added with $errcount errors.");
 
 	return $service;
 }
@@ -445,6 +529,16 @@ function pentdb_update_vuln() {
 	return $status;
 }
 
+function pentdb_get_valid_host_fields() {
+	$form_fields = array( 'name', 'platform',
+		'os_version','patch_version',
+		'cpu_arch', 'core_count','service_pack',
+		'status','cmd','process_result_cmd',
+		'watch_file','notes','wireshark','proof','loot','lessons_learned','flags'
+	);
+
+	return $form_fields;
+}
 
 function pentdb_get_valid_obj_fields() {
 	$form_fields = array( 'title', 'objective', 'status', 'notes',
@@ -943,8 +1037,40 @@ function build_ip_status_display( $session_id, $ip ) {
 }
 
 
+function pentdb_get_host_record( $session_id, $ip ) {
+
+	// don't bother to query for an empty ip
+	if ( empty($_GET['ip']) ) {
+		return false;
+	}
+	$myip = pentdb_validate_ip( $ip );
+	$my_session = pentdb_clean( $session_id );
+
+	$host_q = "SELECT * FROM {host} WHERE session_id='%s' AND ip_address='%s'";
+
+	$host_rec = db_query( $host_q, $my_session, $myip );
+	if ( !$host_rec ) {
+		pentdb_log_error("Host query failed. [Error-2715]");
+		return false;
+	}
+	if ( $host_rec->num_rows == 0 ) {
+		pentdb_log_error("No host record found. [Notice 2716]");
+		return false;
+	}
+
+	$host_data = db_fetch_array( $host_rec );
+
+	return $host_data;
+}
+
+
 function get_service_list( $session_id, $ip ) {
 	$servicelist = array();
+
+	// no need to error if we aren't on a page display with services
+	if ( !isset($_GET['ip']) ) {
+		return false;
+	}
 
 	$service_q = "SELECT service,port FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' GROUP BY port,service ORDER BY port";
 
@@ -953,7 +1079,7 @@ function get_service_list( $session_id, $ip ) {
 
 	$service_recs = db_query( $service_q, $session_id, $ip );
 	if ( !$service_recs ) {
-		pentdb_log_error('<div>Services query failed. [Error-2111]</div>' );
+		pentdb_log_error('<div>Services query failed. [Error-2711]</div>' );
 		return false;
 	}
 	if ( $service_recs->num_rows == 0 ) {
@@ -1675,6 +1801,7 @@ function get_session_form( $title = "Add a session") {
 	return $bigform;
 }
 
+/* -- defunct
 function get_host_form( $title = "Add a host" ) {
 	$bigform = '
 		<div class="bigform"><FORM action="index.php" method="GET">
@@ -1695,6 +1822,116 @@ function get_host_form( $title = "Add a host" ) {
 
 	return $bigform;
 }
+*/
+
+function get_add_host_form( $title = "Add a host" ) {
+	$vars = pentdb_get_page_vars();
+	$bigform = '
+		<div class="bigform"><FORM action="index.php" method="GET">
+
+		<LABEL for="ip_address">IP address: </LABEL>
+		<INPUT type="text" name="ip_address" id = "ip_address"></INPUT><br/>
+
+		<LABEL for="name">Name: </LABEL>
+		<INPUT type="text" name="name" id = "name"></INPUT><br/>
+
+		<LABEL for="status">Status: </LABEL>
+		<SELECT name="status" id="status">
+			<OPTION value="NEW">NEW</OPTION>
+			<OPTION value="UNKNOWN">UNKNOWN</OPTION>
+			<OPTION value="SCANNED">SCANNED</OPTION>
+			<OPTION value="IN-PROGRESS">IN-PROGRESS</OPTION>
+			<OPTION value="STANDBY">STANDBY</OPTION>
+			<OPTION value="PWNED">PWNED</OPTION>
+		</SELECT><br/>
+
+		<LABEL for="platform">Platform: </LABEL>
+		<INPUT type="text" name="platform" id = "platform"></INPUT><br/>
+
+		<LABEL for="os_version">OS version: </LABEL>
+		<INPUT type="text" name="os_version" id = "os_version"></INPUT><br/>
+
+		<LABEL for="patch_version">Patch version: </LABEL>
+		<INPUT type="text" name="patch_version" id = "patch_version"></INPUT><br/>
+
+		<LABEL for="service_pack">Service pack (SP): </LABEL>
+		<INPUT type="text" name="service_pack" id = "service_pack"></INPUT><br/>
+
+		<LABEL for="cpu_arch">CPU architecture: </LABEL>
+		<INPUT type="text" name="cpu_arch" id = "cpu_arch"></INPUT><br/>
+
+		<LABEL for="core_count">Core count: </LABEL>
+		<INPUT type="text" name="core_count" id = "core_count"></INPUT><br/>
+
+
+		<LABEL for="cmd">Cmd: </LABEL>
+		<INPUT type="text" name="cmd" id="cmd" value="'.DEFAULT_HOST_CMD.'"></INPUT><br/>
+
+		<LABEL for="process_result_cmd">Process result cmd: </LABEL>
+		<INPUT type="text" name="process_result_cmd" id="process_result_cmd" value="'.DEFAULT_HOST_PRORESULT_CMD.'"></INPUT><br/>
+
+
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="add-host"></INPUT>
+		<INPUT type="submit" value="Add host"></INPUT>
+		</FORM></div>
+	';
+	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+	return $bigform;
+}
+
+
+function get_add_host_datum_form( $name, $value, $recid ) {
+
+	// don't list internal fields
+	// TODO: change this to get a list of valid fields, then we can control the order, too.
+	if ( in_array($name, array("hid","created","session_id","ip_address")) ) {
+		return NULL;
+	}
+
+	if ( in_array($name, array("cmd","process_result_cmd")) ) {
+		$value = fill_varset( $value );
+	}
+
+	$vars = pentdb_get_page_vars();
+
+	$data = '		<LABEL for="'.$name.'">'.$name.': </LABEL>
+		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>';
+
+	$ta_form = '';
+	if ( in_array($name, array("notes","wireshark","proof","loot","lessons_learned") )) {
+		$data = '		<LABEL for="'.$name.'_form">'.$name.': </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="8" name="'.$name.'" id ="'.$name.'">'.$value.'</textarea><br/>';
+		$ta_form = ' taform';
+	}
+
+	if ( $name == 'status' ) {
+		$data = '		<LABEL for="status">Status: </LABEL>
+		<SELECT name="status" id="status">
+			<OPTION '.($value=="NEW" ? 'SELECTED ' : '').'value="NEW">NEW</OPTION>
+			<OPTION '.($value=="UNKNOWN" ? 'SELECTED ' : '').'value="UNKNOWN">UNKNOWN</OPTION>
+			<OPTION '.($value=="SCANNED" ? 'SELECTED ' : '').'value="SCANNED">SCANNED</OPTION>
+			<OPTION '.($value=="IN-PROGRESS" ? 'SELECTED ' : '').'value="IN-PROGRESS">IN-PROGRESS</OPTION>
+			<OPTION '.($value=="STANDBY" ? 'SELECTED ' : '').'value="STANDBY">STANDBY</OPTION>
+			<OPTION '.($value=="PWNED" ? 'SELECTED ' : '').'value="PWNED">PWNED</OPTION>
+		</SELECT><br/>';
+	}
+
+	$myform = '
+		<div class="inlineform host'.$ta_form.'"><FORM action="index.php" method="GET">
+		'.$data.'
+		<INPUT type="hidden" name="fname" value="'.$name.'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="update-host"></INPUT>
+		<INPUT type="submit" value="Update"></INPUT>
+		</FORM></div>
+	';
+
+	return $myform;
+}
+
 
 
 function get_add_vuln_form( $title = "Add a vuln" ) {

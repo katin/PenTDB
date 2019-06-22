@@ -25,6 +25,20 @@ TODO LIST
     [_] MySQL 3306
     [_] 
 
+[_] Add porttest maintenance screen
+    [_] with export
+
+
+[x] Add host record data display and update form
+    [x] OS, version, SP, architecture, etc. fields to match vulns qualifications
+    [x] add lessons learned field?
+    [x] flags captured (proof)
+    [N] creds starter spot? No - just add creds records later
+    [x] Notes
+[x] Refactor all display pages code to use host record
+[_] Remove HOST record type from .dat files (porttest data)
+
+
 [_] change $vuln parm in URL to recid so it works for objectives, too
 
 [_] remove XML parser

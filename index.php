@@ -2,7 +2,7 @@
 
 // penTDB index.php
 //
-// Display a chart specified by the passed parms, "ip" and "service".
+// Display a tracking chart specified by the passed parms, "session", ip" and "service".
 //
 // 190519 KBI created
 
@@ -164,10 +164,10 @@ echo "<div><pre>".print_r($oid,true)."</pre></div>";
 
 function display_iplist_page( $session_id ) {
 
-	$ip_q = "SELECT DISTINCT ip_address FROM {testinstance} WHERE session_id='%s'";
+	$ip_q = "SELECT DISTINCT ip_address FROM {host} WHERE session_id='%s'";
 	$ip_recs = db_query( $ip_q, $session_id);
 	if ( !$ip_recs ) {
-		echo '<div>Query failed. [MSG-2116]';
+		echo '<div>Host query failed. [MSG-2116]';
 		// *** TODO: Add link to add this as new session to db
 		die();
 	}
@@ -198,7 +198,7 @@ function display_iplist_page( $session_id ) {
 		$ip_list .= "\n".'<p class="clear">. </p>'."\n";
 	}
 
-	$mypage = $ip_list . get_host_form();
+	$mypage = $ip_list . get_add_host_form();
 	display_page( $mypage );
 }
 
@@ -397,6 +397,19 @@ function display_serviceslist_page( $session_id, $ip ) {
 
 	unset($_GET['vuln']);		// [_] *** TODO: Figure out a better way to do vuln display page
 
+	// display host information & update form
+	$host_form = '';
+	$host_rec = pentdb_get_host_record( $session_id, $ip );
+	foreach ($host_rec as $name => $value) {
+		$host_form .= get_add_host_datum_form( $name, $value, $host_rec['oid'] );
+	}
+	if ( $host_form ) {
+		$host_form = "<h2>Host info:</h2>\n" . $host_form;
+		$host_form .= "\n".'<p class="clear">. </p>'."\n";
+	}
+
+
+
 	$service_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND rectype='TITLE' GROUP BY port,service ORDER BY service";
 	$service_recs = db_query( $service_q, $session_id, $ip);
 	if ( !$service_recs ) {
@@ -456,7 +469,8 @@ function display_serviceslist_page( $session_id, $ip ) {
 		</FORM></div>
 	';
 
-	$mypage = $service_list . $myform . get_add_service_form() . get_add_objective_form() . get_add_vuln_form();
+	$mypage = $service_list . $host_form . $myform . get_add_service_form() . get_add_objective_form() . get_add_vuln_form();
+
 	display_page( $mypage );
 }
 

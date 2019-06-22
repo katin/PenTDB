@@ -25,35 +25,17 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 				break;
 			}
 
-
-		case 'add-ip':
-			$the_ip = pentdb_validate_ip($_GET['ipaddr'] );
+		case 'add-host':
 			$the_session = $_GET['session_id'];		// TODO: sanitize session
-				# run variables on hostname option
-			$_GET['ip'] = $the_ip;
-			$hostname = fill_varset( $_GET['hostname'] );	// TODO santize hostname (keep '$' chars!)
-			$success = pentdb_add_ip( $the_ip, $the_session, $hostname );
-			if ( $success ) {
-				$_GET['ip'] = $success;
-				if ( $_GET['mktank'] == 'mktank' ) {
-					$data_path = pentdb_get_session_path();
-					$cmd_path = pentdb_get_cmd_path();
-					$my_cmd = $cmd_path.'mktank '.$the_ip.' '.$hostname.' '.$data_path;
-					$cmd_result = shell_exec( $my_cmd );
-					$top_message .= "CMD: $my_cmd -- RESULT: ".$cmd_result;
-				}
-				if ( $_GET['penscan'] == 'penscan' ) {
-					$data_path = pentdb_get_session_path();
-					$cmd_path = pentdb_get_cmd_path();
-					$my_cmd = $cmd_path.'penscan '.$data_path.$the_ip;
-					$cmd_result = exec( $my_cmd );
-					$top_message .= "CMD: $my_cmd -- Launched.";
-				}				break;
-			} else {
-				echo "<div>Add ip failed.</div>";
-				break;
-			}
+			$success = pentdb_add_host( $the_session );
+			break;
 
+		case 'update-host':
+			$success = pentdb_update_host();	// uses $_GET for parms
+			// ptdb_process_cmd ( 'display-vuln' );
+			break;
+
+// echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
 
 		case 'add-service':
 			if ( empty($_GET['altport'])) {
@@ -67,12 +49,11 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			// $service = substr($_GET['service'],0,strpos($_GET['service-select'], ' (' ));
 			$service = $_GET['service'];
 
-// die( print_r($_GET,true) );
-
 			// [_] TODO: validate service selection
 			$success = pentdb_add_service( $the_ip, $the_session, $port, $service );
 			if ( $success ) {
 				$_GET['service'] = $success;
+				$_GET['port'] = $port;
 				break;
 			} else {
 				echo "<div>Add service failed.</div>";
@@ -162,8 +143,6 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 				"Notes update query failed. [ERR-881]";
 				die();
 			}
-// echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
-
 			return true;
 			break;
 

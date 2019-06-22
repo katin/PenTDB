@@ -368,20 +368,28 @@ input, select {
 	color: #ddd;
 	border-color: #555;
 }
-.inlineform.vuln input, .inlineform.objective input {
+.inlineform.vuln input, .inlineform.objective input, .inlineform.host input {
 	width: 70%;
 }
 .inlineform input[type="submit"] {
 	width: 120px;
 }
+.inlineform.taform input[type="submit"] {
+    float: right;
+    margin-right: 10%;
+}
 
-.notes-form {
+.notes-form, .taform {
 	margin-left: 40px;
     padding-right: 40px;
     text-align: left;
     vertical-align: top;
 }
-.notes-form textarea {
+.taform {
+	margin-left: 140px;
+	margin-bottom: 10px;
+}
+.notes-form textarea, .host textarea {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
