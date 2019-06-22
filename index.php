@@ -31,14 +31,19 @@ if ( isset($_GET['fcmd']) ) {
 	ptdb_process_cmd( $mycmd );
 }
 
+// if we don't have a session going, 
+//   then display the choose/new session page
 
 if ( !isset($_GET['session_id']) ) {
 	display_sessions();
 }
+
 if ( empty($_GET['session_id']) ) {
-	echo '<div class="error"><h2>Missing parameter(s). Session ID required.</h2></div>';
+	pentdb_log_error("Missing parameter(s). Session ID required.");
+	display_page();
 	die();	
 }
+
 $session_id = pentdb_clean( $_GET['session_id'] );
 
 if ( isset($_GET['service']) ) {
@@ -48,7 +53,14 @@ if ( isset($_GET['service']) ) {
 	if ( $vservice = pentdb_validate_service($_GET['service'] ) ) {
 		if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
 			if ( $vport = $_GET['port'] ) {
+
+// echo "<div><pre>".print_r($session_id,true)."</em></div>";
+// echo "<div><pre>".print_r($vip,true)."</em></div>";
+// echo "<div><pre>".print_r($vservice,true)."</em></div>";
+// echo "<div><pre>".print_r($vport,true)."</em></div>";
+
 				display_service_page( $session_id, $vip, $vservice, $vport );
+
 			}
 		} else {
 			echo '<div class="error">Invalid ip parameter. [Error 427]</div>';
@@ -254,11 +266,19 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		die();
 	}
 
+// echo "<div><pre>".print_r($tests_recs,true)."</em></div>";
+// die("abc");
+// echo "<div><em>display service page</em></div>";
+
 	// display a list of tests for this service
 	$test_list = '';
 	$service = '';
 	$passD = 0;
 	while ( $test = db_fetch_array( $tests_recs ) ) {
+
+// echo "<div><pre>".print_r($test,true)."</em></div>";
+
+
 		$auto_expand = false;
 		$status_bar = 'status-empty';
 		if ( !empty($test['flags']) ) {
@@ -340,6 +360,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			$banner_form = get_add_banner_form( $test['irid'] );
 		}
 		$flags_form = get_set_flags_form( $test['irid'] );
+		$watchfile_form = get_watchfile_form( $test['irid'], $test['watch_file'] );
 
 		// if the last form submit operation was about this test, then keep this test open
 		// [_] *** TODO reconcile $_GET['rec_id'] and $_GET['recid']... can they all be the same?
@@ -363,13 +384,16 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset($test['process_result_cmd'])).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "\n";
 
-		$test_list .= $notes_form . $banner_form . $flags_form;
+		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form;
 		$test_list .= '</'.$details.'>'."\n";
 		$test_list .= '</div>'."\n";	// close test-wrapper
 
 
 		$service = ($service ? $service : $test['service']);
 	}
+
+// die("blue1");
+
 	if ( $test_list ) {
 			// build page title
 		$test_list = '<h2>Test Set, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
@@ -469,7 +493,15 @@ function display_serviceslist_page( $session_id, $ip ) {
 		</FORM></div>
 	';
 
-	$mypage = $service_list . $host_form . $myform . get_add_service_form() . get_add_objective_form() . get_add_vuln_form();
+	$quicklink_add_service = '<div class="quicklink"><a href="#add-service-form">Add a service</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a></div>'."\n";
+
+	$mypage = $service_list 
+		. $quicklink_add_service 
+		. $host_form 
+		. $myform 
+		. get_add_service_form() 
+		. get_add_objective_form() 
+		. get_add_vuln_form();
 
 	display_page( $mypage );
 }

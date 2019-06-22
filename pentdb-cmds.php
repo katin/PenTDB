@@ -118,7 +118,7 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			$up_q = "UPDATE {testinstance} set banner='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['banner'], $_GET['recid']);
 			if ( !$up_result ) {
-				"Banner update query failed. [ERR-881]";
+				"Banner update query failed. [ERR-886]";
 				die();
 			}
 			return true;
@@ -129,7 +129,17 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			$up_q = "UPDATE {testinstance} set flags='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['flags'], $_GET['recid']);
 			if ( !$up_result ) {
-				"Flags update query failed. [ERR-881]";
+				"Flags update query failed. [ERR-887]";
+				die();
+			}
+			return true;
+			break;
+
+		case 'update-watchfile':
+			$up_q = "UPDATE {testinstance} set watch_file='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['watch_file'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Watch file update query failed. [ERR-889]";
 				die();
 			}
 			return true;
@@ -140,7 +150,7 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			$up_q = "UPDATE {testinstance} set notes='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['notes'], $_GET['recid']);
 			if ( !$up_result ) {
-				"Notes update query failed. [ERR-881]";
+				"Notes update query failed. [ERR-888]";
 				die();
 			}
 			return true;

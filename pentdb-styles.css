@@ -369,7 +369,7 @@ input, select {
 	border-color: #555;
 }
 .inlineform.vuln input, .inlineform.objective input, .inlineform.host input {
-	width: 70%;
+	width: 60%;
 }
 .inlineform input[type="submit"] {
 	width: 120px;
@@ -389,7 +389,7 @@ input, select {
 	margin-left: 140px;
 	margin-bottom: 10px;
 }
-.notes-form textarea, .host textarea {
+.notes-form textarea, .host textarea, .objective textarea {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
@@ -430,3 +430,20 @@ a.link-button:hover {
 	text-decoration: underline;
 	box-shadow: 1px 1px 5px #aaa;
 }
+
+.quicklink a {
+	text-transform: uppercase;
+	font-size: 0.8em;
+	padding-right: 10px;
+	text-decoration: none;
+}
+.quicklink a:hover {
+	text-decoration: underline;
+}
+.quicklink a::before {
+	content: '[ ';
+}
+.quicklink a::after {
+	content: ' ]';
+}
+

@@ -50,7 +50,7 @@ function pentdb_validate_service( $service ) {
 	// okay for service to be blank if we have a session_id and an fcmd
 	$current_session = pentdb_clean( $_GET['session_id'] );
 	$current_fcmd = pentdb_clean( $_GET['fcmd'] );
-	if ( !empty($current_session) && !empty($current_fcmd) ) {
+	if ( !empty($current_session) && !empty($current_fcmd) && empty($service) ) {
 		return true;
 	}
 
@@ -883,7 +883,7 @@ global $base_path;
 
 	// write the page out
 	$status = file_put_contents ( $filepath, $page_source ); 
-		pentdb_log_error("Cached file locally: ".$filepath);
+		pentdb_top_msg("Cached file locally: ".$filepath);
 // die("wrote out the file of length ".strlen($page_source).": ".$filepath." -- status: ".$status);
 	return $status;
 }
@@ -1632,7 +1632,7 @@ echo "<div>".$newp_q."</div>\n";
 function get_add_objective_form( $title = "Add an objective" ) {
 	$vars = pentdb_get_page_vars();
 	$bigform = '
-		<div class="bigform"><FORM action="index.php" method="GET">
+		<div class="bigform"><FORM action="index.php" method="GET" id="add-objective-form">
 
 		<LABEL for="title">Objective display title: </LABEL>
 		<INPUT type="text" name="title" id = "title"></INPUT><br/>
@@ -1683,7 +1683,7 @@ function pentdb_get_reset_status_form( $vars, $rec_id ) {
 
 function get_add_service_form( $title = "Add a service" ) {
 	$bigform = '
-		<div class="bigform"><FORM action="index.php" method="GET">
+		<div class="bigform"><FORM action="index.php" method="GET" id="add-service-form">
 
 		<LABEL for="port">Port number: </LABEL>
 		<INPUT type="text" name="port" id = "port"></INPUT><br/>
@@ -1801,28 +1801,6 @@ function get_session_form( $title = "Add a session") {
 	return $bigform;
 }
 
-/* -- defunct
-function get_host_form( $title = "Add a host" ) {
-	$bigform = '
-		<div class="bigform"><FORM action="index.php" method="GET">
-			<LABEL for="ip_addr">IP address: </LABEL>
-			<INPUT type="text" name="ipaddr" id="ip_addr"></INPUT><br/>
-			<LABEL for="hostname">Host name: </LABEL>
-			<INPUT type="text" name="hostname" id="hostname" value="box-$i4p"></INPUT><br/>
-			'
-			// <INPUT type="checkbox" name="mktank" value="mktank" id="mktank"><label for="mktank"> Run mktank command</label><br/>
-			// <INPUT type="checkbox" name="penscan" value="penscan" id="penscan"><label for="penscan"> Launch penscan command</label><br/>
-			.'<INPUT type="hidden" name="fcmd" value="add-ip"></INPUT>
-			<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
-			<INPUT type="submit" value="Add IP address"></INPUT>
-		</FORM></div>
-	';
-
-	$bigform = "<h2>".$title."</h2>\n" . $bigform;
-
-	return $bigform;
-}
-*/
 
 function get_add_host_form( $title = "Add a host" ) {
 	$vars = pentdb_get_page_vars();
@@ -1890,19 +1868,21 @@ function get_add_host_datum_form( $name, $value, $recid ) {
 		return NULL;
 	}
 
+	$copy_button = '';
 	if ( in_array($name, array("cmd","process_result_cmd")) ) {
 		$value = fill_varset( $value );
+		$copy_button = '<button class="cmd-copy" onclick="ptdb_copytext(\''.$name.$recid.'\')">Copy</button>';
 	}
 
 	$vars = pentdb_get_page_vars();
 
-	$data = '		<LABEL for="'.$name.'">'.$name.': </LABEL>
-		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>';
+	$data = '		<LABEL for="'.$name.$recid.'">'.$name.': </LABEL>
+		<INPUT type="text" name="'.$name.'" id ="'.$name.$recid.'" value="'.$value.'"></INPUT>';
 
 	$ta_form = '';
 	if ( in_array($name, array("notes","wireshark","proof","loot","lessons_learned") )) {
-		$data = '		<LABEL for="'.$name.'_form">'.$name.': </LABEL><br/>
-		<textarea wrap="soft" cols="80" rows="8" name="'.$name.'" id ="'.$name.'">'.$value.'</textarea><br/>';
+		$data = '		<LABEL for="'.$name.$recid.'_form">'.$name.': </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="8" name="'.$name.'" id ="'.$name.$recid.'">'.$value.'</textarea><br/>';
 		$ta_form = ' taform';
 	}
 
@@ -1925,8 +1905,8 @@ function get_add_host_datum_form( $name, $value, $recid ) {
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 		<INPUT type="hidden" name="fcmd" value="update-host"></INPUT>
-		<INPUT type="submit" value="Update"></INPUT>
-		</FORM></div>
+		<INPUT type="submit" value="Update"></INPUT>'.$copy_button.'
+		</FORM></div><div class="clear"></div>
 	';
 
 	return $myform;
@@ -1937,7 +1917,7 @@ function get_add_host_datum_form( $name, $value, $recid ) {
 function get_add_vuln_form( $title = "Add a vuln" ) {
 	$vars = pentdb_get_page_vars();
 	$bigform = '
-		<div class="bigform"><FORM action="index.php" method="GET">
+		<div class="bigform"><FORM action="index.php" method="GET" id="add-vuln-form">
 
 		<LABEL for="title">Vuln display title: </LABEL>
 		<INPUT type="text" name="title" id = "title"></INPUT><br/>
@@ -2009,7 +1989,7 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 
 		<INPUT type="hidden" name="fcmd" value="update-vuln"></INPUT>
 		<INPUT type="submit" value="Update"></INPUT>
-		</FORM></div>
+		</FORM></div><div class="clear"></div>
 	';
 
 	return $myform;
@@ -2020,6 +2000,13 @@ function get_add_obj_datum_form( $name, $value, $recid ) {
 
 	$data = '		<LABEL for="'.$name.'">'.$name.': </LABEL>
 		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>';
+
+	$ta_form = '';
+	if ( in_array($name, array("notes","notes2","notes3") )) {
+		$data = '		<LABEL for="'.$name.'_form">'.$name.': </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="8" name="'.$name.'" id ="'.$name.'">'.$value.'</textarea><br/>';
+		$ta_form = ' taform';
+	}
 
 	if ( $name == 'status' ) {
 		$data = '		<LABEL for="status">Status: </LABEL>
@@ -2032,7 +2019,7 @@ function get_add_obj_datum_form( $name, $value, $recid ) {
 	}
 
 	$myform = '
-		<div class="inlineform objective"><FORM action="index.php" method="GET">
+		<div class="inlineform objective'.$ta_form.'"><FORM action="index.php" method="GET">
 
 		'.$data.'
 		<INPUT type="hidden" name="fname" value="'.$name.'"></INPUT>
@@ -2045,7 +2032,7 @@ function get_add_obj_datum_form( $name, $value, $recid ) {
 
 		<INPUT type="hidden" name="fcmd" value="update-obj"></INPUT>
 		<INPUT type="submit" value="Update"></INPUT>
-		</FORM></div>
+		</FORM></div><div class="clear"></div>
 	';
 
 	return $myform;
@@ -2093,6 +2080,29 @@ function get_set_flags_form( $recid ) {
 
 		<INPUT type="hidden" name="fcmd" value="update-flags"></INPUT>
 		<INPUT type="submit" value="Update Flags"></INPUT>
+		</FORM></div>
+	';
+
+	return $myform;
+}
+
+function get_watchfile_form( $recid, $field_contents = NULL ) {
+	$vars = pentdb_get_page_vars();
+	$myform = '
+		<div class="inlineform"><FORM action="index.php#test-'.$recid.'" method="GET">
+
+		<LABEL for="watch_file">Watch file: </LABEL>
+		<INPUT type="text" name="watch_file" id="watch_file" value="'.$field_contents.'"></INPUT>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-watchfile"></INPUT>
+		<INPUT type="submit" value="Update watch file"></INPUT>
 		</FORM></div>
 	';
 
