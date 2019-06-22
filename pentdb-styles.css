@@ -96,8 +96,15 @@ a.hover-link:hover, #top a.hover-link:hover {
 
 .error-log {
 	display: block;
-	background-color: #777;
+	background-color: #f88;
 	color: #000;
+	padding: 20px;
+}
+
+.top-msg {
+	display: block;
+	background-color: #777;
+	color: #eee;
 	padding: 20px;
 }
 
@@ -187,6 +194,15 @@ button.cmd-copy {
 
 }
 
+.gold-star {
+	color: #ec5;
+}
+.red-star {
+	color: #d33;
+}
+.green-star {
+	color: green;
+}
 
 .red-button, .red, .statusform input.red-button {
 	background-color: #933;
@@ -233,6 +249,7 @@ button.cmd-copy {
 .vulns-links-bar {
 	margin-left: 80px;
 	padding-top: 5px;
+    display: inline-block;
 }
 .service-test-status, .service-vuln-status {
 	clear: both;
@@ -274,6 +291,9 @@ button.cmd-copy {
 .indicator.selected {
 	box-shadow: 1px 3px 7px #fff;
 }
+.obj-dot.selected {
+	text-shadow: 1px 1px 4px #ccc;
+}
 .vuln-eliminated {
 	background-color: #000;
 	color: red;
@@ -294,6 +314,19 @@ button.cmd-copy {
 .vuln-worked {
 	background-color: #3f3;
 }
+
+.objectives-links-bar, .objective-status {
+	float: left;
+    display: inline-block;
+}
+.objective-status a {
+	font-size: 2em;
+	float: left;
+	text-decoration: none;
+	padding-right: 3px;
+}
+
+
 .bigform {
 	margin-top: 20px;
 }
@@ -305,6 +338,19 @@ button.cmd-copy {
 .bigform input[type="submit"] {
 	margin-left: 220px;
 	margin-top: 5px;
+}
+.bigform input[type="text"] {
+	width: 50%;
+/*	background-color: #444;
+	border-color: #555;
+	color: #eee;*/
+}
+
+input, select {
+	background-color: #444;
+	border-color: #555;
+	/*border-width: 1px;*/
+	color: #eee;
 }
 
 .inlineform {
@@ -322,7 +368,7 @@ button.cmd-copy {
 	color: #ddd;
 	border-color: #555;
 }
-.inlineform.vuln input {
+.inlineform.vuln input, .inlineform.objective input {
 	width: 70%;
 }
 .inlineform input[type="submit"] {

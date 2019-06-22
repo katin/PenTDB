@@ -42,9 +42,18 @@ function pentdb_validate_port( $port ) {
 	}
 }
 
+
 function pentdb_validate_service( $service ) {
 	// [_] TODO: write service validator
 	// can't just use db query, since new services can be added per host
+
+	// okay for service to be blank if we have a session_id and an fcmd
+	$current_session = pentdb_clean( $_GET['session_id'] );
+	$current_fcmd = pentdb_clean( $_GET['fcmd'] );
+	if ( !empty($current_session) && !empty($current_fcmd) ) {
+		return true;
+	}
+
 	return $service;
 
 }
@@ -157,6 +166,7 @@ global $top_message;
 // echo "<div><pre>".print_r($service,true)."</pre></div>";
 
 	}
+
 // die('here!');
 // $t1 = build_vuln_status_display( $vars['session_id'], $vars['ip'] );
 // echo "<div>t1: <pre>".print_r($t1,true)."</pre></div>";
@@ -164,6 +174,9 @@ global $top_message;
 // echo "<div>ip: <pre>".print_r($vars['ip'],true)."</pre></div>";
 
 	$output .= '<div class="services-links-bar">' . $other_services_html . "</div>\n";
+
+	$output .= '<div class="objectives-links-bar">'.build_objectives_status_display( $vars['session_id'], $vars['ip'] ). "</div>\n";
+
 	$output .= '<div class="vulns-links-bar">'.build_vuln_status_display( $vars['session_id'], $vars['ip'] ). "</div>\n";
 	$output .= '</div>'."\n";				// close #top
 	$output .= '<div id="page">'."\n";		// open page
@@ -172,6 +185,7 @@ global $top_message;
 		// $output .= '<div class="top-message">'.$top_message.'</div>'."\n";
 	}
 	$output .= pentdb_log_error('','display');
+	$output .= pentdb_top_msg('','display' );
 
 
 	echo $output;
@@ -222,6 +236,27 @@ static $error_log_html;
 	}
 
 	$error_log_html .= '<div>'.$msg.'</div>'."\n";
+}
+
+// top msg
+//
+// Simple message logger and  displayer for PenTDB system.
+//
+// Collects messages. Displays to an area at the page top.
+
+function pentdb_top_msg( $msg, $mode='log' ) {
+static $top_msg_html;
+
+// $top_msg_html = "GREETINGZ!";
+
+	if ( $mode == 'display' && !empty( $top_msg_html ) ) {
+		$output = '<div class="top-msg display">'."\n";
+		$output .= $top_msg_html;
+		$output .= '</div>'."\n";
+		return $output;
+	}
+
+	$top_msg_html .= '<div>'.$msg.'</div>'."\n";
 }
 
 
@@ -331,7 +366,7 @@ function pentdb_add_service( $the_ip, $the_session, $port, $service ) {
 }
 
 
-// add_service
+// new_vuln
 //
 // add a new vuln to the vuln database,
 // uses the $_GET[] array for values
@@ -360,7 +395,6 @@ function pentdb_new_vuln() {
 	);
 
 	if ( !$result ) {
-		$errcount++;
 		echo '<div class="error">Error adding vuln record "'.$template['title'].' [ERR-1021]".</div>';
 		// die();
 	}
@@ -412,6 +446,13 @@ function pentdb_update_vuln() {
 }
 
 
+function pentdb_get_valid_obj_fields() {
+	$form_fields = array( 'title', 'objective', 'status', 'notes',
+		'notes2', 'notes3', 'flags');
+
+	return $form_fields;
+}
+
 function pentdb_get_valid_vuln_fields() {
 	$form_fields = array( 'title', 'url', 'exploit_type', 'attack_type', 'platform',
 		'edb_verified','target_version_match','tested_version_match','exploit_date',
@@ -421,6 +462,78 @@ function pentdb_get_valid_vuln_fields() {
 	);
 
 	return $form_fields;
+}
+
+
+// new_obj
+//
+// add a new objective to the vuln database,
+// uses the $_GET[] array for values
+
+function pentdb_new_objective() {
+
+	$ip = pentdb_clean($_GET['ip']);
+	$port = pentdb_clean($_GET['port']);
+	$service = pentdb_clean($_GET['service']);
+	$session_id = pentdb_clean($_GET['session_id']);
+
+
+	// Create the vuln record
+	$obj_q = "INSERT into {objective} (session_id, ip_address, title, port, service, objective, status)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s')";
+	$result = db_query( $obj_q,
+		$session_id,
+		$ip,
+		$_GET['title'],
+		$port,
+		$service,
+		$_GET['objective'],
+		$_GET['status']
+	);
+
+	if ( !$result ) {
+		pentdb_log_error("Error adding objective record ".$template['title']." [ERR-1084]");
+	}
+
+	pentdb_top_msg("Objective added.");
+
+	return;
+}
+
+function pentdb_update_objective() {
+	$vars = pentdb_get_page_vars();
+
+	// validate fname ------
+
+	if ( !isset($_GET['fname']) ) {
+		pentdb_log_error("Feildname param required to update objective. [MSG-4103]");
+		return false;
+	}
+	$fname = pentdb_clean($_GET['fname']);
+
+	$valid_obj_fields = pentdb_get_valid_obj_fields();
+	if ( !in_array($fname, $valid_obj_fields) ) {
+		pentdb_log_error("Invalid fieldname '".$fname."' passed to update_objective(). [MSG-4142]");
+		return false;
+	}
+
+	// validate field data -----------
+
+	if ( !isset($_GET[$fname]) ) {
+		pentdb_log_error("Missing field data parm '".$fname."' in update_objective(). [MSG-4108]");
+		return false;
+	}
+
+	// update db
+
+	$vuln_q = "UPDATE objective SET ".$fname."='%s' WHERE oid=".$vars['vuln'];
+	$result = db_query( $vuln_q, $_GET[$fname] );
+	if ( !$result ) {
+		pentdb_log_error("Objective update failed. [MSG-4120]");
+		return false;
+	}
+
+	return $status;
 }
 
 
@@ -958,14 +1071,8 @@ function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = N
 	$output = '<div class="service-vuln-status">'."\n";
 	$rec_handle = read_vuln_records( $session_id, $ip );
 
-// die('boo');
-// echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
-
 	$depth = 0;
 	while ( $rec = db_fetch_array($rec_handle) ) {
-
-// echo "<div><pre>".print_r($rec,true)."</pre></div>";
-
 		$depth_mark = '';
 		// if ( $rec['pass_depth'] > $depth ) {
 		// 	$depth++;
@@ -989,7 +1096,7 @@ function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = N
 		}
 
 		$selected = '';
-		if ( isset( $_GET['vuln']) ) {
+		if ( $_GET['fcmd'] == 'display-vuln' ) {
 			if ( $rec['vid'] == $_GET['vuln'] ) {
 				$selected = ' selected';
 			}
@@ -997,15 +1104,9 @@ function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = N
 
 		$block = $link.'<div class="indicator '.$display_color.$selected.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $depth_mark . $block;
-
-// echo "<div><pre>".print_r($output,true)."</pre></div>";
-// die("check");
-
 	}
 
 	$output .= '</div>'."\n";
-
-// echo "<div><pre>".print_r($output,true)."</pre></div>";
 
 	return $output;
 }
@@ -1048,6 +1149,114 @@ function read_vuln_records( $session_id, $ip, $service = NULL, $port = NULL ) {
 
 	return $vuln_recs;
 }
+
+//------------------------------------------------------
+
+// build_objective_status_display
+//
+// Create HTML for a one-line, simple boxes-and-colors status display 
+//  of the vulns for given service for the given ip address in the given session.
+// This can grow more sophisticated over time, adding visual indicators
+//  for flags, discoveries, and more.
+// Hover-over for more details of the vuln.
+
+function build_objectives_status_display( $session_id, $ip, $service = NULL, $port = NULL ) {
+
+// return NULL;
+
+	$output = '<div class="objective-status">'."\n";
+	$rec_handle = read_objective_records( $session_id, $ip );
+
+// echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
+// die('123');
+
+	$depth = 0;
+	while ( $rec = db_fetch_array($rec_handle) ) {
+
+// echo "<div><pre>".print_r($rec,true)."</pre></div>";
+
+		$display_color = '';
+		// $display_color = get_objective_status_color( $rec['status'], $rec['flags'] );
+
+		$title = 'title="'.($rec['status'] ? $rec['status'].' - ' : '').$rec['title'].')"';
+		$link = base_link($session_id,$ip,$service,$port,$title,NULL,$rec['oid'],'display-obj'); 
+		$flag_star = '&#9734;';		// hollow star
+		if ( $rec['status'] == "ACCOMPLISHED" ) {
+			$flag_star = '&#9733;';		// solid star
+			$display_color = 'gold-star';
+		}
+		if ( $rec['status'] == "FAILED" ) {
+			$flag_star = '&#9733;';		// solid star
+			$display_color = 'red-star';
+		}
+		if ( $rec['status'] == "IN-PROGRESS" ) {
+			$flag_star = '&#9733;';		// solid star
+			$display_color = 'green-star';
+		}
+
+		$selected = '';
+		if ( $_GET['fcmd'] == 'display-obj' ) {
+			if ( $rec['oid'] == $_GET['vuln'] ) {
+				$selected = ' selected';
+			}
+		}
+
+		$block = $link.'<div class="obj-dot '.$display_color.$selected.'">'.$flag_star.'</div></a>'."\n";
+		$output .= $block;
+
+// echo "<div><pre>".print_r($output,true)."</pre></div>";
+// die("check");
+
+	}
+
+	$output .= '</div>'."\n";
+
+// echo "<div><pre>".print_r($output,true)."</pre></div>";
+
+	return $output;
+}
+
+
+function read_objective_records( $session_id, $ip, $service = NULL, $port = NULL ) {
+
+	$where_service = '';
+	if ( !empty($service) ) {
+		$where_service = " AND service='%s'";
+	}
+	$where_port = '';
+	if ( !empty($port) ) {
+		$where_port = " AND port='%s'";
+	}
+
+	$obj_q = "SELECT * FROM {objective} WHERE session_id='%s' AND ip_address='%s'".$where_service.$where_port;
+
+// echo "<div>port: <pre>".print_r($port,true)."</pre></div>";
+// echo "<div>session: <pre>".print_r($session_id,true)."</pre></div>";
+// echo "<div>ip: <pre>".print_r($ip,true)."</pre></div>";
+// echo "<div>service: <pre>".print_r($service,true)."</pre></div>";
+// die("check");
+	if ( empty($service) && empty($port) ) {
+		$obj_recs = db_query( $obj_q, $session_id, $ip );
+	} else {
+		$obj_recs = db_query( $obj_q, $session_id, $ip, $service, $port );
+	}
+
+	if ( !$obj_recs ) {
+		pentdb_log_error( '<div>Query or DB error looking for objective records. [Error 673]' );
+		return false;
+	}
+	// if ( $vuln_recs->num_rows == 0 ) {
+	// 	pentdb_log_error( '<div>No vuln records found for service '.$service.' session "'.$session_id.'" [MSG-2318]' );
+	// 	return false;
+	// }
+
+// die('count: '.$vuln_recs->num_rows);
+
+	return $obj_recs;
+}
+
+//-----------------------------------------------------
+
 
 
 function get_status_color( $statustype, $status, $flags = NULL ) {
@@ -1248,26 +1457,6 @@ function get_depth_status_button( $status, $rec_id ) {
 }
 
 
-function pentdb_get_reset_status_form( $vars, $rec_id ) {
-
-
-	$button_form .= '
-		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
-			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
-			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
-			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
-			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
-			<INPUT type="hidden" name="fcmd" value="set-status"></INPUT>
-			<INPUT type="hidden" name="status" value="0"></INPUT>
-			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
-			<INPUT type="submit" value="reset"></INPUT>
-		</FORM></div>
-	';
-
-	return $button_form;
-}
-
-
 function create_port_record() {
 	// YES IT'S INSECURE -- DON'T PROCESS FORMS LIKE THIS!
 
@@ -1306,6 +1495,110 @@ echo "<div>".$newp_q."</div>\n";
 	return true;
 
 }
+
+
+//////////////////////////////////////////////////////////
+//														//
+//   					 FORMS    						//	
+//														//
+//////////////////////////////////////////////////////////
+
+function get_add_objective_form( $title = "Add an objective" ) {
+	$vars = pentdb_get_page_vars();
+	$bigform = '
+		<div class="bigform"><FORM action="index.php" method="GET">
+
+		<LABEL for="title">Objective display title: </LABEL>
+		<INPUT type="text" name="title" id = "title"></INPUT><br/>
+
+		<LABEL for="objective">Objective description: </LABEL>
+		<INPUT type="text" name="objective" id = "objective"></INPUT><br/>
+
+		<LABEL for="status">Status: </LABEL>
+		<SELECT name="status" id="status">
+			<OPTION value="NEW">NEW</OPTION>
+			<OPTION value="IN-PROGRESS">IN-PROGRESS</OPTION>
+			<OPTION value="ACCOMPLISHED">ACCOMPLISHED</OPTION>
+			<OPTION value="FAILED">FAILED</OPTION>
+		</SELECT><br/>
+
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="new-obj"></INPUT>
+		<INPUT type="submit" value="Add objective"></INPUT>
+		</FORM></div>
+	';
+	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+	return $bigform;
+}
+
+function pentdb_get_reset_status_form( $vars, $rec_id ) {
+
+
+	$button_form .= '
+		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
+			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+			<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+			<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+			<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+			<INPUT type="hidden" name="fcmd" value="set-status"></INPUT>
+			<INPUT type="hidden" name="status" value="0"></INPUT>
+			<INPUT type="hidden" name="rec_id" value="'.$rec_id.'"></INPUT>
+			<INPUT type="submit" value="reset"></INPUT>
+		</FORM></div>
+	';
+
+	return $button_form;
+}
+
+
+function get_add_service_form( $title = "Add a service" ) {
+	$bigform = '
+		<div class="bigform"><FORM action="index.php" method="GET">
+
+		<LABEL for="port">Port number: </LABEL>
+		<INPUT type="text" name="port" id = "port"></INPUT><br/>
+
+		<LABEL for="title">Port display title: </LABEL>
+		<INPUT type="text" name="title" id = "title"></INPUT><br/>
+
+		<LABEL for="service">Service label: </LABEL>
+		<INPUT type="text" name="service" id = "service"></INPUT><br/>
+
+		<LABEL for="banner">Banner: </LABEL>
+		<INPUT type="text" name="banner" id = "banner"></INPUT><br/>
+
+		<LABEL for="statustype">Status type: </LABEL>
+		<SELECT name="statustype" id="statustype">
+			<OPTION value="BINARY">BINARY</OPTION>
+			<OPTION value="DEPTH">DEPTH</OPTION>
+			<OPTION value="NONE">NONE</OPTION>
+		</SELECT><br/>
+
+		<LABEL for="command">Command: </LABEL>
+		<INPUT type="text" name="command" id = "command"></INPUT><br/>
+
+		<LABEL for="process_result_cmd">Process result cmd: </LABEL>
+		<INPUT type="text" name="process_result_cmd" id = "process_result_cmd"></INPUT><br/>
+
+		<INPUT type="hidden" name="pass_depth" value="0"></INPUT>
+		<INPUT type="hidden" name="order_weight" value="0"></INPUT>
+		<INPUT type="hidden" name="rectype" value="TITLE"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="new-port"></INPUT>
+		<INPUT type="submit" value="Create service port"></INPUT>
+		</FORM></div>
+	';
+	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+	return $bigform;
+}
+
+
 
 function get_add_test_form( $title = "Add a test" ) {
 	$vars = pentdb_get_page_vars();
@@ -1361,6 +1654,49 @@ function get_add_test_form( $title = "Add a test" ) {
 }
 
 
+function get_session_form( $title = "Add a session") {
+	$bigform = '
+		<div class="bigform"><FORM action="index.php" method="GET">
+			<LABEL for="session_name">Session name: </LABEL>
+			<INPUT type="text" name="idname" id="session_name"></INPUT><br/>
+			<LABEL for="dir">Data (tanks) path: </LABEL>
+			<INPUT type="text" name="dir" id="dir" value="'.DEFAULT_DATA_PATH.'"></INPUT> (Include trailing slash)<br/>
+			<LABEL for="cmd_path">Scripts cmd path: </LABEL>
+			<INPUT type="text" name="cmd_path" id="cmd_path" value="'.DEFAULT_CMD_PATH.'"></INPUT> (shell user has minimal path)<br/>
+			<LABEL for="api_url">CmdSvr URL: </LABEL>
+			<INPUT type="text" name="api_url" id="api_url" value="http://127.0.0.1:8888"></INPUT><br/>
+			<INPUT type="hidden" name="fcmd" value="create-session"></INPUT><br/>
+			<INPUT type="submit" value="Create session"></INPUT>
+		</FORM></div>
+	';
+
+	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+	return $bigform;
+}
+
+function get_host_form( $title = "Add a host" ) {
+	$bigform = '
+		<div class="bigform"><FORM action="index.php" method="GET">
+			<LABEL for="ip_addr">IP address: </LABEL>
+			<INPUT type="text" name="ipaddr" id="ip_addr"></INPUT><br/>
+			<LABEL for="hostname">Host name: </LABEL>
+			<INPUT type="text" name="hostname" id="hostname" value="box-$i4p"></INPUT><br/>
+			'
+			// <INPUT type="checkbox" name="mktank" value="mktank" id="mktank"><label for="mktank"> Run mktank command</label><br/>
+			// <INPUT type="checkbox" name="penscan" value="penscan" id="penscan"><label for="penscan"> Launch penscan command</label><br/>
+			.'<INPUT type="hidden" name="fcmd" value="add-ip"></INPUT>
+			<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
+			<INPUT type="submit" value="Add IP address"></INPUT>
+		</FORM></div>
+	';
+
+	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+
+	return $bigform;
+}
+
+
 function get_add_vuln_form( $title = "Add a vuln" ) {
 	$vars = pentdb_get_page_vars();
 	$bigform = '
@@ -1406,7 +1742,6 @@ function get_add_vuln_form( $title = "Add a vuln" ) {
 function get_add_vuln_datum_form( $name, $value, $recid ) {
 	$vars = pentdb_get_page_vars();
 
-
 	$data = '		<LABEL for="'.$name.'">'.$name.': </LABEL>
 		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>';
 
@@ -1423,7 +1758,6 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 		</SELECT><br/>';
 	}
 
-
 	$myform = '
 		<div class="inlineform vuln"><FORM action="index.php" method="GET">
 
@@ -1437,6 +1771,42 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 		<INPUT type="hidden" name="vuln" value="'.$vars['vuln'].'"></INPUT>
 
 		<INPUT type="hidden" name="fcmd" value="update-vuln"></INPUT>
+		<INPUT type="submit" value="Update"></INPUT>
+		</FORM></div>
+	';
+
+	return $myform;
+}
+
+function get_add_obj_datum_form( $name, $value, $recid ) {
+	$vars = pentdb_get_page_vars();
+
+	$data = '		<LABEL for="'.$name.'">'.$name.': </LABEL>
+		<INPUT type="text" name="'.$name.'" id ="'.$name.'" value="'.$value.'"></INPUT>';
+
+	if ( $name == 'status' ) {
+		$data = '		<LABEL for="status">Status: </LABEL>
+		<SELECT name="status" id="status">
+			<OPTION '.($value=="NEW" ? 'SELECTED ' : '').'value="NEW">NEW</OPTION>
+			<OPTION '.($value=="IN-PROGRESS" ? 'SELECTED ' : '').'value="IN-PROGRESS">IN-PROGRESS</OPTION>
+			<OPTION '.($value=="ACCOMPLISHED" ? 'SELECTED ' : '').'value="ACCOMPLISHED">ACCOMPLISHED</OPTION>
+			<OPTION '.($value=="FAILED" ? 'SELECTED ' : '').'value="FAILED">FAILED</OPTION>
+		</SELECT><br/>';
+	}
+
+	$myform = '
+		<div class="inlineform objective"><FORM action="index.php" method="GET">
+
+		'.$data.'
+		<INPUT type="hidden" name="fname" value="'.$name.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="vuln" value="'.$vars['vuln'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-obj"></INPUT>
 		<INPUT type="submit" value="Update"></INPUT>
 		</FORM></div>
 	';

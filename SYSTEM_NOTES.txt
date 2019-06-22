@@ -9,7 +9,25 @@ TODO LIST
 
 [_] add display & update of raw_result and discovered long text fields
 
-[_] add auto-import of data from exploit-db.com vuln URLs (in add vuln routine)
+[_] update button for cmd lines
+
+[_] add export of host - JSON?
+
+[_] Add individual tests (e.g. Deploy WAR file)
+    [_] Add scrolling display / chooser to add individual tests to a port
+
+[_] Add Objectives
+
+[_] ADD TEST SETS:
+    [_] buffer overflow
+    [_] MSSQL
+    [_] Port 47001 
+    [_] MySQL 3306
+    [_] 
+
+[_] change $vuln parm in URL to recid so it works for objectives, too
+
+[_] remove XML parser
 
 [_] add test for presence of the PHPDoc module; skip using XML parser if absent.
     (use string search instead of the XML Doc for those functions).
@@ -22,6 +40,12 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 [_] add data export: session or host (ip), CSV export of the database (for post-test saving).
 
 [_] add a "vuln score" number that we can display: an expression of how many factors (out of 10?) match the target and match a working vuln. Add this display to the hover-title of the vulns status line.
+
+
+DONE LIST
+---------
+[X] add auto-import of data from exploit-db.com vuln URLs (in add vuln routine) :D
+
 
 
 

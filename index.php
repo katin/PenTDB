@@ -15,6 +15,7 @@ require_once $dru_db_version.'/database.inc';
 require_once $dru_db_version.'/database.mysqli.inc';
 require_once $dru_db_version.'/dru_db_startup.php';
 
+require_once 'pentdb-config.php';
 require_once 'pentdb-lib.php';
 require_once 'pentdb-cmds.php';
 
@@ -44,7 +45,7 @@ if ( isset($_GET['service']) ) {
 	if ( !isset($_GET['port']) ) {
 		die('Port param is required for this display.');
 	}
-	if ( $vservice = pentdb_validate_service($_GET['service'] )) {
+	if ( $vservice = pentdb_validate_service($_GET['service'] ) ) {
 		if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
 			if ( $vport = $_GET['port'] ) {
 				display_service_page( $session_id, $vip, $vservice, $vport );
@@ -52,10 +53,11 @@ if ( isset($_GET['service']) ) {
 		} else {
 			echo '<div class="error">Invalid ip parameter. [Error 427]</div>';
 		}
-	} else {
-		echo '<div class="error">Invalid service parameter. [Error 422]</div>';
-	}
-	die();
+	} 
+	// else {
+	// 	echo '<div class="error">Invalid service parameter. [Error 422]</div>';
+	// }
+	// die();
 }
 
 if ( isset($_GET['ip']) ) {
@@ -118,6 +120,45 @@ function display_vuln_page( $session_id, $ip, $vuln_id ) {
 
 
 	//
+	// display a objective page
+	//
+
+function display_objective_page( $session_id, $ip, $oid ) {
+
+	$vars = pentdb_get_urlparms( array( 'session_id'=>$session_id, 'ip'=>$ip) );
+
+echo "<div><pre>".print_r($oid,true)."</pre></div>";
+
+
+	$obj_q = "SELECT * FROM {objective} WHERE oid='%s'";
+	$obj_recs = db_query( $obj_q, $oid);
+	if ( !$obj_recs ) {
+		echo '<div>Query failed. [MSG-842]';
+		// *** TODO: Add link to add this as new session to db
+		die();
+	}
+
+	$display_fields = pentdb_get_valid_obj_fields();
+
+	// display the obj info
+	$output = '';
+	while ( $obj = db_fetch_array( $obj_recs ) ) {
+		foreach ($display_fields as $field) {
+			$output .= get_add_obj_datum_form( $field, $obj[$field], $obj['vid'] );
+		}
+	}
+	if ( $output ) {
+		$output = "<h2>obj info:</h2>\n" . $visit_button . $output;
+		$output .= "\n".'<p class="clear">. </p>'."\n";
+	}
+
+	display_page( $output );
+}
+
+
+
+
+	//
 	// display a list of IP addresses under test for this session
 	//
 
@@ -157,21 +198,7 @@ function display_iplist_page( $session_id ) {
 		$ip_list .= "\n".'<p class="clear">. </p>'."\n";
 	}
 
-$myform = '
-	<div><FORM action="index.php" method="GET">
-		<LABEL for="ip_addr">IP address: </LABEL>
-		<INPUT type="text" name="ipaddr" id="ip_addr"></INPUT><br/>
-		<LABEL for="hostname">Host name: </LABEL>
-		<INPUT type="text" name="hostname" id="hostname" value="box-$i4p"></INPUT><br/>
-		<INPUT type="checkbox" name="mktank" value="mktank" id="mktank"><label for="mktank"> Run mktank command</label><br/>
-		<INPUT type="checkbox" name="penscan" value="penscan" id="penscan"><label for="penscan"> Launch penscan command</label><br/>
-		<INPUT type="hidden" name="fcmd" value="add-ip"></INPUT>
-		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
-		<INPUT type="submit" value="Add IP address"></INPUT>
-	</FORM></div>
-';
-
-	$mypage = $ip_list . $myform;
+	$mypage = $ip_list . get_host_form();
 	display_page( $mypage );
 }
 
@@ -205,26 +232,7 @@ function display_sessions() {
 	}
 
 	// display a create session form
-$myform = '
-	<div><FORM action="index.php" method="GET">
-		<LABEL for="session_name">Session name: </LABEL>
-		<INPUT type="text" name="idname" id="session_name"></INPUT><br/>
-		<LABEL for="dir">Data (tanks) path: </LABEL>
-		<INPUT type="text" name="dir" id="dir"></INPUT> (Include trailing slash)<br/>
-		<LABEL for="cmd_path">Scripts cmd path: </LABEL>
-		<INPUT type="text" name="cmd_path" id="cmd_path"></INPUT> (shell user has minimal path)<br/>
-		<LABEL for="api_url">CmdSvr URL: </LABEL>
-		<INPUT type="text" name="api_url" id="api_url" value="http://127.0.0.1:8888"></INPUT><br/>
-		<INPUT type="hidden" name="fcmd" value="create-session"></INPUT><br/>
-		<INPUT type="submit" value="Create session"></INPUT>
-	</FORM></div>
-';
-
-// <INPUT type="checkbox" name="mktank" value="1" id="mktank"><label for="mktank"> Run mktank command</label>
-// 
-
-// echo print_r($sess_list,true);
-// die("check1");
+	$myform = get_session_form();
 
 	$mypage = $sess_list . $myform;
 	display_page( $mypage );
@@ -364,7 +372,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 	}
 	if ( $test_list ) {
 			// build page title
-		$test_list = '<h2>Test Tracker, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
+		$test_list = '<h2>Test Set, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
 		\n" 
 		  . build_service_status_display( $session_id, $ip, $service, $port )
 		  . "\n<p>&nbsp;</p>\n" . $test_list;
@@ -375,7 +383,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$test_list .= "<div>ip ".$ip.", service ".$service."</div>\n";
 	}
 
-	$mypage = $test_list . get_add_test_form() . get_add_vuln_form();
+	$mypage = $test_list . get_add_test_form() . get_add_objective_form() . get_add_vuln_form();
 ;
 	display_page( $mypage );
 }
@@ -448,48 +456,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 		</FORM></div>
 	';
 
-
-	$bigform = '
-		<div class="bigform"><FORM action="index.php" method="GET">
-
-		<LABEL for="port">Port number: </LABEL>
-		<INPUT type="text" name="port" id = "port"></INPUT><br/>
-
-		<LABEL for="title">Port display title: </LABEL>
-		<INPUT type="text" name="title" id = "title"></INPUT><br/>
-
-		<LABEL for="service">Service label: </LABEL>
-		<INPUT type="text" name="service" id = "service"></INPUT><br/>
-
-		<LABEL for="banner">Banner: </LABEL>
-		<INPUT type="text" name="banner" id = "banner"></INPUT><br/>
-
-		<LABEL for="statustype">Status type: </LABEL>
-		<SELECT name="statustype" id="statustype">
-			<OPTION value="BINARY">BINARY</OPTION>
-			<OPTION value="DEPTH">DEPTH</OPTION>
-			<OPTION value="NONE">NONE</OPTION>
-		</SELECT><br/>
-
-		<LABEL for="command">Command: </LABEL>
-		<INPUT type="text" name="command" id = "command"></INPUT><br/>
-
-		<LABEL for="process_result_cmd">Process result cmd: </LABEL>
-		<INPUT type="text" name="process_result_cmd" id = "process_result_cmd"></INPUT><br/>
-
-		<INPUT type="hidden" name="pass_depth" value="0"></INPUT>
-		<INPUT type="hidden" name="order_weight" value="0"></INPUT>
-		<INPUT type="hidden" name="rectype" value="TITLE"></INPUT>
-		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
-		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
-		<INPUT type="hidden" name="fcmd" value="new-port"></INPUT>
-		<INPUT type="submit" value="Create port test"></INPUT>
-		</FORM></div>
-	';
-
-
-
-	$mypage = $service_list . $myform . $bigform . get_add_vuln_form();
+	$mypage = $service_list . $myform . get_add_service_form() . get_add_objective_form() . get_add_vuln_form();
 	display_page( $mypage );
 }
 

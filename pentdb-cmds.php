@@ -107,6 +107,32 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			ptdb_process_cmd ( 'display-vuln' );
 			break;
 
+		case 'display-obj':
+			// yeah, we're using the 'vuln' parm for oid until we convert it to 'recid'
+			if ( empty($_GET['vuln']) ) {
+				die('Vuln param (oid) is required for this display.');
+			}
+			$oid = pentdb_clean( $_GET['vuln'] );
+
+			if ( !isset($_GET['ip']) ) {
+				die('IP param is required for this display.');
+			}
+			if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
+				display_objective_page( $session_id, $vip, $oid );
+				die();
+			}
+			break;
+
+		case 'new-obj':
+			$the_ip = pentdb_validate_ip($_GET['ip'] );
+			$success = pentdb_new_objective();		// uses $_GET for parms
+			break;
+
+		case 'update-obj':
+			$success = pentdb_update_objective();	// uses $_GET for parms
+			ptdb_process_cmd ( 'display-obj' );
+			break;
+
 		case 'update-banner':
 			$up_q = "UPDATE {testinstance} set banner='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['banner'], $_GET['recid']);
