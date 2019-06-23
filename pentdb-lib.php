@@ -6,12 +6,15 @@
 //
 // 190519 KBI - created
 
-global $top_message;
+global $top_message;		// TODO: remove this; it should be a static in the top_msg() routine
+
+	// TODO: change these to be constants in the pentdb-config.php
 global $webpages_cache_path;
 global $base_path;
 
 	$webpages_cache_path = "../exploit-db-pages/";
 	$base_path = '/'.substr(__FILE__, 1, strrpos(__FILE__,'/'));
+
 
 
 // clean()
@@ -120,6 +123,54 @@ function pentdb_get_cmd_path() {
 	}
 
 }
+
+
+// get_watchfile
+//
+// Returns the file contents if present;
+//   or false if the file doesn't exit.
+//
+
+function pentdb_get_watchfile( $ip, $filename ) {
+
+	$base_path = pentdb_get_session_path();
+	if ( $myip = pentdb_validate_ip($ip) ) {
+		$full_path = $base_path . $myip . "/" . $filename;
+	} else {
+		pentdb_log_error("Apparent invalid IP address in get_watchfile. ERR-2230");
+		return false;
+	}
+
+	if ( file_exists($full_path) ) {
+		$contents = file_get_contents($full_path);
+		return $contents;
+	}
+
+	return false;
+}
+
+// get_watchfile_display
+// 
+// Return HTML expandable-section of the watchfile (if it is present),
+//   or NULL if the file doesn't exist.
+//
+
+function get_watchfile_display( $ip, $filename ) {
+
+	$thefile = pentdb_get_watchfile( $ip, $filename );
+	if ( !$thefile ) {
+		return NULL;
+	}
+
+	$output = '';
+
+	$output .= '<div class="display-watchfile"><details><summary>'.$filename.' ('.strlen($thefile).' bytes)</summary>'."\n";
+	$output .= '<pre>'.$thefile.'</pre>'."\n";
+	$output .= '</details></div>'."\n";
+
+	return $output;
+}
+
 
 
 // display_page
@@ -697,18 +748,29 @@ global $webpages_cache_path;
 
 	//
 	// process the page
+	//   w/o using dom/XML utilities, since those aren't well on Kali
 	//
 
- 	$dom = new domDocument('1.0', 'utf-8'); 
- 	$dom->loadHTML($page_source); 
- 	$dom->preserveWhiteSpace = false; 
+		// old (dom) method of getting the Vuln title
+ // 	$dom = new domDocument('1.0', 'utf-8'); 
+ // 	$dom->loadHTML($page_source); 
+ // 	$dom->preserveWhiteSpace = false; 
 
-	$data = array();
+	// $data = array();
 
-	// get exploit title
- 	$elem = $dom->getElementsByTagName('title'); // here u use your desired tag
- 	$data['title'] = $elem->item(0)->nodeValue;
+	// // get exploit title
+ // 	$elem = $dom->getElementsByTagName('title'); // here u use your desired tag
+ // 	$data['title'] = $elem->item(0)->nodeValue;
 
+	// get the page title - it's also the vuln title
+	//
+	$searchkey = '<title>';
+	$endmark = '</title>';
+	$searchlength = 600;
+	$type = pentdb_search_source( $page_source, $searchkey, $endmark, $searchlength );
+	if ( $type ) {
+		$data['title'] = $type;
+	}
 
 // die('title:'.$title);
 
@@ -883,7 +945,9 @@ global $base_path;
 
 	// write the page out
 	$status = file_put_contents ( $filepath, $page_source ); 
+	if ( $status ) {
 		pentdb_top_msg("Cached file locally: ".$filepath);
+	}
 // die("wrote out the file of length ".strlen($page_source).": ".$filepath." -- status: ".$status);
 	return $status;
 }

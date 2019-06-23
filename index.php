@@ -275,10 +275,6 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 	$service = '';
 	$passD = 0;
 	while ( $test = db_fetch_array( $tests_recs ) ) {
-
-// echo "<div><pre>".print_r($test,true)."</em></div>";
-
-
 		$auto_expand = false;
 		$status_bar = 'status-empty';
 		if ( !empty($test['flags']) ) {
@@ -361,6 +357,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		}
 		$flags_form = get_set_flags_form( $test['irid'] );
 		$watchfile_form = get_watchfile_form( $test['irid'], $test['watch_file'] );
+		$watchfile_display = get_watchfile_display( $ip, $test['watch_file'] );
 
 		// if the last form submit operation was about this test, then keep this test open
 		// [_] *** TODO reconcile $_GET['rec_id'] and $_GET['recid']... can they all be the same?
@@ -384,7 +381,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset($test['process_result_cmd'])).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "\n";
 
-		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form;
+		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display;
 		$test_list .= '</'.$details.'>'."\n";
 		$test_list .= '</div>'."\n";	// close test-wrapper
 

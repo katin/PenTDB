@@ -5,11 +5,11 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[_] add display of watch file
+[x] add display of watch file
     [x] add display and update of watch_file field
-    [_] add expandable field display of the watch_file with content present indicator
+    [x] add expandable field display of the watch_file with content present indicator
 
-[_] remove XML parser
+[x] remove XML parser
 
 [_] add display & update of raw_result and discovered long text fields
 
