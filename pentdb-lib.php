@@ -77,8 +77,6 @@ function fill_varset( $line, $ip = NULL, $port = NULL ) {
 	$my_i4p = substr( $my_ip, strrpos( $my_ip, '.')+1, 99);
 	$my_hostname = pentdb_get_hostname( $my_ip );
 
-// die('i4p='.$my_i4p);
-
 	$line = str_replace ( '$i4p' , $my_i4p, $line );
 	$line = str_replace ( '$ip' , $my_ip, $line );
 	$line = str_replace ( '$port' , $my_port, $line );
@@ -218,22 +216,14 @@ global $top_message;
 			$other_services_html .= '<span class="top-ip-addr">'.base_link($vars['session_id'], $vars['ip'], ' ', ' ','class="hover-link"').$vars['ip']."</a></span>\n";
 		}
 	}
-// echo "<div><pre>".print_r($services_list,true)."</pre></div>";
+
 	foreach ( $services_list as $service ) {
 		$highlite = '';
 		if ( $service['port'] == $vars['port'] && $service['service'] == $vars['service'] ) {
 			$highlite = ' highlight';
 		}
 		$other_services_html .= '<span class="ip-service-link'.$highlite.'">'.base_link($vars['session_id'], $vars['ip'], $service['service'], $service['port']).'('.$service['port'].') '.$service['service']."</a></span>\n";
-// echo "<div><pre>".print_r($service,true)."</pre></div>";
-
 	}
-
-// die('here!');
-// $t1 = build_vuln_status_display( $vars['session_id'], $vars['ip'] );
-// echo "<div>t1: <pre>".print_r($t1,true)."</pre></div>";
-// echo "<div>session: <pre>".print_r($vars['session_id'],true)."</pre></div>";
-// echo "<div>ip: <pre>".print_r($vars['ip'],true)."</pre></div>";
 
 	$output .= '<div class="services-links-bar">' . $other_services_html . "</div>\n";
 
@@ -454,8 +444,6 @@ function pentdb_add_service( $the_ip, $the_session, $port, $service ) {
 	$errcount = 0;
 	while ( $template = db_fetch_array($template_recs) ) {
 
-		//echo "<div></pre>".print_r($template,true)."</pre></div>";
-
 		// check to see if record aready exists
 		$dup_q = "SELECT irid FROM {testinstance} WHERE "
 			. "session_id='%s' AND "
@@ -646,8 +634,6 @@ function pentdb_new_objective() {
 		// array('return' => Database::RETURN_INSERT_ID)
 	);
 
-// echo "<div><pre>".print_r($result,true)."<pre><div>";
-
 	if ( !$result ) {
 		pentdb_log_error("Error adding objective record [ERR-1084]");
 	}
@@ -765,8 +751,6 @@ global $webpages_cache_path;
 	// save this page to cache so we don't have to re-read it later
 	pentdb_cache_web_page( $url, $page_source );
 
-// echo "<div><pre>".print_r($page_lines_array,true)."<pre><div>";
-
 	//
 	// process the page
 	//   w/o using dom/XML utilities, since those aren't well on Kali
@@ -792,8 +776,6 @@ global $webpages_cache_path;
 	if ( $type ) {
 		$data['title'] = $type;
 	}
-
-// die('title:'.$title);
 
 	// get verified status
 	//
@@ -881,12 +863,6 @@ global $webpages_cache_path;
 
 	// compare with:   <pre><code
 
-
-
-// echo "<div><pre>".$page_source."<pre><div>";
-// echo "<div><pre>".$vid."<pre><div>";
-// die('passed');
-
 	$sql_fields = '';
 	$sql_values = '';
 	$sql_series = '';
@@ -899,8 +875,6 @@ global $webpages_cache_path;
 		$sql_fields = '('.$sql_fields.')';
 		$sql_values = '('.$sql_fields.')';
 		$vuln_q = "UPDATE vuln SET ".$sql_series." WHERE vid=%d";
-
-// die($vuln_q);
 
 		$result = db_query( $vuln_q, $vid );
 		if ( !$result ) {
@@ -940,11 +914,8 @@ global $base_path;
 	$filepath = $base_path.$webpages_cache_path.$page_id;
 
 	if ( file_exists( $filepath ) ) {
-// die('got the file');
 		return file_get_contents($filepath);
 	}
-
-// die($filepath);
 
 	return false;
 }
@@ -969,7 +940,6 @@ global $base_path;
 	if ( $status ) {
 		pentdb_top_msg("Cached file locally: ".$filepath);
 	}
-// die("wrote out the file of length ".strlen($page_source).": ".$filepath." -- status: ".$status);
 	return $status;
 }
 
@@ -1053,8 +1023,6 @@ function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NUL
 
 function pentdb_get_urlparms( $parms = array() ) {
 
-// echo '<div>parms: <pre>',print_r($parms,true).'</pre></div>';
-
 	// all of these need to be runable thru pentdb_clean(),
 	//   so don't add parms like URL, etc. here
 	$check_parms = array( 	
@@ -1082,15 +1050,12 @@ function pentdb_get_urlparms( $parms = array() ) {
 		}
 	}
 
-// echo '<div>pre-clean: <pre>',print_r($data,true).'</pre></div>';
-
 	// remove any blank parms
 	foreach ($data as $key => $value) {
 		if ( empty($value) ) {
 			unset( $data[$key] );
 		}
 	}
- // echo '<div>send back:<pre>',print_r($data,true).'</pre></div>';
 
 	return http_build_query($data);
 }
@@ -1108,9 +1073,6 @@ function build_ip_status_display( $session_id, $ip ) {
 	$output = '<div class="ip-test-status">'."\n";
 
 	$servicelist = get_service_list( $session_id, $ip );
-
-// echo "<div><pre>".print_r($servicelist,true)."</pre></div>";
-// die("check");
 
 	foreach( $servicelist as $service ) {
 		$output .= build_service_status_display( $session_id, $ip, $service['service'], $service['port'] );
@@ -1159,9 +1121,6 @@ function get_service_list( $session_id, $ip ) {
 
 	$service_q = "SELECT service,port FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' GROUP BY port,service ORDER BY port";
 
-// echo "<div><pre>".print_r($service_q,true)."</pre></div>";
-// die("check");
-
 	$service_recs = db_query( $service_q, $session_id, $ip );
 	if ( !$service_recs ) {
 		pentdb_log_error('<div>Services query failed. [Error-2711]</div>' );
@@ -1186,6 +1145,7 @@ function get_service_list( $session_id, $ip ) {
 	return $servicelist;
 }
 
+
 // build_service_status_display
 //
 // Create HTML for a one-line, simple boxes-and-colors status display 
@@ -1199,13 +1159,9 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 	$output = '<div class="service-test-status">'."\n";
 	$rec_handle = read_service_records( $session_id, $ip, $service, $port );
 
-// echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
-
 	$depth = 0;
 	$title_found = false;
 	while ( $rec = db_fetch_array($rec_handle) ) {
-
-// echo "<div><pre>".print_r($rec,true)."</pre></div>";
 
 		if ( !$title_found ) {
 			if ( $rec['rectype'] == 'TITLE' ) {
@@ -1234,15 +1190,9 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 
 		$block = $link.'<div class="indicator '.$display_color.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $depth_mark . $block;
-
-// echo "<div><pre>".print_r($rec,true)."</pre></div>";
-// die("check");
-
 	}
 
 	$output .= '</div>'."\n";
-
-// echo "<div><pre>".print_r($output,true)."</pre></div>";
 
 	return $output;
 }
@@ -1251,9 +1201,6 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 function read_service_records( $session_id, $ip, $service, $port ) {
 
 	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight, irid";
-
-// echo "<div>port: <pre>".print_r($port,true)."</pre></div>";
-// die("check");
 
 	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
 	if ( !$tests_recs ) {
@@ -1336,11 +1283,6 @@ function read_vuln_records( $session_id, $ip, $service = NULL, $port = NULL ) {
 
 	$vuln_q = "SELECT * FROM {vuln} WHERE session_id='%s' AND ip_address='%s'".$where_service.$where_port." ORDER BY order_weight";
 
-// echo "<div>port: <pre>".print_r($port,true)."</pre></div>";
-// echo "<div>session: <pre>".print_r($session_id,true)."</pre></div>";
-// echo "<div>ip: <pre>".print_r($ip,true)."</pre></div>";
-// echo "<div>service: <pre>".print_r($service,true)."</pre></div>";
-// die("check");
 	if ( empty($service) && empty($port) ) {
 		$vuln_recs = db_query( $vuln_q, $session_id, $ip );
 	} else {
@@ -1355,8 +1297,6 @@ function read_vuln_records( $session_id, $ip, $service = NULL, $port = NULL ) {
 	// 	pentdb_log_error( '<div>No vuln records found for service '.$service.' session "'.$session_id.'" [MSG-2318]' );
 	// 	return false;
 	// }
-
-// die('count: '.$vuln_recs->num_rows);
 
 	return $vuln_recs;
 }
@@ -1378,14 +1318,8 @@ function build_objectives_status_display( $session_id, $ip, $service = NULL, $po
 	$output = '<div class="objective-status">'."\n";
 	$rec_handle = read_objective_records( $session_id, $ip );
 
-// echo "<div>rows:<pre>".$rec_handle->num_rows."</pre></div>";
-// die('123');
-
 	$depth = 0;
 	while ( $rec = db_fetch_array($rec_handle) ) {
-
-// echo "<div><pre>".print_r($rec,true)."</pre></div>";
-
 		$display_color = '';
 		// $display_color = get_objective_status_color( $rec['status'], $rec['flags'] );
 
@@ -1414,15 +1348,9 @@ function build_objectives_status_display( $session_id, $ip, $service = NULL, $po
 
 		$block = $link.'<div class="obj-dot '.$display_color.$selected.'">'.$flag_star.'</div></a>'."\n";
 		$output .= $block;
-
-// echo "<div><pre>".print_r($output,true)."</pre></div>";
-// die("check");
-
 	}
 
 	$output .= '</div>'."\n";
-
-// echo "<div><pre>".print_r($output,true)."</pre></div>";
 
 	return $output;
 }
@@ -1441,11 +1369,6 @@ function read_objective_records( $session_id, $ip, $service = NULL, $port = NULL
 
 	$obj_q = "SELECT * FROM {objective} WHERE session_id='%s' AND ip_address='%s'".$where_service.$where_port;
 
-// echo "<div>port: <pre>".print_r($port,true)."</pre></div>";
-// echo "<div>session: <pre>".print_r($session_id,true)."</pre></div>";
-// echo "<div>ip: <pre>".print_r($ip,true)."</pre></div>";
-// echo "<div>service: <pre>".print_r($service,true)."</pre></div>";
-// die("check");
 	if ( empty($service) && empty($port) ) {
 		$obj_recs = db_query( $obj_q, $session_id, $ip );
 	} else {
@@ -1460,8 +1383,6 @@ function read_objective_records( $session_id, $ip, $service = NULL, $port = NULL
 	// 	pentdb_log_error( '<div>No vuln records found for service '.$service.' session "'.$session_id.'" [MSG-2318]' );
 	// 	return false;
 	// }
-
-// die('count: '.$vuln_recs->num_rows);
 
 	return $obj_recs;
 }

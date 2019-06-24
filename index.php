@@ -53,14 +53,7 @@ if ( isset($_GET['service']) ) {
 	if ( $vservice = pentdb_validate_service($_GET['service'] ) ) {
 		if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
 			if ( $vport = $_GET['port'] ) {
-
-// echo "<div><pre>".print_r($session_id,true)."</em></div>";
-// echo "<div><pre>".print_r($vip,true)."</em></div>";
-// echo "<div><pre>".print_r($vservice,true)."</em></div>";
-// echo "<div><pre>".print_r($vport,true)."</em></div>";
-
 				display_service_page( $session_id, $vip, $vservice, $vport );
-
 			}
 		} else {
 			echo '<div class="error">Invalid ip parameter. [Error 427]</div>';
@@ -139,9 +132,6 @@ function display_objective_page( $session_id, $ip, $oid ) {
 
 	$vars = pentdb_get_urlparms( array( 'session_id'=>$session_id, 'ip'=>$ip) );
 
-echo "<div><pre>".print_r($oid,true)."</pre></div>";
-
-
 	$obj_q = "SELECT * FROM {objective} WHERE oid='%s'";
 	$obj_recs = db_query( $obj_q, $oid);
 	if ( !$obj_recs ) {
@@ -194,8 +184,6 @@ function display_iplist_page( $session_id ) {
 	// 	// *** TODO: Add link to add this as new session to db
 	// 	die();
 	// }
-
-// echo "<div><pre>".print_r($ip_recs,true)."</pre></div>";
 
 	// display a list of ip addresses available to test
 	$ip_list = '';
@@ -265,10 +253,6 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		echo '<div>Session services "'.$session_id.'"not found in database. [Error 611]';
 		die();
 	}
-
-// echo "<div><pre>".print_r($tests_recs,true)."</em></div>";
-// die("abc");
-// echo "<div><em>display service page</em></div>";
 
 	// display a list of tests for this service
 	$test_list = '';
@@ -389,8 +373,6 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$service = ($service ? $service : $test['service']);
 	}
 
-// die("blue1");
-
 	if ( $test_list ) {
 			// build page title
 		$test_list = '<h2>Test Set, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
@@ -449,15 +431,12 @@ function display_serviceslist_page( $session_id, $ip ) {
 		// }
 		$panel = build_service_status_display( $session_id, $ip, $service['service'], $service['port'] );
 		$service_list .= $panel."\n";
-
-// echo "<div><pre>".print_r($service,true)."</pre></div>";
-
 	}
+
 	if ( $service_list ) {
 		$service_list = "<h2>Select service to test:</h2>\n" . $service_list;
 		$service_list .= "\n".'<p class="clear"></p><p>&nbsp;</p>'."\n";
 	}
-
 
 	// display a create test form
 	$tests_q = "SELECT service,title,port FROM {porttest} WHERE rectype='TITLE'";
@@ -502,21 +481,5 @@ function display_serviceslist_page( $session_id, $ip ) {
 
 	display_page( $mypage );
 }
-
-
-
-/* --- holding tank
-
-		<LABEL for="rectype">Record/Test type: </LABEL>
-		<SELECT name="rectype" id="rectype">
-			<OPTION value="TITLE">TITLE</OPTION>
-			<OPTION value="SCAN">SCAN</OPTION>
-			<OPTION value="TOOL">TOOL</OPTION>
-			<OPTION value="SCRIPT">SCRIPT</OPTION>
-			<OPTION value="HOST">HOST</OPTION>
-			<OPTION value="EXAMINE">EXAMINE</OPTION>
-		</SELECT><br/>
-
-*/
 
 

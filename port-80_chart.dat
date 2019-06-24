@@ -2,7 +2,7 @@
 //
 // NOTES: 
 //		statustype = BINARY, DEPTH, or NONE (case insensitive)
-//		rectype = TITLE, SCAN, TOOL, SCRIPT, HOST, or EXAMINE
+//		rectype = TITLE, SCAN, TOOL, SCRIPT, or EXAMINE
 //
 // LOAD DATA LOCAL INFILE '/path/port-80_chart.dat' INTO TABLE porttest FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 9 ROWS;
 //

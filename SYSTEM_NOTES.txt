@@ -5,26 +5,17 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[x] add display of watch file
-    [x] add display and update of watch_file field
-    [x] add expandable field display of the watch_file with content present indicator
-
-[x] remove XML parser
-
 [_] Add config-per-environment (multiple machines in one config file, auto-switch)
 [_] fix data path
 
 [_] add display & update of raw_result and discovered long text fields
 
-[x] copy button for cmd lines on host record
 [_] update button for cmd lines on tests page
 
 [_] add export of host - JSON?
 
 [_] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
     [_] Add scrolling display / chooser to add individual tests to a port
-
-[x] Add Objectives w/display and edit
 
 [_] ADD TEST SETS:
     [_] buffer overflow
@@ -36,22 +27,7 @@ TODO LIST
 [_] Add porttest maintenance screen
     [_] with export
 
-
-[x] Add host record data display and update form
-    [x] OS, version, SP, architecture, etc. fields to match vulns qualifications
-    [x] add lessons learned field?
-    [x] flags captured (proof)
-    [N] creds starter spot? No - just add creds records later
-    [x] Notes
-[x] Refactor all display pages code to use host record
-[_] Remove HOST record type from .dat files (porttest data)
-
-
-[_] change $vuln parm in URL to recid so it works for objectives, too
-
-
-[_] add test for presence of the PHPDoc module; skip using XML parser if absent.
-    (use string search instead of the XML Doc for those functions).
+[_] change $vuln parm in URL to recid so it is better for objectives, too
 
 [_] add caching of vars in pentdb_get_page_vars()
 
@@ -63,9 +39,32 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 [_] add a "vuln score" number that we can display: an expression of how many factors (out of 10?) match the target and match a working vuln. Add this display to the hover-title of the vulns status line.
 
 
+
 DONE LIST
 ---------
 [X] add auto-import of data from exploit-db.com vuln URLs (in add vuln routine) :D
+
+[x] Add host record data display and update form
+    [x] OS, version, SP, architecture, etc. fields to match vulns qualifications
+    [x] add lessons learned field?
+    [x] flags captured (proof)
+    [N] creds starter spot? No - just add creds records later
+    [x] Notes
+[x] Refactor all display pages code to use host record
+[x] Remove HOST record type from .dat files (porttest data)
+
+[x] Add Objectives w/display and edit
+
+[x] add display of watch file
+    [x] add display and update of watch_file field
+    [x] add expandable field display of the watch_file with content present indicator
+
+[x] remove XML parser
+
+[x] copy button for cmd lines on host record
+
+[-] add test for presence of the PHPDoc module; skip using XML parser if absent.
+    (use string search instead of the XML Doc for those functions).
 
 
 

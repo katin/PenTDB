@@ -35,8 +35,6 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			// ptdb_process_cmd ( 'display-vuln' );
 			break;
 
-// echo "<div>rows:<pre>".print_r($up_result,true)."</pre></div>";
-
 		case 'add-service':
 			if ( empty($_GET['altport'])) {
 				die('You must specify a port number');
