@@ -80,7 +80,11 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 			$the_session = $_GET['session_id'];		// TODO: sanitize session id
 			$port = pentdb_validate_port($_GET['port']);
 			$service = $_GET['service'];
-			$success = pentdb_new_vuln();		// uses $_GET for parms
+			$vuln_id = pentdb_new_vuln();			// uses $_GET for parms
+			$_GET['vuln'] = $vuln_id;
+			if ( $vuln_id ) {
+				ptdb_process_cmd("display-vuln");
+			}
 			break;
 
 		case 'update-vuln':
@@ -106,7 +110,11 @@ $top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
 
 		case 'new-obj':
 			$the_ip = pentdb_validate_ip($_GET['ip'] );
-			$success = pentdb_new_objective();		// uses $_GET for parms
+			$oid = pentdb_new_objective();		// uses $_GET for parms
+			$_GET['vuln'] = $oid;
+			if ( $oid ) {
+				ptdb_process_cmd("display-obj");
+			}
 			break;
 
 		case 'update-obj':

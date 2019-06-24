@@ -926,6 +926,7 @@ echo "<div>Creating Table: objective";
 
 CREATE TABLE `objective` (
   `oid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `session_id` varchar(96) NOT NULL DEFAULT '',
   `ip_address` varchar(39) NOT NULL DEFAULT '',
   `port` int(10) unsigned NOT NULL DEFAULT '0',
@@ -951,6 +952,11 @@ $schema['objective'] = array(
       'unsigned' => TRUE,
       'not null' => TRUE,
       'description' => 'Primary Key: Unique item ID.',
+    ),
+    'created' => array(
+      'mysql_type' => 'timestamp',
+      'not null' => TRUE,
+      'description' => 'Record creation time',
     ),
     'session_id' => array(
       'type' => 'varchar',

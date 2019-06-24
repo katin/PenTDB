@@ -11,6 +11,9 @@ TODO LIST
 
 [x] remove XML parser
 
+[_] Add config-per-environment (multiple machines in one config file, auto-switch)
+[_] fix data path
+
 [_] add display & update of raw_result and discovered long text fields
 
 [x] copy button for cmd lines on host record

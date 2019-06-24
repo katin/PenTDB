@@ -530,13 +530,21 @@ function pentdb_new_vuln() {
 	);
 
 	if ( !$result ) {
-		echo '<div class="error">Error adding vuln record "'.$template['title'].' [ERR-1021]".</div>';
-		// die();
+		pentdb_log_error("Error adding vuln record ".$_GET['title']." [ERR-1021]");
 	}
 
-	echo '<div class="status">Vuln added.</div>'."\n";
+	pentdb_top_msg("Vuln added.");
 
-	return;
+	// read newest record in objective db to be able to return the oid
+	//  this can fail if more than one person/browser is inserting records simultaneously
+	$vid_q = "SELECT vid FROM {vuln} ORDER BY created DESC LIMIT 1";
+	$result = db_query($vid_q);
+	if ( !$result ) {
+		pentdb_log_error("Error re-reading newly added objective record [ERR-1086]");
+	}	
+	$record = db_fetch_array($result);
+
+	return $record['vid'];
 }
 
 
@@ -634,15 +642,28 @@ function pentdb_new_objective() {
 		$service,
 		$_GET['objective'],
 		$_GET['status']
+			// this line gives "PHP Fatal error:  Uncaught Error: Class 'Database' not found"
+		// array('return' => Database::RETURN_INSERT_ID)
 	);
 
+// echo "<div><pre>".print_r($result,true)."<pre><div>";
+
 	if ( !$result ) {
-		pentdb_log_error("Error adding objective record ".$template['title']." [ERR-1084]");
+		pentdb_log_error("Error adding objective record [ERR-1084]");
 	}
 
 	pentdb_top_msg("Objective added.");
 
-	return;
+	// read newest record in objective db to be able to return the oid
+	//  this can fail if more than one person/browser is inserting records simultaneously
+	$oid_q = "SELECT * FROM {objective} ORDER BY created DESC LIMIT 1";
+	$result = db_query($oid_q);
+	if ( !$result ) {
+		pentdb_log_error("Error re-reading newly added objective record [ERR-1085]");
+	}	
+	$record = db_fetch_array($result);
+
+	return $record['oid'];
 }
 
 function pentdb_update_objective() {
