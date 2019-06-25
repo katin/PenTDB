@@ -30,4 +30,6 @@ It is also quite insecure. So insecure, in fact, that it might serve as the basi
 
 **Length Limited Notes and a Solution**
 
-Due to the use of GET mode in HTTP -- which can be handy in development and in "power user" mode to see what's going on and tweak field values and commands right in the URL -- the maximum length of any post can be as small as 2K depending on browser and server config. So keep your note field text concise; don't paste long results (like from LinuxPrivChecker) into the notes fields. Instead, **use the watch_file field:** save the long results as a text file in your testing data area, and then put the filename in the watch_file field of the test. You can then fold-open the entire file right on the web page.
+Due to the use of GET mode in HTTP -- which can be handy in development and in "power user" mode to see what's going on and tweak field values and commands right in the URL -- the maximum length of any post can be as small as 2K depending on browser and server config. So keep your note field text concise; don't paste long results (like from LinuxPrivChecker) into the notes fields. 
+
+Instead, **use the watch_file field:** save the long results as a text file in your testing data area, and then put the filename in the watch_file field of the test. You can then fold-open the entire file right on the web page.
