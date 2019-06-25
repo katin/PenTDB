@@ -1,9 +1,9 @@
 # PenTDB
 Pentesting Tracker application with HTML Interface
 
-Basically, a set of custom web forms and data displays that help track tests and results, IPs and ports under test, and vulns processed while pentesting.
+This is set of custom web forms and data displays that help track tests and results, IPs and ports under test, and vulns processed while pentesting. Basically, this is a replacement for apps like KeepNote.
 
-Made for those who are wondering why we are spending gobs of brain cycles organizing and re-reading large amounts of detailed data about pentesting progress for multiple hosts in **text files** and **free-form notes**... when tracking data bits are what computers are for! Now you can apply that brain juice to figuring out the puzzles and problems instead. PenTDB may also be good for training purposes; we'll be exploring that.
+PenTDB is for those people who are wondering why we are spending gobs of brain cycles organizing and re-reading large amounts of detailed data about pentesting progress for multiple hosts under time pressure in **text files** and **free-form notes**... when tracking data bits quickly are what computers are for! Now you can apply that brain juice to figuring out the puzzles and problems instead. PenTDB may also be good for training purposes; we'll be exploring that.
 
 ### Requirements
 This is designed to be run on Kali Linux. Web server (e.g. apache) and database (e.g. MariaDB) are required, as is PHP.
