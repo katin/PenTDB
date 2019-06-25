@@ -22,7 +22,7 @@ This is designed to be run on Kali Linux. Web server (e.g. apache) and database 
  ### Caveats
 **Rapid hack**
 
-This tool was thrown together quickly as an experiment, and is NOT a good example of PHP coding nor good database design. It has proven useful enough to justify development of a Version 2, which will include a clean DB design from scratch and be written in Python as an exercise and learning project.
+This tool was thrown together quickly as an experiment, and is NOT a good example of PHP coding nor good database design. It has proven useful enough to justify development of a Version 2, which will include a clean DB design from scratch and will be written in Python as an exercise and learning project.
 
 **Insecure**
 
