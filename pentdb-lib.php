@@ -1885,6 +1885,11 @@ function get_add_host_datum_form( $name, $value, $recid ) {
 	$data = '		<LABEL for="'.$name.$recid.'">'.$name.': </LABEL>
 		<INPUT type="text" name="'.$name.'" id ="'.$name.$recid.'" value="'.$value.'"></INPUT>';
 
+	// add fold-out display of watch_file, if there is one
+	if ( $name == "watch_file" ) {
+		$data .= get_watchfile_display( $vars['ip'], $value );
+	}
+
 	$ta_form = '';
 	if ( in_array($name, array("notes","wireshark","proof","loot","lessons_learned") )) {
 		$data = '		<LABEL for="'.$name.$recid.'_form">'.$name.': </LABEL><br/>

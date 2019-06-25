@@ -448,10 +448,11 @@ a.link-button:hover {
 }
 
 .display-watchfile {
-	margin-left: 140px;
+    margin-left: 140px;
     font-size: 0.8em;
     background-color: #222;
     padding: 15px;
+    text-align: left;
 }
 
 
