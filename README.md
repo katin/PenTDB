@@ -26,7 +26,7 @@ This tool was thrown together quickly as an experiment, and is NOT a good exampl
 
 **Insecure**
 
-It is also quite insecure. So insecure, in fact, that it might serve as the basis of an exercise for web app hacking practice and teaching secure (insecure?) code development. This is a tool for tracking tests; it isn't a releasable app. Don't run this on the cloud or anywhere that is exposed to the Internet... you will be pwnd, possibly by 8th graders that have watched a few HAK5 videos.
+It is also quite insecure. So insecure, in fact, that it might serve as the basis of an exercise for web app hacking practice and teaching secure (insecure?) code development. This is a tool for tracking tests; it isn't a releasable app. Don't run this on the cloud or anywhere that is exposed to the Internet... you will be pwnd, possibly by 8th graders that have watched a few YouTube videos.
 
 **Length Limited Notes and a Solution**
 
