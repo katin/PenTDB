@@ -15,8 +15,8 @@ This is designed to be run on Kali Linux. Web server (e.g. apache) and database 
   2. mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON pentdb.* to '\<username\>'@'localhost' IDENTIFIED BY '\<password\>';
   2. $ cp dru_db_settings-default.php dru_db_settings.php    # and put the database credentials in your settings file
   3. [optional] $ sudo vim /etc/hosts     # and enter a line for your preferred URL to access, e.g.  127.0.0.1  pentdb.local
-  4. Browse to the site, e.g. http://pentdb.local  --  you should see the page with an error about missing data
-  5. Create the tables in the database by browsing to http://pentdb.local/pentdb_init.php
-  6. Application is ready for use.
+  3. Create the tables in the database by browsing to http://pentdb.local/pentdb_init.php
+  4. cd <webroot> && chmod u+x load-templates.sh && ./load-templates.sh
+  6. Application is ready for use; browse to the site, e.g. http://pentdb.local
  
  
