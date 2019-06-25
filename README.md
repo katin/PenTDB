@@ -3,7 +3,7 @@ Pentesting Tracker application with HTML Interface
 
 Basically, a set of custom web forms and data displays that help track tests and results, IPs and ports under test, and vulns tried while pentesting.
 
-Made for those who are wondering why we are spending gobs of brain cycles writing and re-reading testing progress in **text files** and **free-form notes**... when that's what computers are for! May also be good for training purposes; we'll be exploring that.
+Made for those who are wondering why we are spending gobs of brain cycles writing and re-reading large amounts of detailed data about pentesting progress for multiple hosts in **text files** and **free-form notes**... when that's what computers are for! Now you can apply that brain juice to figuring out the puzzles and problems instead. May also be good for training purposes; we'll be exploring that.
 
 ### Requirements
 This is designed to be run on Kali Linux. Web server (e.g. apache) and database (e.g. MariaDB) are required, as is PHP.
