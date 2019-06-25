@@ -16,7 +16,7 @@ This is designed to be run on Kali Linux. Web server (e.g. apache) and database 
   2. $ cp dru_db_settings-default.php dru_db_settings.php    # and put the database credentials in your settings file
   3. [optional] $ sudo vim /etc/hosts     # and enter a line for your preferred URL to access, e.g.  127.0.0.1  pentdb.local
   3. Create the tables in the database by browsing to http://pentdb.local/pentdb_init.php
-  4. $ cd <webroot> && chmod u+x load-templates.sh && ./load-templates.sh
+  4. $ cd \<webroot\> && chmod u+x load-templates.sh && ./load-templates.sh
   6. Application is ready for use; browse to the site, e.g. http://pentdb.local
  
  
