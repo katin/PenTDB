@@ -1123,11 +1123,11 @@ function get_service_list( $session_id, $ip ) {
 
 	$service_recs = db_query( $service_q, $session_id, $ip );
 	if ( !$service_recs ) {
-		pentdb_log_error('<div>Services query failed. [Error-2711]</div>' );
+		pentdb_log_error('Services query failed. [Error-2711]');
 		return false;
 	}
 	if ( $service_recs->num_rows == 0 ) {
-		pentdb_log_error('<div>No service records found. [Notice 211]</div>' );
+		pentdb_top_msg('Notice: No service records found. [Notice 211]' );
 		return false;
 	}
 
@@ -1735,7 +1735,7 @@ function get_add_service_form( $title = "Add a service" ) {
 function get_add_test_form( $title = "Add a test" ) {
 	$vars = pentdb_get_page_vars();
 	$bigform = '
-		<div class="bigform"><FORM action="index.php" method="GET">
+		<div class="bigform"><FORM action="index.php" method="GET" id="add-test-form">
 
 		<LABEL for="title">Test display title: </LABEL>
 		<INPUT type="text" name="title" id = "title"></INPUT><br/>

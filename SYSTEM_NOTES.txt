@@ -7,6 +7,9 @@ TODO LIST
 ---------
 [_] Add watchfile display to host page
 
+[x] Add test template maintenance page
+    [_] add delete test button
+
 [_] Add config-per-environment (multiple machines in one config file, auto-switch)
 [_] fix data path
 

@@ -6,12 +6,10 @@
  * 190525 KBI created as a part of refactoring index.php
  */
 
-global $top_message;
 
 function ptdb_process_cmd ( $mycmd ) {
-global $top_message;
 
-$top_message .= '<div>PROCESSED CMD '.$mycmd.'</div>';
+// pentdb_top_msg('PROCESSED CMD '.$mycmd);
 
 	switch( $mycmd ) {
 

@@ -368,7 +368,8 @@ input, select {
 	color: #ddd;
 	border-color: #555;
 }
-.inlineform.vuln input, .inlineform.objective input, .inlineform.host input {
+.inlineform.vuln input, .inlineform.objective input, .inlineform.host input,
+	.inlineform.test input, .inlineform.test select {
 	width: 60%;
 }
 .inlineform input[type="submit"] {
@@ -377,6 +378,13 @@ input, select {
 .inlineform.taform input[type="submit"] {
     float: right;
     margin-right: 10%;
+}
+.inlineform.test select {
+	/*color: green;*/
+}
+.inlineform.test label {
+	/*float: left;
+    margin-left: 200px;*/
 }
 
 .notes-form, .taform {
@@ -455,5 +463,29 @@ a.link-button:hover {
     text-align: left;
 }
 
+.tests-table {
+	margin: 20px;
+	text-align: left;
+    font-family: Courier, monospace;
+    font-size: 0.8em;
+    border-spacing: 1px;
+}
 
+.tests-table td, .tests-table th {
+    border: 1px solid #777;
+    padding: 3px 8px;
 
+}
+
+.tests-table tr.even {
+	background-color: #222;
+}
+
+.tests-table th {
+	background-color: #999;
+	font-size: 1.1em;
+	color: #111;
+}
+.tests-table th a {
+	color: #111;
+}
