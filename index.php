@@ -348,6 +348,11 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		if ( $_GET['recid'] == $test['irid'] || $_GET['rec_id'] == $test['irid'] ) {
 			$auto_expand = true;
 		}
+		if ( isset($_GET['expand']) ) {
+			if ( $_GET['expand'] == $test['irid'] ) {
+				$auto_expand = true;
+			}
+		}
 
 		$summary = 'summary';
 		$details = 'details';
@@ -361,8 +366,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$test_list .= '<'.$summary.' class="test-title '.$status_bar.'">'.strtoupper($test['rectype']).': &nbsp;&nbsp;'.$test['title'].($test['banner'] ? ' - '.$test['banner'] : '').'</'.$summary.'>'
 			. $buttons
 			. '<div class="flags-display">'.($test['flags'] ? 'Flags: ' : '').$test['flags'].'</div>'."\n"
-			. '<div class="test-cmd">CMD: <input class="cmd-text" type="text" value="'.fill_varset($test['cmd']).'" id="'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button></div>'
-			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset($test['process_result_cmd'])).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
+			. '<div class="test-cmd">CMD: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['cmd']))).'" id="'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button></div>'
+			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['process_result_cmd']))).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "\n";
 
 		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display;

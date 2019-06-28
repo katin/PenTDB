@@ -84,14 +84,17 @@ a.hover-link:hover, #top a.hover-link:hover {
 .ip-service-link a {
 	padding: 2px 5px;
 	min-width: 80px;
-	background-color: #555;
+	/*background-color: #555;*/
 	color: #5d5;
 }
 .ip-service-link.highlight a {
 	padding: 2px 5px;
 	min-width: 80px;
-	background-color: #aaa;
-	color: #222;
+	background-color: #555;
+	color: #ccc;
+}
+.top-ip-addr {
+	font-weight: bold;
 }
 
 .error-log {
@@ -397,7 +400,7 @@ input, select {
 	margin-left: 140px;
 	margin-bottom: 10px;
 }
-.notes-form textarea, .host textarea, .objective textarea {
+.notes-form textarea, .host textarea, .objective textarea, .vuln textarea {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;

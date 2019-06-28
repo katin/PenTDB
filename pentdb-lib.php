@@ -581,7 +581,7 @@ function pentdb_get_valid_host_fields() {
 		'os_version','patch_version',
 		'cpu_arch', 'core_count','service_pack',
 		'status','cmd','process_result_cmd',
-		'watch_file','notes','wireshark','proof','loot','lessons_learned','flags'
+		'watch_file','watch_file2','watch_file3','notes','wireshark','proof','loot','lessons_learned','flags'
 	);
 
 	return $form_fields;
@@ -1012,8 +1012,8 @@ function pentdb_get_page_vars() {
 }
 
 
-function base_link($session_id, $ip, $service = NULL, $port = NULL, $extra = NULL, $spot = NULL, $vuln = NULL, $fcmd = NULL ) {
-	return '<a '.$extra.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port,'vuln'=>$vuln) ).($fcmd ? '&fcmd='.$fcmd : '').($spot ? "#".$spot : '').'">';
+function base_link($session_id, $ip, $service = NULL, $port = NULL, $classes = NULL, $jumpto = NULL, $vuln = NULL, $fcmd = NULL ) {
+	return '<a '.$classes.' href="index.php'.'?'.pentdb_get_urlparms( array( 'session_id'=>$session_id,'ip'=>$ip,'service'=>$service,'port'=>$port,'vuln'=>$vuln) ).($fcmd ? '&fcmd='.$fcmd : '').($jumpto ? "#".$jumpto : '').'">';
 }
 
 
@@ -1607,17 +1607,14 @@ function create_port_record() {
 		if ( $key == 'command' ) {
 			$key = 'cmd';
 		}
-		echo '<div>'.$key." / ".$value.'</div>'."\n";
 		$fields .= ($comma ? ',' : '').$key;
-		$values .= ($comma ? ',' : '').'"'.$value.'"';
+		$values .= ($comma ? ',' : '').'"'.addslashes($value).'"';
 		$comma = true;
 	}
 	$fields .= ') ';
 	$values .= ') ';
 
 	$newp_q = "INSERT into {testinstance}".$fields.$values;
-
-echo "<div>".$newp_q."</div>\n";
 
 	$newp_result = db_query( $newp_q );
 	if ( !$newp_result ) {
@@ -1628,6 +1625,26 @@ echo "<div>".$newp_q."</div>\n";
 
 }
 
+
+function jump_to_latest_test() {
+	// read newest test added for the irid
+	$last_q = "SELECT irid FROM {testinstance} ORDER BY irid DESC LIMIT 1";
+
+	$last_result = db_query( $last_q );
+	if ( !$last_result ) {
+		pentdb_log_error ("Error reading latest test added. [ERR-2149]");
+		return false;
+	}
+	$last_test = db_fetch_array( $last_result );
+
+	// read the current URL parms for the display page
+	$vars = pentdb_get_urlparms();
+
+	$url = "index.php?".$vars."&expand=".$last_test['irid']."#test-".$last_test['irid'];
+
+	// go there
+	header('Location: http://'.$_SERVER['SERVER_NAME'].'/'.$url);
+}
 
 //////////////////////////////////////////////////////////
 //														//
@@ -1688,6 +1705,8 @@ function pentdb_get_reset_status_form( $vars, $rec_id ) {
 
 
 function get_add_service_form( $title = "Add a service" ) {
+	$vars = pentdb_get_page_vars();
+
 	$bigform = '
 		<div class="bigform"><FORM action="index.php" method="GET" id="add-service-form">
 
@@ -1719,8 +1738,8 @@ function get_add_service_form( $title = "Add a service" ) {
 		<INPUT type="hidden" name="pass_depth" value="0"></INPUT>
 		<INPUT type="hidden" name="order_weight" value="0"></INPUT>
 		<INPUT type="hidden" name="rectype" value="TITLE"></INPUT>
-		<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
-		<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
 		<INPUT type="hidden" name="fcmd" value="new-port"></INPUT>
 		<INPUT type="submit" value="Create service port"></INPUT>
 		</FORM></div>
@@ -1886,7 +1905,7 @@ function get_add_host_datum_form( $name, $value, $recid ) {
 		<INPUT type="text" name="'.$name.'" id ="'.$name.$recid.'" value="'.$value.'"></INPUT>';
 
 	// add fold-out display of watch_file, if there is one
-	if ( $name == "watch_file" ) {
+	if ( $name == "watch_file" || $name == "watch_file2" || $name == "watch_file3" ) {
 		$data .= get_watchfile_display( $vars['ip'], $value );
 	}
 
@@ -1986,8 +2005,15 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 		</SELECT><br/>';
 	}
 
+	$ta_form = '';
+	if ( in_array($name, array("notes")) ) {
+		$data = '		<LABEL for="'.$name.$recid.'_form">'.$name.': </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="8" name="'.$name.'" id ="'.$name.$recid.'">'.$value.'</textarea><br/>';
+		$ta_form = ' taform';
+	}
+
 	$myform = '
-		<div class="inlineform vuln"><FORM action="index.php" method="GET">
+		<div class="inlineform vuln'.$ta_form.'"><FORM action="index.php" method="GET">
 
 		'.$data.'
 		<INPUT type="hidden" name="fname" value="'.$name.'"></INPUT>
@@ -2123,6 +2149,7 @@ function get_watchfile_form( $recid, $field_contents = NULL ) {
 
 function get_notes_form( $recid, $notes ) {
 	$vars = pentdb_get_page_vars();
+
 	$myform = '
 		<div class="inlineform"><FORM class="notes-form" action="index.php#test-'.$recid.'" method="GET" id="notes-form-'.$recid.'">
 

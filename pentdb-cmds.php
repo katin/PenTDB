@@ -66,6 +66,8 @@ function ptdb_process_cmd ( $mycmd ) {
 				die('IP param is required for this display.');
 			}
 			if ( $vip = pentdb_validate_ip($_GET['ip'] )) {
+				// clear port so it doesn't light up on the top bar
+				unset($_GET['port']);
 				display_vuln_page( $session_id, $vip, $vuln );
 				die();
 			}
@@ -172,8 +174,19 @@ function ptdb_process_cmd ( $mycmd ) {
 			ptdb_set_binary_status( 'IN-PROGRESS' );
 			break;
 
-		case 'new-port':
+		case 'new-port':	// aka  add-test  or  new-test
+			if ( !isset($_GET['service']) ) {
+				pentdb_log_error('"Service label" cannot be empty when adding a new service');
+				unset($_GET['fcmd']);
+				break;
+			}
+			if ( empty($_GET['service']) ) {
+				pentdb_log_error('"Service label" cannot be empty when adding a new service');
+				unset($_GET['fcmd']);
+				break;
+			}
 			create_port_record();
+			jump_to_latest_test();
 			break;
 
 		case 'load_templates':
