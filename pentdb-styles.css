@@ -167,11 +167,22 @@ a.hover-link:hover, #top a.hover-link:hover {
 }
 
 .test-cmd, .test-process {
-	margin-left: 80px;
+	margin-left: 135px;
 	font-family: "Lucida Console", Monaco, monospace;
 	font-size: 11pt;
 	padding-right: 20px;
 	text-align: right;
+	width: 80%;
+}
+.test-cmd-form {
+    width:100%;
+    text-align: center;
+}
+.test-cmd-form label,
+.test-cmd-form input,
+.test-cmd-form button {
+	display: inline-block;
+	font-family: "Lucida Console", Monaco, monospace;
 }
 
 input.cmd-text {
@@ -183,6 +194,12 @@ input.cmd-text {
     width: -webkit-calc(100% - 150px);
     width:    -moz-calc(100% - 150px);
     width:         calc(100% - 150px);
+}
+
+.test-cmd-form input.cmd-text {
+    width: -webkit-calc(100% - 350px);
+    width:    -moz-calc(100% - 350px);
+    width:         calc(100% - 350px);
 }
 button.cmd-copy {
 	background-color: #666;
@@ -372,7 +389,7 @@ input, select {
 	border-color: #555;
 }
 .inlineform.vuln input, .inlineform.objective input, .inlineform.host input,
-	.inlineform.test input, .inlineform.test select {
+	.inlineform.test input, .inlineform.test select, .inlineform input[type="text"] {
 	width: 60%;
 }
 .inlineform input[type="submit"] {
@@ -390,17 +407,19 @@ input, select {
     margin-left: 200px;*/
 }
 
-.notes-form, .taform {
+.notes-form, .discovered-form, .raw-result-form, .taform {
 	margin-left: 40px;
     padding-right: 40px;
     text-align: left;
     vertical-align: top;
+    margin-top: 1.5em;
 }
 .taform {
 	margin-left: 140px;
 	margin-bottom: 10px;
 }
-.notes-form textarea, .host textarea, .objective textarea, .vuln textarea {
+.notes-form textarea, .host textarea, .objective textarea, .vuln textarea,
+.discovered-form textarea, .raw-result-form textarea, .taform textarea {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
@@ -414,6 +433,10 @@ input, select {
     width: -webkit-calc(100% - 85px);
     width:    -moz-calc(100% - 85px);
     width:         calc(100% - 85px);
+}
+
+.delete-confirm-form {
+	padding: 20px;
 }
 
 .flags-display {

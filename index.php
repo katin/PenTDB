@@ -334,6 +334,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$buttons .= '</div>'."\n";
 
 		$notes_form = get_notes_form( $test['irid'], $test['notes'] );
+		$discovered_form = get_discovered_form( $test['irid'], $test['discovered'] );
+		$raw_result_form = get_raw_result_form( $test['irid'], $test['raw_result'] );
 
 		$banner_form = '';
 		if ( $test['rectype'] == 'TITLE' ) {
@@ -366,11 +368,13 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$test_list .= '<'.$summary.' class="test-title '.$status_bar.'">'.strtoupper($test['rectype']).': &nbsp;&nbsp;'.$test['title'].($test['banner'] ? ' - '.$test['banner'] : '').'</'.$summary.'>'
 			. $buttons
 			. '<div class="flags-display">'.($test['flags'] ? 'Flags: ' : '').$test['flags'].'</div>'."\n"
-			. '<div class="test-cmd">CMD: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['cmd']))).'" id="'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button></div>'
-			. '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['process_result_cmd']))).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
+			. get_add_cmd_form( $test['irid'], fill_varset(str_replace('"', '&quot;',$test['cmd'])) )
+			// . '<div class="test-cmd">CMD: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['cmd']))).'" id="'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button></div>'
+			.  get_add_processcmd_form( $test['irid'], fill_varset(str_replace('"', '&quot;',$test['process_result_cmd'])) )
+			// . '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['process_result_cmd']))).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "\n";
 
-		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display;
+		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display . $discovered_form . $raw_result_form;
 		$test_list .= '</'.$details.'>'."\n";
 		$test_list .= '</div>'."\n";	// close test-wrapper
 
@@ -409,7 +413,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 	$host_form = '';
 	$host_rec = pentdb_get_host_record( $session_id, $ip );
 	foreach ($host_rec as $name => $value) {
-		$host_form .= get_add_host_datum_form( $name, $value, $host_rec['oid'] );
+		$host_form .= get_add_host_datum_form( $name, $value, $host_rec['hid'] );
 	}
 	if ( $host_form ) {
 		$host_form = "<h2>Host info:</h2>\n" . $host_form;

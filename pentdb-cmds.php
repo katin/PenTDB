@@ -120,6 +120,27 @@ function ptdb_process_cmd ( $mycmd ) {
 			ptdb_process_cmd ( 'display-obj' );
 			break;
 
+		case 'update-cmd':
+			$up_q = "UPDATE {testinstance} set cmd='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['cmd'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Cmd field update query failed. [ERR-891]";
+				die();
+			}
+			return true;
+			break;
+
+		case 'update-processcmd':
+			$up_q = "UPDATE {testinstance} set process_result_cmd='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['processcmd'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Process cmd update query failed. [ERR-892]";
+				die();
+			}
+			return true;
+			break;
+
+
 		case 'update-banner':
 			$up_q = "UPDATE {testinstance} set banner='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['banner'], $_GET['recid']);
@@ -157,6 +178,26 @@ function ptdb_process_cmd ( $mycmd ) {
 			$up_result = db_query($up_q, $_GET['notes'], $_GET['recid']);
 			if ( !$up_result ) {
 				"Notes update query failed. [ERR-888]";
+				die();
+			}
+			return true;
+			break;
+
+		case 'update-discovered':
+			$up_q = "UPDATE {testinstance} set discovered='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['discovered'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Discovered update query failed. [ERR-889]";
+				die();
+			}
+			return true;
+			break;
+
+		case 'update-raw-result':
+			$up_q = "UPDATE {testinstance} set raw_result='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['raw-result'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Raw-result update query failed. [ERR-890]";
 				die();
 			}
 			return true;

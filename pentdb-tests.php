@@ -54,7 +54,7 @@ if ( isset($_GET['sort']) ) {
 
 
 
-$alltests_q = "SELECT * FROM {porttest} ORDER BY ".$orderby;
+$alltests_q = "SELECT * FROM {porttest} ORDER BY ".$orderby.",service,pass_depth,order_weight";
 $alltests_recs = db_query( $alltests_q );
 if ( !$alltests_recs ) {
 	pentdb_top_msg( "No porttest records found in database." );
@@ -124,7 +124,7 @@ switch ($_GET['sort']) {
 
 }
 
-	// display all portests with edit link
+	// display all portests with edit & delete links
 
 $test_list .= "<h2>Tests on file</h2>\n";
 // $test_list .= "<em>Click on a column title to sort by that column.</em>\n";
@@ -132,9 +132,11 @@ $test_list .= '<table class="tests-table">'."\n";
 $test_list .= "<tr>" 
 	. '<th><a href="pentdb-tests.php'.$service_sort.'">service</a> '.$service_sort_arrow.'</th>'
 	. '<th><a href="pentdb-tests.php'.$port_sort.'">port</a> '.$port_sort_arrow.'</th>'
+	. '<th>pass</th>'
+	. '<th>weight</th>'
 	. '<th><a href="pentdb-tests.php'.$rectype_sort.'">rectype</a> '.$rectype_sort_arrow.'</th>'
 	. '<th><a href="pentdb-tests.php'.$statustype_sort.'">statustype</a> '.$statustype_sort_arrow.'</th>'
-	. "<th>action</th>"
+	. "<th>actions</th>"
 	. '<th><a href="pentdb-tests.php'.$title_sort.'">title</a> '.$title_sort_arrow.'</th>'
 	. "</tr>\n";
 
@@ -150,9 +152,11 @@ while ( $test = db_fetch_array( $alltests_recs ) ) {
 	$test_list .= '<tr class="'.$row_class.'">'."\n";
 	$test_list .= "<td>".$test['service']."</td>\n";
 	$test_list .= "<td>".$test['port']."</td>\n";
+	$test_list .= "<td>".$test['pass_depth']."</td>\n";
+	$test_list .= "<td>".$test['order_weight']."</td>\n";
 	$test_list .= "<td>".$test['rectype']."</td>\n";
 	$test_list .= "<td>".$test['statustype']."</td>\n";
-	$test_list .= '<td><a href="pentdb-tests.php?fcmd=edit-test&tid='.$test["pitid"].'">edit</a></td>'."\n";
+	$test_list .= '<td><a href="pentdb-tests.php?fcmd=edit-test&tid='.$test["pitid"].'">edit</a> | <a href="pentdb-tests.php?fcmd=delete-test&tid='.$test["pitid"].'">delete</a></td>'."\n";
 	$test_list .= "<td>".$test['title']."</td>\n";
 	$test_list .= "</tr>\n";
 
@@ -173,6 +177,56 @@ display_tests_page( $mypage );
 
 // display test detail and edit form
 //
+
+function display_delete_page( $tid ) {
+
+	$tid = pentdb_clean( $tid );
+
+	$test_q = "SELECT * FROM {porttest} WHERE pitid='%s'";
+	$test_rec = db_query( $test_q, $tid );
+	if ( !$test_rec ) {
+		pentdb_log_error( "Error reading porttest tid=".$tid." [ERR-5141]" );
+	}
+
+	$test = db_fetch_array( $test_rec );
+
+	// display the test info
+
+	$test_list .= "<h2>DELETE Test</h2>\n";
+	$test_list .= '<table class="tests-table">'."\n";
+	$test_list .= "<tr>" 
+		. '<th><a href="pentdb-tests.php'.$service_sort.'">service</a> '.$service_sort_arrow.'</th>'
+		. '<th><a href="pentdb-tests.php'.$port_sort.'">port</a> '.$port_sort_arrow.'</th>'
+		. '<th><a href="pentdb-tests.php'.$rectype_sort.'">rectype</a> '.$rectype_sort_arrow.'</th>'
+		. '<th><a href="pentdb-tests.php'.$statustype_sort.'">statustype</a> '.$statustype_sort_arrow.'</th>'
+		. '<th><a href="pentdb-tests.php'.$title_sort.'">title</a> '.$title_sort_arrow.'</th>'
+		. "</tr>\n";
+	$test_list .= '<tr class="'.$row_class.'">'."\n";
+	$test_list .= "<td>".$test['service']."</td>\n";
+	$test_list .= "<td>".$test['port']."</td>\n";
+	$test_list .= "<td>".$test['rectype']."</td>\n";
+	$test_list .= "<td>".$test['statustype']."</td>\n";
+	$test_list .= "<td>".$test['title']."</td>\n";
+	$test_list .= "</tr>\n";
+	$test_list .= '</table>'."\n";
+
+	// build the confirmation form
+	$myform = '
+		<div class="delete-confirm-form"><FORM action="pentdb-tests.php" method="GET">
+		<div class="alert-text">ARE YOU SURE?</div>
+		<div>There is no undo for this action.</div>
+		<INPUT type="hidden" name="tid" value="'.$tid.'"></INPUT>
+		<INPUT type="hidden" name="delete" value="CONFIRM"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="delete-test"></INPUT>
+		<INPUT type="submit" value="DELETE"></INPUT>
+		</FORM></div>
+
+	';
+
+
+	display_tests_page( $test_list . $myform );
+
+}
 
 function display_tid_page( $tid ) {
 

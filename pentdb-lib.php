@@ -2075,6 +2075,55 @@ function get_add_obj_datum_form( $name, $value, $recid ) {
 	return $myform;
 }
 
+function get_add_cmd_form( $recid, $value = NULL) {
+	$vars = pentdb_get_page_vars();
+	$lineid = "Tcmd".$recid;
+	$myform = '
+		<div class="test-cmd-form"><FORM action="index.php#test-'.$recid.'" method="GET">
+
+		<LABEL for="'.$lineid.'"> &nbsp; &nbsp; CMD: </LABEL>
+		<INPUT class="cmd-text" type="text" name="cmd" id = "'.$lineid.'" value="'.$value.'"></INPUT>
+<button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button>
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-cmd"></INPUT>
+		<INPUT type="submit" value="Update"></INPUT>
+		</FORM></div>
+
+	';
+
+	return $myform;
+}
+
+function get_add_processcmd_form( $recid, $value = NULL) {
+	$vars = pentdb_get_page_vars();
+	$lineid = "Tprocess-cmd".$recid;
+	$myform = '
+		<div class="test-cmd-form"><FORM action="index.php#test-'.$recid.'" method="GET">
+
+		<LABEL for="'.$lineid.'">PROCESS: </LABEL>
+		<INPUT class="cmd-text" type="text" name="processcmd" id = "'.$lineid.'" value="'.$value.'"></INPUT>
+<button class="cmd-copy" onclick="ptdb_copytext(\''.$lineid.'\')">Copy</button>
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-processcmd"></INPUT>
+		<INPUT type="submit" value="Update"></INPUT>
+		</FORM></div>
+
+	';
+
+	return $myform;
+}
 
 function get_add_banner_form( $recid ) {
 	$vars = pentdb_get_page_vars();
@@ -2174,6 +2223,60 @@ function get_notes_form( $recid, $notes ) {
 
 	return $myform;
 }
+
+function get_raw_result_form( $recid, $value ) {
+	$vars = pentdb_get_page_vars();
+
+	$myform = '
+		<div class="inlineform"><FORM class="raw-result-form" action="index.php#test-'.$recid.'" method="GET" id="raw-result-form-'.$recid.'">
+
+		<LABEL for="raw-result_form">Raw-result: </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="8" name="raw-result" id ="raw-result">'.$value.'</textarea><br/>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-raw-result"></INPUT>
+		<INPUT type="submit" value="Update Raw-result"></INPUT>
+		</FORM></div>
+
+	';
+
+		// <textarea rows="4" cols="50" name="notes" form="notes-form">'.$notes.'</textarea>
+
+
+	return $myform;
+}
+
+function get_discovered_form( $recid, $value ) {
+	$vars = pentdb_get_page_vars();
+
+	$myform = '
+		<div class="inlineform"><FORM class="discovered-form" action="index.php#test-'.$recid.'" method="GET" id="discovered-form-'.$recid.'">
+
+		<LABEL for="discovered">Discovered: </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="8" name="discovered" id ="discovered">'.$value.'</textarea><br/>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-discovered"></INPUT>
+		<INPUT type="submit" value="Update Discovered"></INPUT>
+		</FORM></div>
+
+	';
+
+	return $myform;
+}
+
 
 // load_templates
 //
