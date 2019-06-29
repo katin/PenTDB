@@ -201,6 +201,7 @@ global $top_message;
 <BODY>
 	<div id="top">
 	<span class="titlespan"><a class="hover-link" href="index.php">PenTDB Tool by K10</a></span>
+	<span><a class="hover-link" href="pentdb-tests.php">[Templates]</a> &nbsp; &nbsp; &nbsp; </span>
 <?php
 	$vars = pentdb_get_page_vars();
 	$path = pentdb_get_session_path();
@@ -2309,3 +2310,9 @@ function ptdb_load_templates() {
 
 }
 
+function diebug( $show_var, $die = false ) {
+	echo "<div><pre>".print_r($show_var,true)."</pre></div>";
+	if ( $die ) {
+		die('program halt in diebug');
+	}
+}

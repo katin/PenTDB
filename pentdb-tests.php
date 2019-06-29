@@ -51,11 +51,46 @@ if ( isset($_GET['sort']) ) {
 	}
 }
 
+$where = '';
+$include_parms = '';
+$service = '';
+if ( isset($_GET['service']) ) {
+	if ( empty($_GET['service']) ) {
+		unset($_GET['service']);
+	} else {
+		$service = pentdb_clean( $_GET['service'] );
+		$where = " WHERE service='%s'";
+		$include_parms = 'SERVICE';
+	}
+}
+$port = '';
+if ( isset($_GET['port']) ) {
+	if ( empty($_GET['port']) ) {
+		unset($_GET['port']);
+	} else {
+		$port = pentdb_validate_port( $_GET['port'] );
+		$where = " WHERE port='%s'";
+		$include_parms = 'PORT';
+	}
+}
 
+$alltests_q = "SELECT * FROM {porttest}".$where." ORDER BY ".$orderby.",service,pass_depth,order_weight";
+switch ($include_parms) {
+	case 'SERVICE':
+		$alltests_recs = db_query( $alltests_q, $service );
+		break;
 
+	case 'PORT':
+		$alltests_recs = db_query( $alltests_q, $port );
+		break;
 
-$alltests_q = "SELECT * FROM {porttest} ORDER BY ".$orderby.",service,pass_depth,order_weight";
-$alltests_recs = db_query( $alltests_q );
+	default:
+		$alltests_recs = db_query( $alltests_q );
+		break;
+}
+
+// diebug($alltests_q,true);
+
 if ( !$alltests_recs ) {
 	pentdb_top_msg( "No porttest records found in database." );
 }
@@ -127,6 +162,8 @@ switch ($_GET['sort']) {
 	// display all portests with edit & delete links
 
 $test_list .= "<h2>Tests on file</h2>\n";
+$test_list .= display_data_filter_form();
+
 // $test_list .= "<em>Click on a column title to sort by that column.</em>\n";
 $test_list .= '<table class="tests-table">'."\n";
 $test_list .= "<tr>" 
@@ -173,6 +210,104 @@ $mypage = $quicklink_add_service . $test_list . $myform;
 
 display_tests_page( $mypage );
 
+
+// display filter form & indicators
+//
+
+function display_data_filter_form() {
+
+	$myform = '
+	<div class="filter-data-form">
+	<FORM action="pentdb-tests.php" method="GET">
+	<LABEL for="service-filter">service:</LABEL>
+	<SELECT name="service" id="service-filter">
+	'.implode(tests_get_service_options()).'
+	</SELECT>
+	<INPUT type="submit" value="Show"></INPUT>
+	</FORM></div>
+	';
+
+	$myform .= '
+	<div class="filter-data-form">
+	<FORM action="pentdb-tests.php" method="GET">
+	<LABEL for="port-filter"> &nbsp; &nbsp; port:</LABEL>
+	<SELECT name="port" id="port-filter">
+	'.implode(tests_get_port_options()).'
+	</SELECT>
+	<INPUT type="submit" value="Show"></INPUT>
+	</FORM></div>
+	';
+
+	if ( isset($_GET['service']) || isset($_GET['port']) ) {
+		$myform .= '<div class="quicklink"><a href="pentdb-tests.php">SHOW ALL RECORDS</a></div>'."\n";
+	}
+
+	return $myform;
+}
+
+
+
+
+function tests_get_service_options() {
+
+	$service_selected = NULL;
+	if ( isset($_GET['service']) ) {
+		$service_selected = pentdb_clean($_GET['service']);
+	}
+	$servicelist = array();
+
+	$service_q = "SELECT service FROM {porttest} GROUP BY service ORDER BY service";
+
+	$service_recs = db_query( $service_q );
+	if ( !$service_recs ) {
+		pentdb_log_error('Services query failed. [ERR-9711]');
+		return false;
+	}
+	if ( $service_recs->num_rows == 0 ) {
+		pentdb_top_msg('[Notice 233] No service records found.' );
+		return false;
+	}
+
+	$servicelist[] = '<OPTION value="">-</OPTION>';
+	while ( $rec = db_fetch_array( $service_recs) ) {
+		$servicelist[] = '<OPTION '
+			.($rec['service']==$service_selected ? "SELECTED " : '')
+			.'value="'.$rec['service'].'">'.$rec['service'].'</OPTION>';
+	}
+
+	return $servicelist;
+}
+
+
+function tests_get_port_options() {
+
+	$port_selected = NULL;
+	if ( isset($_GET['port']) ) {
+		$port_selected = pentdb_clean($_GET['port']);
+	}
+	$portlist = array();
+
+	$port_q = "SELECT port FROM {porttest} GROUP BY port ORDER BY port";
+
+	$port_recs = db_query( $port_q );
+	if ( !$port_recs ) {
+		pentdb_log_error('Ports query failed. [ERR-9712]');
+		return false;
+	}
+	if ( $port_recs->num_rows == 0 ) {
+		pentdb_top_msg('[Notice 233] No port records found.' );
+		return false;
+	}
+
+	$portlist[] = '<OPTION value="">-</OPTION>';
+	while ( $rec = db_fetch_array( $port_recs) ) {
+		$portlist[] = '<OPTION '
+			.($rec['port']==$port_selected ? "SELECTED " : '')
+			.'value="'.$rec['port'].'">'.$rec['port'].'</OPTION>';
+	}
+
+	return $portlist;
+}
 
 
 // display test detail and edit form
@@ -275,6 +410,7 @@ function get_new_test_form( $title = "Add a test template" ) {
 			<OPTION value="SCAN">SCAN</OPTION>
 			<OPTION value="TOOL">TOOL</OPTION>
 			<OPTION value="SCRIPT">SCRIPT</OPTION>
+			<OPTION value="TITLE">TITLE</OPTION>
 		</SELECT><br/>
 
 		<LABEL for="statustype">Status type: </LABEL>
@@ -448,12 +584,12 @@ global $top_message;
 
 <BODY>
 	<div id="top">
-	<span class="titlespan"><a class="hover-link" href="pentdb-tests.php">PenTDB Tool by K10</a></span>
+	<span class="titlespan"><a class="hover-link" href="index.php">PenTDB Tool by K10</a></span>
 <?php
 	// $vars = pentdb_get_tests_vars();
 
 	$output = '';
-	$output .= '<span class="session-title">Tests Templates Maintenance</span>'."\n";
+	$output .= '<span class="session-title"><a class="hover-link" href="pentdb-tests.php">Tests Templates Maintenance</a></span>'."\n";
 
 
 	$output .= '</div>'."\n";				// close #top
