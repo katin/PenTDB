@@ -264,6 +264,7 @@ button.cmd-copy {
 .ip-link {
 	clear: both;
 	padding-top: 5px;
+	padding-left: 20px;
 }
 
 .vulns-links-bar {

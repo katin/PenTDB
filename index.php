@@ -166,7 +166,7 @@ function display_objective_page( $session_id, $ip, $oid ) {
 
 function display_iplist_page( $session_id ) {
 
-	$ip_q = "SELECT DISTINCT ip_address FROM {host} WHERE session_id='%s'";
+	$ip_q = "SELECT DISTINCT ip_address,name FROM {host} WHERE session_id='%s'";
 	$ip_recs = db_query( $ip_q, $session_id);
 	if ( !$ip_recs ) {
 		echo '<div>Host query failed. [MSG-2116]';
@@ -188,7 +188,7 @@ function display_iplist_page( $session_id ) {
 	// display a list of ip addresses available to test
 	$ip_list = '';
 	while ( $ip = db_fetch_array( $ip_recs ) ) {
-		$ip_list .= '<div class="ip-link"><a href="index.php?'.pentdb_get_urlparms( array( 'ip'=>$ip['ip_address']) ).'">'.$ip['ip_address'].'</a></div>'."\n";
+		$ip_list .= '<div class="ip-link"><a class="hover-link" href="index.php?'.pentdb_get_urlparms( array( 'ip'=>$ip['ip_address']) ).'">'.$ip['ip_address'].' &nbsp; '.$ip['name'].'</a></div>'."\n";
 
 		$ip_list .= build_ip_status_display( $session_id, $ip['ip_address'] );
 

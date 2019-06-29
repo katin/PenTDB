@@ -5,11 +5,8 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[x] add cross-links between sessions and template maintenance
-[x] add TITLE type back into new test template (for now)
+[_] add hostname display to the ip list page (host select page)
 
-[_] add port filter to maintenance master table
-[_] add service filter to maintenance master table
 [_] add new record type 'template' that will be the parent id for tests in that set
 [_] add new field 'template' to porttest to group tests into a template (w/o limits on port# and service name) -- only for template side; this doesn't go over to the testinstance table
 [_] add template filter to maintenance master table
@@ -47,6 +44,10 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] add cross-links between sessions and template maintenance
+[x] add TITLE type back into new test template (for now)
+[x] add port filter to maintenance master table
+[x] add service filter to maintenance master table
 [x] add display & update of raw_result and discovered long text fields
 [x] update button for cmd lines on tests page
 [x] Add watchfile display to host page
