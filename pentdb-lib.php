@@ -854,6 +854,13 @@ global $webpages_cache_path;
 	if ( $pos = strpos($page_source, '#!python') ) {
 		$data['code_language'] = 'python';
 	}
+	if ( $pos = strpos($page_source, '#!/usr/bin/sh') ) {
+		$data['code_language'] = 'bash/shell';
+	}
+	if ( $pos = strpos($page_source, '#!/bin/sh') ) {
+		$data['code_language'] = 'bash/shell';
+	}
+
 
 	// if we have a language identified, then we probably have code
 	if ( $data['code_language'] ) {
@@ -1238,7 +1245,8 @@ function build_vuln_status_display( $session_id, $ip, $service = NULL, $port = N
 		// 	$depth_mark = '<div class="depth-divider"></div>'."\n";
 		// }
 		$display_color = get_vuln_status_color( $rec['status'], $rec['flags'] );
-		$title = 'title="'.($rec['status'] ? $rec['status'].' - ' : '').$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
+		$edb_num = get_edb_from_url($rec['url']);
+		$title = 'title="'.($rec['status'] ? $rec['status'].' - ' : '').$edb_num.$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
 		$link = base_link($session_id,$ip,$service,$port,$title,NULL,$rec['vid'],'display-vuln'); 
 		$flag_star = '';
 		if ( $rec['status'] == "OPEN" ) {
@@ -1301,6 +1309,21 @@ function read_vuln_records( $session_id, $ip, $service = NULL, $port = NULL ) {
 
 	return $vuln_recs;
 }
+
+// get_edb_from_url
+//
+// Return the EDB number as a string, if it is present in the URL
+
+function get_edb_from_url( $url ) {
+	$edb_num = '';
+	if ( strpos($url, 'exploit-db.com') === false ) {
+		return NULL;
+	}
+	$ebd_num = "EDB: ".substr($url, strrpos($url, "/"))." - ";
+
+	return $ebd_num;
+}
+
 
 //------------------------------------------------------
 

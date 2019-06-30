@@ -334,7 +334,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			// add a simple copy-cmd button with irid displayed and a mysql mod record cmd
 		#plugh
 		$qmysqlid = "qsql-".$test['irid'];
-		$buttons .= '<INPUT class="hideme" type="text" id="'.$qmysqlid.'" value="UPDATE {testinstance} set title=\'newtitle\' WHERE irid='.$test['irid'].';"></INPUT><button class="sql-copy" onclick="ptdb_copytext(\''.$qmysqlid.'\')">rid:'.$test['irid'].'</button>';
+		$buttons .= '<INPUT class="hideme" type="text" id="'.$qmysqlid.'" value="UPDATE testinstance set title=\'newtitle\' WHERE irid='.$test['irid'].';"></INPUT><button class="sql-copy" onclick="ptdb_copytext(\''.$qmysqlid.'\')">rid:'.$test['irid'].'</button>';
 
 		$buttons .= '</div>'."\n";
 

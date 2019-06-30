@@ -7,7 +7,8 @@ TODO LIST
 ---------
 [x] add hostname display to the ip list page (host select page)
 [x] add quicklinks to top of service page to add vuln, add objective, and add test
-[_] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title
+[x] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title
+[x] add EDB number to the vuln-hover info title
 
 [_] add function to "make template" from a test set from a service page
 
