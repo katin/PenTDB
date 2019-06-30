@@ -1183,7 +1183,7 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 			$depth_mark = '<div class="depth-divider"></div>'."\n";
 		}
 		$display_color = get_status_color( $rec['statustype'], $rec['status'], $rec['flags'] );
-		$title = 'title="'.$rec['title'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
+		$title = 'title="'.$rec['title'].' '.$rec['banner'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
 		$link = base_link($session_id,$ip,$service,$port,$title,"test-".$rec['irid']); 
 		$flag_star = '';
 		if ( $rec['statustype'] == 'DEPTH' && $rec['status'] > 0 ) {
@@ -1318,6 +1318,9 @@ function get_edb_from_url( $url ) {
 	$edb_num = '';
 	if ( strpos($url, 'exploit-db.com') === false ) {
 		return NULL;
+	}
+	if ( strrpos($url, "/") == strlen($url)-1 ) {
+		$url = substr($url, 0, strlen($url)-1);
 	}
 	$ebd_num = "EDB: ".substr($url, strrpos($url, "/"))." - ";
 
