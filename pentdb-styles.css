@@ -260,6 +260,19 @@ button.cmd-copy {
 .clear {
 	clear: both;
 }
+.hideme {
+    width: 10px;
+    /* float: left; */
+    position: absolute;
+    x: 0;
+}
+.sql-copy {
+    position: absolute;
+	x: 0;
+    background-color: #222;
+    color: #aaa;
+    border-color: #444;
+}
 
 .ip-link {
 	clear: both;

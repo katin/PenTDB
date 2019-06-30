@@ -5,7 +5,11 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[_] add hostname display to the ip list page (host select page)
+[x] add hostname display to the ip list page (host select page)
+[x] add quicklinks to top of service page to add vuln, add objective, and add test
+[_] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title
+
+[_] add function to "make template" from a test set from a service page
 
 [_] add new record type 'template' that will be the parent id for tests in that set
 [_] add new field 'template' to porttest to group tests into a template (w/o limits on port# and service name) -- only for template side; this doesn't go over to the testinstance table
@@ -28,6 +32,10 @@ TODO LIST
 
 [x] Add porttest maintenance screen
     [_] with export
+
+[_] Add "myIP" address field to the HOST record to allow scripts parms to fill in local IP
+    -- OR, to the session record, which is more universal, but requires:
+      [_] Add edit session link and form(s) (which woul dbe handy to fix the data directory anyway)
 
 [_] change $vuln parm in URL to recid so it is better for objectives, too
 

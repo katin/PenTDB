@@ -331,6 +331,11 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			$buttons .= get_binary_status_button( $test['status'], $test['irid'] )
 					. get_depth_status_button( $test['status'], $test['irid'] );
 		}
+			// add a simple copy-cmd button with irid displayed and a mysql mod record cmd
+		#plugh
+		$qmysqlid = "qsql-".$test['irid'];
+		$buttons .= '<INPUT class="hideme" type="text" id="'.$qmysqlid.'" value="UPDATE {testinstance} set title=\'newtitle\' WHERE irid='.$test['irid'].';"></INPUT><button class="sql-copy" onclick="ptdb_copytext(\''.$qmysqlid.'\')">rid:'.$test['irid'].'</button>';
+
 		$buttons .= '</div>'."\n";
 
 		$notes_form = get_notes_form( $test['irid'], $test['notes'] );
@@ -384,7 +389,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 	if ( $test_list ) {
 			// build page title
-		$test_list = '<h2>Test Set, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
+		$quicklinks = '<div class="quicklink"><a href="#add-test-form">Add a test</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a></div>'."\n";
+		$test_list = $quicklinks . '<h2>Test Set, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
 		\n" 
 		  . build_service_status_display( $session_id, $ip, $service, $port )
 		  . "\n<p>&nbsp;</p>\n" . $test_list;

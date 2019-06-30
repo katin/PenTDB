@@ -14,3 +14,5 @@ function ptdb_copytext( field_id ) {
   /* Alert the copied text */
   /* alert("Copied the text: " + copyText.value); */
 }
+
+
