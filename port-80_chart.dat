@@ -7,7 +7,7 @@
 // LOAD DATA LOCAL INFILE '/path/port-80_chart.dat' INTO TABLE porttest FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 9 ROWS;
 //
 // Cols: autoid, port, rectype, statustype, service, title, cmd, process_result_cmd, watch_file, pass_depth, order_weight
-0,"80","TITLE","BINARY","http","http port $port","nmap -sV $ip -p$port","nmap -sV $ip -p$port | grep open | rev | cut -d" " -f-2 | rev","","0","0"
+0,"80","TITLE","DEPTH","http","http port $port","nmap -sV $ip -p$port","nmap -sV $ip -p$port | grep open | rev | cut -d" " -f-2 | rev","","0","0"
 0,"80","SCAN","BINARY","http","Nikto scan","nikto -host $ip -port $port | tee nikto-scan-$myport.txt","Examine results and check CVEs","","1","0"
 0,"80","EXAMINE","DEPTH","http","vuln search","searchsploit $banner; google $banner exploit; http://exploit-db.com $service $progressive_versions","Human disqualification and ranking","","1","1"
 0,"80","EXAMINE","BINARY","http","Examine index page","http://$ip","Check for app, version, and source for vulns","","1","2"

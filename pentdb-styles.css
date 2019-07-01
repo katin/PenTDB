@@ -18,16 +18,27 @@ a {
 a:visited {
 	color: #bbb;
 }
+.bluetext a:visited {
+	color: #5d5;
+}
 a.hover-link {
 	text-decoration: none;
 }
 #top a.hover-link {
 	text-decoration: none;
-	color: #5d5;
+	/*color: #5d5;*/
+	/*color: #5fa7d2; */
 }
 a.hover-link:hover, #top a.hover-link:hover {
 	color: #e8e8e8;
 	text-decoration: underline;
+}
+.top-ip-addr, .top-ip-addr a {
+	color: #5d5;
+	font-weight: bold;
+	font-size: 1.1em;
+	top-padding: -1px;
+	line-height: 0.9em
 }
 
 #top {
@@ -59,6 +70,10 @@ a.hover-link:hover, #top a.hover-link:hover {
 }
 #top .session-title {
 	font-weight: bold;
+	color: #5fa7d2;
+}
+#top .bluetext {
+	color: #5fa7d2;
 }
 
 .bold {
@@ -82,11 +97,16 @@ a.hover-link:hover, #top a.hover-link:hover {
 	margin-top: 5px;
 }
 .ip-service-link a {
-	padding: 2px 5px;
+	padding: 2px 6px;
 	min-width: 80px;
 	/*background-color: #555;*/
 	color: #5d5;
+	text-decoration: none;
 }
+.ip-service-link a:hover {
+	text-decoration: underline;
+}
+
 .ip-service-link.highlight a {
 	padding: 2px 5px;
 	min-width: 80px;
@@ -281,7 +301,7 @@ button.cmd-copy {
 }
 
 .vulns-links-bar {
-	margin-left: 80px;
+	margin-left: 90px;
 	padding-top: 5px;
     display: inline-block;
 }

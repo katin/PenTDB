@@ -10,6 +10,8 @@ TODO LIST
 [x] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title
 [x] add EDB number to the vuln-hover info title
 [x] add banner to hover on title record of service status display
+[x] set add service form to default to DEPTH test type. 
+[x] Set ALL TITLE records to be DEPTH (in .dat files and open db porttest and testinstance)
 
 [_] add function to "make template" from a test set from a service page
 

@@ -201,20 +201,20 @@ global $top_message;
 <BODY>
 	<div id="top">
 	<span class="titlespan"><a class="hover-link" href="index.php">PenTDB Tool by K10</a></span>
-	<span><a class="hover-link" href="pentdb-tests.php">[Templates]</a> &nbsp; &nbsp; &nbsp; </span>
+	<span><a class="hover-link bluetext" href="pentdb-tests.php">[Templates]</a> &nbsp; &nbsp; &nbsp; </span>
 <?php
 	$vars = pentdb_get_page_vars();
 	$path = pentdb_get_session_path();
 	$output = '';
 	if ( isset($vars['session_id']) ) {
-		$output .= '<span class="session-title">Session ID: <a class="hover-link" href="index.php?session_id='.$vars['session_id'].'">'.$vars['session_id'].'</a> </span><span class="spacer bold">data path: </span><span class="dir-path">'.$path.'</span>'."\n";
+		$output .= '<span class="session-title">Session ID: <a class="hover-link bluetext" href="index.php?session_id='.$vars['session_id'].'">'.$vars['session_id'].'</a> </span><span class="spacer bold bluetext">data path: </span><span class="dir-path bluetext">'.$path.'</span>'."\n";
 	}
 	// build quick-links to other services on this IP address
 	$services_list = get_service_list( $vars['session_id'], $vars['ip'] );
 	$other_services_html = '';
 	if ( isset($vars['ip']) ) {
 		if ( !empty($vars['ip']) ) {
-			$other_services_html .= '<span class="top-ip-addr">'.base_link($vars['session_id'], $vars['ip'], ' ', ' ','class="hover-link"').$vars['ip']."</a></span>\n";
+			$other_services_html .= '<span class="top-ip-addr">'.base_link($vars['session_id'], $vars['ip'], ' ', ' ','class="hover-link"').$vars['ip'].'/'.pentdb_get_hostname($vars['ip'])."</a></span>\n";
 		}
 	}
 
@@ -339,7 +339,7 @@ function pentdb_create_session( $name ) {
 // add an IP address to the testing list for the specified session
 
 function pentdb_add_ip( $ip, $session, $hostname ) {
-	$addip_q = "INSERT into testinstance (session_id,ip_address,rectype,title) VALUES ('%s','%s','HOST','%s')";
+	$addip_q = "INSERT into {testinstance} (session_id,ip_address,rectype,title) VALUES ('%s','%s','HOST','%s')";
 	$addip_result = db_query( $addip_q, $session, $ip, 'HOST '.$hostname);
 	if ( !$addip_result ) {
 		echo '<div>Query failed.</div>';
@@ -1752,7 +1752,7 @@ function get_add_service_form( $title = "Add a service" ) {
 		<LABEL for="statustype">Status type: </LABEL>
 		<SELECT name="statustype" id="statustype">
 			<OPTION value="BINARY">BINARY</OPTION>
-			<OPTION value="DEPTH">DEPTH</OPTION>
+			<OPTION value="DEPTH" SELECTED>DEPTH</OPTION>
 			<OPTION value="NONE">NONE</OPTION>
 		</SELECT><br/>
 

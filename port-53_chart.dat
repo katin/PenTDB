@@ -7,7 +7,7 @@
 // LOAD DATA LOCAL INFILE '/path/port-53_chart.dat' INTO TABLE porttest FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 9 ROWS;
 //
 // Cols: autoid, port, rectype, statustype, service, title, cmd, process_result_cmd, watch_file, pass_depth, order_weight
-0,"53","TITLE","BINARY","dns","dns port $port",,"","","","0","0"
+0,"53","TITLE","DEPTH","dns","dns port $port",,"","","","0","0"
 0,"53","SCRIPT","DEPTH","dns","Lookup DNS server name","host -t cname $ip $ip","Get local 2nd-level domain, store in $domain","","1","1"
 0,"53","SCAN","BINARY","dns","Attempt zone transfer","dig $domain axfr @$ip","try other zone transfer tools if no results","","1","2"
 0,"53","SCAN","DEPTH","dns","Scan with dnsrecon","dnsrecon $domain","try other domain scan tools if poor results","","1","3"

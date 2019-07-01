@@ -7,7 +7,7 @@
 // LOAD DATA LOCAL INFILE '/path/port-22_chart.dat' INTO TABLE porttest FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 9 ROWS;
 //
 // Cols: autoid, port, rectype, statustype, service, title, cmd, process_result_cmd, watch_file, pass_depth, order_weight
-0,"22","TITLE","BINARY","ssh","ssh port $port",,"","","","0","0"
+0,"22","TITLE","DEPTH","ssh","ssh port $port",,"","","","0","0"
 0,"22","EXAMINE","BINARY","ssh","Level 1 Credentials attempts: defaults, related, common","hydra -U user-file.txt -P password-file.txt -v $ip ssh","Check for success","",1,1
 0,"22","EXAMINE","DEPTH","ssh","Version exploit search (SSH and SSL)","...","Exclude and test exploits",1,2
 0,"22","EXAMINE","BINARY","ssh","Level 2 Credentials attempts: cewl compiled password attack","(cewl tool to scrape their website, hydra or medusa to try passwords)","Check for success","",1,3
