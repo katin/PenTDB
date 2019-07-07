@@ -5,13 +5,7 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[x] add hostname display to the ip list page (host select page)
-[x] add quicklinks to top of service page to add vuln, add objective, and add test
-[x] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title
-[x] add EDB number to the vuln-hover info title
-[x] add banner to hover on title record of service status display
-[x] set add service form to default to DEPTH test type. 
-[x] Set ALL TITLE records to be DEPTH (in .dat files and open db porttest and testinstance)
+
 
 [_] add function to "make template" from a test set from a service page
 
@@ -56,6 +50,13 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] add hostname display to the ip list page (host select page)
+[x] add quicklinks to top of service page to add vuln, add objective, and add test
+[x] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title
+[x] add EDB number to the vuln-hover info title
+[x] add banner to hover on title record of service status display
+[x] set add service form to default to DEPTH test type. 
+[x] Set ALL TITLE records to be DEPTH (in .dat files and open db porttest and testinstance)
 [x] add cross-links between sessions and template maintenance
 [x] add TITLE type back into new test template (for now)
 [x] add port filter to maintenance master table
@@ -104,9 +105,9 @@ DONE LIST
 GENERAL
 -------
 This tool was built quickly, and while it is being continously improved, it isn't an ideal example of a web app.
-Also, perhaps ironically, it is quite insecure and should be run ONLY on the local box/VM that you are using for pentesting. DO NOT EXPOSE THIS WEB INTERFACE/APP TO THE OPEN INTERNET, IT IS NOT SECURE.
+Also, perhaps ironically, it is insecure and should be run ONLY on the local box/VM that you are using for pentesting. DO NOT EXPOSE THIS WEB INTERFACE/APP TO THE OPEN INTERNET, IT IS NOT SECURE.
 
-PenTDB is intended as a local tool, like a sheaf of paper on your desk to track hosts, tests, and notes while pentesting.
+PenTDB is intended as a local tool, like a sheaf of paper on your desk to track hosts, tests, and notes while pentesting. It can replace apps like KeepNote with a specialized set of data fields and displays that help you keep track of what tests have been run on each port of each machine, the results, and the path you followed to get root.
 
 
 

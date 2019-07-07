@@ -238,6 +238,10 @@ function ptdb_process_cmd ( $mycmd ) {
 			ptdb_set_depth_status();
 			break;
 
+		case 'save-as-template':
+			ptdb_testset_to_template();
+			break;
+
 		default:
 			echo "<div>Uknown command.</div>";
 			die();

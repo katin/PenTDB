@@ -689,6 +689,69 @@ function pentdb_update_objective() {
 	return $status;
 }
 
+// testset_to_template
+//
+// Copy a set of tests created in testinstance to make a service template
+
+function ptdb_testset_to_template() {
+	$vars = pentdb_get_page_vars();
+
+	// make sure we don't have a conflicting template on file already
+	//
+	$check_q = "SELECT pitid FROM {porttest} WHERE port='%s' AND service='%s'";
+	$check_result = db_query($check_q, $vars['port'], $vars['service'] );
+	if ( !$check_result ) {
+		pentdb_log_error("Error reading porttest table [ERR-1335]");
+	}	
+	// $record = db_fetch_array($result);
+	$check_count = $check_result->num_rows;
+	if ( $check_count > 0 ) {
+		pentdb_log_error("Template for ".$vars['service']." on port ".$vars['port']." are already present in the templates table. Rename service or use another port.");
+		return false;
+	}
+
+	// get a list of the tests to copy
+	//
+	$test_recs = ptdb_get_test_set( $vars['session_id'], $vars['ip'], $vars['service'], $vars['port'] );
+
+	// copy the tests
+	//
+	$error_count = 0;
+	$record_count = 0;
+	while ( $test = db_fetch_array( $test_recs ) ) {
+		$copy_q = "INSERT INTO {porttest} (port, service, rectype, statustype, title, cmd, process_result_cmd, watch_file, pass_depth, order_weight) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+		$copy_result = db_query( $copy_q, $test['port'], $test['service'], $test['rectype'], $test['statustype'], $test['title'], $test['cmd'], $test['process_result_cmd'], $test['watch_file'], $test['pass_depth'], $test['order_weight'] );
+		if ( !$copy_result ) {
+			pentdb_log_error("Error copying test to porttest table [ERR-1138]");
+			$error_count++;
+		} else {
+			$record_count++;
+		}
+	}
+	if ( !$error_count ) {
+		pentdb_top_msg("Test set copied successfully, ".$record_count." records copied.");
+	}
+
+	return true;
+}
+
+
+// get_test_set
+//
+// Fetch a set of tests from testinstance
+
+function ptdb_get_test_set( $session_id, $ip, $service, $port ) {
+
+	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight, irid";
+	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
+	if ( !$tests_recs ) {
+		echo '<div>Session services "'.$session_id.'"not found in database. [Error 611]';
+		die();
+	}
+
+	return $tests_recs;
+}
+
 
 function pentdb_curl_fetch_page( $url ) {
 	$ch=curl_init();
@@ -1776,6 +1839,30 @@ function get_add_service_form( $title = "Add a service" ) {
 	return $bigform;
 }
 
+
+function get_save_template_form( $title = "Save as Template" ) {
+	$vars = pentdb_get_page_vars();
+
+	$myform = '
+		<div class="bigform"><FORM class="save-template-form" action="index.php" method="GET" id="save-template-form'.$recid.'">
+
+		<LABEL for="service">Service: </LABEL>
+		<INPUT type="text" name="service" value="'.$vars['service'].'"></INPUT><br/>
+
+		<LABEL for="port">Port: </LABEL>
+		<INPUT type="text" name="port" value="'.$vars['port'].'"></INPUT>
+
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="fcmd" value="save-as-template"></INPUT>
+		<INPUT type="submit" value="Save test set as Template"></INPUT>
+		</FORM></div>
+
+	';
+
+	$myform = "<h2>".$title."</h2>\n" . $myform;
+	return $myform;
+}
 
 
 function get_add_test_form( $title = "Add a test" ) {

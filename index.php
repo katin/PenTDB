@@ -239,6 +239,7 @@ function display_sessions() {
 }
 
 
+
 	//
 	// display a service test set page
 	//
@@ -247,12 +248,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 	unset($_GET['vuln']);		// [_] *** TODO: Figure out a better way to do vuln display page
 
-	$tests_q = "SELECT * FROM {testinstance} WHERE session_id='%s' AND ip_address='%s' AND service='%s' AND port='%s' ORDER BY pass_depth, order_weight, irid";
-	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
-	if ( !$tests_recs ) {
-		echo '<div>Session services "'.$session_id.'"not found in database. [Error 611]';
-		die();
-	}
+	$tests_recs = ptdb_get_test_set( $session_id, $ip, $service, $port );
 
 	// display a list of tests for this service
 	$test_list = '';
@@ -389,7 +385,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 	if ( $test_list ) {
 			// build page title
-		$quicklinks = '<div class="quicklink"><a href="#add-test-form">Add a test</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a></div>'."\n";
+		$quicklinks = '<div class="quicklink"><a href="#add-test-form">Add a test</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a> <a href="#save-template-form">Save this test set as a Template</a></div>'."\n";
 		$test_list = $quicklinks . '<h2>Test Set, <a class="hover-link" href="index.php?session_id='.$session_id.'&ip='.$ip.'">IP '.$ip.'</a>, service '.$service.' / '.$service.':</h2>'."
 		\n" 
 		  . build_service_status_display( $session_id, $ip, $service, $port )
@@ -401,8 +397,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 		$test_list .= "<div>ip ".$ip.", service ".$service."</div>\n";
 	}
 
-	$mypage = $test_list . get_add_test_form() . get_add_objective_form() . get_add_vuln_form();
-;
+	$mypage = $test_list . get_add_test_form() . get_add_objective_form() . get_add_vuln_form() . get_save_template_form();
+
 	display_page( $mypage );
 }
 
