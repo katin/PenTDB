@@ -166,7 +166,8 @@ function display_objective_page( $session_id, $ip, $oid ) {
 
 function display_iplist_page( $session_id ) {
 
-	$ip_q = "SELECT DISTINCT ip_address,name,status FROM {host} WHERE session_id='%s'";
+	// if DISTINCT starts acting wierd, maybe add a subquery with the DISTINCT ip_address
+	$ip_q = "SELECT DISTINCT ip_address,name,status,points FROM {host} WHERE session_id='%s'";
 	$ip_recs = db_query( $ip_q, $session_id);
 	if ( !$ip_recs ) {
 		echo '<div>Host query failed. [MSG-2116]';
@@ -195,7 +196,7 @@ function display_iplist_page( $session_id ) {
 		if ( $ip['status'] == 'LLSHELL' ) {
 			$status_color = ' blue';
 		}
-		$ip_list .= '<div class="ip-link"><span class="host-status'.$status_color.'">['.$ip['status'].'] &nbsp; </span> <a class="hover-link" href="index.php?'.pentdb_get_urlparms( array( 'ip'=>$ip['ip_address']) ).'">'.$ip['ip_address'].' &nbsp; '.$ip['name'].'</a></div>'."\n";
+		$ip_list .= '<div class="ip-link"><span class="host-status'.$status_color.'">['.$ip['status'].'] &nbsp; </span> <span class="host-points">'.$ip['points'].' pts &nbsp;</span> <a class="hover-link" href="index.php?'.pentdb_get_urlparms( array( 'ip'=>$ip['ip_address']) ).'">'.$ip['ip_address'].' &nbsp; '.$ip['name'].'</a></div>'."\n";
 
 		$ip_list .= build_ip_status_display( $session_id, $ip['ip_address'] );
 

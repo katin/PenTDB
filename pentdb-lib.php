@@ -208,9 +208,6 @@ global $top_message;
 	$path = pentdb_get_session_path();
 	$score = ptdb_get_session_points( $vars['session_id'] );
 
-// echo "<div><pre>".print_r($score,true)."</pre></div>";
-// die("be");
-
 	if ( $score['maximum_points'] ) {
 		$score_html = '<span class="spacer bold bluetext">'.$score['current_points'].'/'.$score['maximum_points'].' points</span>';
 	} else {
