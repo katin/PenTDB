@@ -298,6 +298,14 @@ button.cmd-copy {
 	clear: both;
 	padding-top: 5px;
 	padding-left: 20px;
+	font-family: "Courier-New", monospace;
+	font-size: 0.85em;
+	line-height: 1.4em;
+}
+.host-status {
+    min-width: 12em;
+    display: inline-block;
+    text-align: right;
 }
 
 .vulns-links-bar {

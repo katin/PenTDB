@@ -191,6 +191,7 @@ function display_page( $content ) {
 function display_html_header() {
 global $top_message;
 
+	$vars = pentdb_get_page_vars();
 ?>
 <HTML>
 <HEAD>
@@ -205,9 +206,19 @@ global $top_message;
 <?php
 	$vars = pentdb_get_page_vars();
 	$path = pentdb_get_session_path();
+	$score = ptdb_get_session_points( $vars['session_id'] );
+
+// echo "<div><pre>".print_r($score,true)."</pre></div>";
+// die("be");
+
+	if ( $score['maximum_points'] ) {
+		$score_html = '<span class="spacer bold bluetext">'.$score['current_points'].'/'.$score['maximum_points'].' points</span>';
+	} else {
+		$score_html = '';
+	}
 	$output = '';
 	if ( isset($vars['session_id']) ) {
-		$output .= '<span class="session-title">Session ID: <a class="hover-link bluetext" href="index.php?session_id='.$vars['session_id'].'">'.$vars['session_id'].'</a> </span><span class="spacer bold bluetext">data path: </span><span class="dir-path bluetext">'.$path.'</span>'."\n";
+		$output .= '<span class="session-title">Session ID: <a class="hover-link bluetext" href="index.php?session_id='.$vars['session_id'].'">'.$vars['session_id'].'</a> </span>'.$score_html.'<span class="spacer bold bluetext">data path: </span><span class="dir-path bluetext">'.$path.'</span>'."\n";
 	}
 	// build quick-links to other services on this IP address
 	$services_list = get_service_list( $vars['session_id'], $vars['ip'] );
@@ -359,8 +370,8 @@ function pentdb_add_host() {
 	$session_id = pentdb_clean($_GET['session_id']);
 
 	// Create the host record
-	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd, points)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d)";
 	$result = db_query( $host_q,
 		$session_id,
 		$_GET['ip_address'],
@@ -373,7 +384,8 @@ function pentdb_add_host() {
 		$_GET['service_pack'],
 		$_GET['status'],
 		$_GET['cmd'],
-		$_GET['process_result_cmd']
+		$_GET['process_result_cmd'],
+		$_GET['points']
 	);
 
 	if ( !$result ) {
@@ -582,7 +594,7 @@ function pentdb_get_valid_host_fields() {
 		'os_version','patch_version',
 		'cpu_arch', 'core_count','service_pack',
 		'status','cmd','process_result_cmd',
-		'watch_file','watch_file2','watch_file3','notes','wireshark','proof','loot','lessons_learned','flags'
+		'watch_file','watch_file2','watch_file3','notes','wireshark','proof','loot','lessons_learned','flags','points'
 	);
 
 	return $form_fields;
@@ -1179,6 +1191,68 @@ function pentdb_get_host_record( $session_id, $ip ) {
 	$host_data = db_fetch_array( $host_rec );
 
 	return $host_data;
+}
+
+
+function ptdb_get_session_hosts( $session_id ) {
+
+	// don't bother to query for an empty session
+	if ( empty($session_id ) ) {
+		return false;
+	}
+	$my_session = pentdb_clean( $session_id );
+
+	$host_q = "SELECT * FROM {host} WHERE session_id='%s'";
+
+	$host_rec = db_query( $host_q, $my_session );
+	if ( !$host_rec ) {
+		pentdb_log_error("Host query failed. [Error-2718]");
+		return false;
+	}
+	if ( $host_rec->num_rows == 0 ) {
+		pentdb_top_msg("No host records found. [Notice 2717]");
+		return false;
+	}
+
+	return $host_rec;
+}
+
+// get_session_points
+//
+// Return an array with 'current_points' and 'maximum_points'
+//
+// We'll be calling this on every page refresh, so optimize it in its own routine
+
+function ptdb_get_session_points( $session_id ) {
+
+	// don't bother to query for an empty session
+	if ( empty($session_id ) ) {
+		return false;
+	}
+	$my_session = pentdb_clean( $session_id );
+
+	$host_q = "SELECT status,points FROM {host} WHERE session_id='%s'";
+
+	$host_recs = db_query( $host_q, $my_session );
+	if ( !$host_recs ) {
+		pentdb_log_error("Host query failed in get_session_points. [Error-2719]");
+		return false;
+	}
+	if ( $host_recs->num_rows == 0 ) {
+		pentdb_top_msg("No host records found in get_session_points. [Notice 2720]");
+		return false;
+	}
+
+	$current_points = 0;
+	$maximum_points = 0;
+	while ( $rec = db_fetch_array( $host_recs) ) {
+		$maximum_points += $rec['points'];
+		if ( $rec['status'] == 'PWNED' ) {
+			$current_points += $rec['points'];
+		}
+	}
+
+	return array( 'current_points' => $current_points, 'maximum_points' => $maximum_points );
 }
 
 
@@ -1959,6 +2033,7 @@ function get_add_host_form( $title = "Add a host" ) {
 			<OPTION value="SCANNED">SCANNED</OPTION>
 			<OPTION value="IN-PROGRESS">IN-PROGRESS</OPTION>
 			<OPTION value="STANDBY">STANDBY</OPTION>
+			<OPTION value="LLSHELL">LLSHELL</OPTION>
 			<OPTION value="PWNED">PWNED</OPTION>
 		</SELECT><br/>
 
@@ -1987,6 +2062,8 @@ function get_add_host_form( $title = "Add a host" ) {
 		<LABEL for="process_result_cmd">Process result cmd: </LABEL>
 		<INPUT type="text" name="process_result_cmd" id="process_result_cmd" value="'.DEFAULT_HOST_PRORESULT_CMD.'"></INPUT><br/>
 
+		<LABEL for="points">Points: </LABEL>
+		<INPUT type="text" name="points" id = "points"></INPUT><br/>
 
 		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
 		<INPUT type="hidden" name="fcmd" value="add-host"></INPUT>
@@ -2038,6 +2115,7 @@ function get_add_host_datum_form( $name, $value, $recid ) {
 			<OPTION '.($value=="SCANNED" ? 'SELECTED ' : '').'value="SCANNED">SCANNED</OPTION>
 			<OPTION '.($value=="IN-PROGRESS" ? 'SELECTED ' : '').'value="IN-PROGRESS">IN-PROGRESS</OPTION>
 			<OPTION '.($value=="STANDBY" ? 'SELECTED ' : '').'value="STANDBY">STANDBY</OPTION>
+			<OPTION '.($value=="LLSHELL" ? 'SELECTED ' : '').'value="LLSHELL">LLSHELL</OPTION>
 			<OPTION '.($value=="PWNED" ? 'SELECTED ' : '').'value="PWNED">PWNED</OPTION>
 		</SELECT><br/>';
 	}

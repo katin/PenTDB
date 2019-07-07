@@ -62,6 +62,7 @@ CREATE TABLE `host` (
   `loot` longtext,
   `lessons_learned` longtext,
   `flags` varchar(255) NOT NULL DEFAULT '',
+  `points` int(11) DEFAULT NULL,
   PRIMARY KEY (`hid`),
   KEY `main` (`session_id`,`ip_address`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 
@@ -222,6 +223,13 @@ $schema['host'] = array(
       'not null' => TRUE,
       'default' => '',
       'description' => 'Item title.',
+    ),
+    'port' => array(
+      'type' => 'int',
+      'unsigned' => FALSE,
+      'not null' => TRUE,
+      'default' => 0,
+      'description' => 'The (common) port number to be tested',
     ),
   ),
   'primary key' => array('hid'),
