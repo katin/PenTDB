@@ -82,6 +82,9 @@ a.hover-link:hover, #top a.hover-link:hover {
 .spacer {
 	padding-left: 40px;
 }
+.bottom-space {
+	height: 40px;
+}
 
 #page {
 	position: absolute;
@@ -93,6 +96,10 @@ a.hover-link:hover, #top a.hover-link:hover {
 	min-width: 960px;
 	width: 98%;
 }
+summary.ip-link {
+	background-color: #222;
+} 
+
 .services-links-bar {
 	margin-top: 5px;
 }
@@ -116,7 +123,10 @@ a.hover-link:hover, #top a.hover-link:hover {
 .top-ip-addr {
 	font-weight: bold;
 }
-
+.ip-test-status {
+	margin-left: 34em;
+    padding-top: 10px;
+}
 .error-log {
 	display: block;
 	background-color: #f88;
@@ -315,6 +325,17 @@ button.cmd-copy {
     font-size: 0.9em;
     color: #7e8;
 }
+.host-ip {
+    min-width: 10em;
+    display: inline-block;
+}
+.host-name {
+    min-width: 10em;
+    display: inline-block;
+}
+.host-spots {
+    display: inline-block;
+}
 
 .vulns-links-bar {
 	margin-left: 90px;
@@ -352,6 +373,17 @@ button.cmd-copy {
 	color: #111;
 	text-align: center;
 }
+
+summary.ip-link .indicator {
+	width: 16px;
+	height: 14px;
+	margin: 4px 2px;
+	float: left;
+	display: block;
+	color: #111;
+	text-align: center;
+}
+
 .service-vuln-status .indicator {
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;

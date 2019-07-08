@@ -176,8 +176,8 @@ function get_watchfile_display( $ip, $filename ) {
 // Display page top, footer, and page tail around the given content
 // and end execution
 
-function display_page( $content ) {
-	display_html_header();
+function display_page( $content, $page_class = NULL ) {
+	display_html_header( $page_class );
 	echo $content;
 	wrapup_page();
 	die();
@@ -188,7 +188,7 @@ function display_page( $content ) {
 //
 // Issue an HTML header with styles, etc.
 
-function display_html_header() {
+function display_html_header( $page_class = NULL ) {
 global $top_message;
 
 	$vars = pentdb_get_page_vars();
@@ -240,7 +240,9 @@ global $top_message;
 
 	$output .= '<div class="vulns-links-bar">'.build_vuln_status_display( $vars['session_id'], $vars['ip'] ). "</div>\n";
 	$output .= '</div>'."\n";				// close #top
-	$output .= '<div id="page">'."\n";		// open page
+	$output .= '<div id="page"'
+		. ( empty($page_class) ? '' : ' class="'.$page_class.'"')
+		.'>'."\n";		// open page
 
 	if ( $top_message ) {
 		// $output .= '<div class="top-message">'.$top_message.'</div>'."\n";
@@ -1257,7 +1259,7 @@ function get_service_list( $session_id, $ip ) {
 	$servicelist = array();
 
 	// no need to error if we aren't on a page display with services
-	if ( !isset($_GET['ip']) ) {
+	if ( !isset($ip) ) {
 		return false;
 	}
 
@@ -1269,9 +1271,11 @@ function get_service_list( $session_id, $ip ) {
 		return false;
 	}
 	if ( $service_recs->num_rows == 0 ) {
-		pentdb_top_msg('Notice: No service records found. [Notice 211]' );
+		pentdb_top_msg('Notice: No service records found for '.$ip.'. [Notice 211]' );
 		return false;
 	}
+
+// diebug("HALLO",true);
 
 	while ( $rec = db_fetch_array( $service_recs) ) {
 		// for now, dont' show service zero 
@@ -1296,25 +1300,53 @@ function get_service_list( $session_id, $ip ) {
 //  for flags, discoveries, and more.
 // Hover-over for more details of the test.
 
-function build_service_status_display( $session_id, $ip, $service, $port ) {
+function build_service_status_display( $session_id, $ip, $service, $port, $filter = array(), $include_divs = TRUE ) {
 
-	$output = '<div class="service-test-status">'."\n";
+	$output = '';
+	if ( $include_divs ) {
+		$output = '<div class="service-test-status">'."\n";
+	}
 	$rec_handle = read_service_records( $session_id, $ip, $service, $port );
 
 	$depth = 0;
 	$title_found = false;
 	while ( $rec = db_fetch_array($rec_handle) ) {
 
+		// run any filters on this record
+		if ( count($filter) > 0 ) {
+
+// diebug( $rec, true, "in filter");
+
+			$qualifies = false;
+			foreach( $filter as $key => $value ) {
+				if ( $value == '*' ) {
+					if ( !empty($rec[$key]) ) {
+						$qualifies = true;
+						break;
+					}
+				}
+				if ( $rec[$key] == $value ) {
+					$qualifies = true;
+					break;
+				}
+			}
+			if ( !$qualifies ) {
+				continue;
+			}
+		} // end filter check
+
 		if ( !$title_found ) {
 			if ( $rec['rectype'] == 'TITLE' ) {
-				$output .= base_link($session_id,$ip,$service,$port,'class="hover-link"').'<div class="label">'.$rec['service'].' port '.$rec['port'].'</div></a>'."\n";
+				$output .= base_link($session_id,$ip,$service,$port,'class="hover-link"')
+					. ($include_divs ? '<div class="label">'.$rec['service'].' port '.$rec['port'].'</div>' : '' )
+					. '</a>'."\n";
 				$title_found = true;
 			}
 		}
 		$depth_mark = '';
 		if ( $rec['pass_depth'] > $depth ) {
 			$depth++;
-			$depth_mark = '<div class="depth-divider"></div>'."\n";
+			$depth_mark = '<span class="depth-divider"></span>'."\n";
 		}
 		$display_color = get_status_color( $rec['statustype'], $rec['status'], $rec['flags'] );
 		$title = 'title="'.$rec['title'].' '.$rec['banner'].($rec['flags'] ? ' - FLAGS: '.$rec['flags'] : '').'"';
@@ -1334,11 +1366,31 @@ function build_service_status_display( $session_id, $ip, $service, $port ) {
 		$output .= $depth_mark . $block;
 	}
 
-	$output .= '</div>'."\n";
+	if ( $include_divs ) {
+		$output .= '</div>'."\n";
+	}
 
 	return $output;
 }
 
+// build_host_spots
+//
+// for the session overview page, we only want to see host squares
+//	for in-progress and flagged tests.
+
+function ptdb_build_host_spots( $session_id, $ip_address ) {
+//plugh
+	$servicelist = get_service_list( $session_id, $ip_address );
+
+// diebug( $servicelist, true, "servicelist ".$ip_address);
+
+	$filters = array( 'status' => 'IN-PROGRESS', 'flags' => '*');
+	foreach( $servicelist as $service ) {
+		$output .= build_service_status_display( $session_id, $ip_address, $service['service'], $service['port'], $filters, FALSE );
+	}
+
+	return $output;
+}
 
 function read_service_records( $session_id, $ip, $service, $port ) {
 
@@ -1346,11 +1398,11 @@ function read_service_records( $session_id, $ip, $service, $port ) {
 
 	$tests_recs = db_query( $tests_q, $session_id, $ip, $service, $port );
 	if ( !$tests_recs ) {
-		pentdb_log_error( '<div>Query or DB error. [Error 612]' );
+		pentdb_log_error( 'Query or DB error. [Error 612]' );
 		return false;
 	}
 	if ( $tests_recs->num_rows == 0 ) {
-		pentdb_log_error( '<div>No records found for service '.$service.' session "'.$session_id.'" [MSG-2118]' );
+		pentdb_log_error( 'No records found for service '.$service.' session "'.$session_id.'", ip '.$ip.', service '.$service.', port '.$port.' [MSG-2118]' );
 		return false;
 	}
 
@@ -2498,9 +2550,9 @@ function ptdb_load_templates() {
 
 }
 
-function diebug( $show_var, $die = false ) {
-	echo "<div><pre>".print_r($show_var,true)."</pre></div>";
-	if ( $die ) {
+function diebug( $show_var, $die = false, $title = NULL ) {
+	echo "<div>$title<pre>".print_r($show_var,true)."</pre></div>";
+	if ( $die == true ) {
 		die('program halt in diebug');
 	}
 }
