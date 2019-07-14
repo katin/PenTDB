@@ -10,6 +10,20 @@ This is designed to be run on Kali Linux. Web server (e.g. apache) and database 
 
 ### Installation
 **NOTE: DO NOT expose this web app to the Internet! It is insecure and for local use only. DO NOT INSTALL ON A WEB HOSTING SERVICE OR CLOUD SERVER.** *You have been warned.*
+You can keep apache2 listening ONLY to the local host by changing the /etc/apache2/ports.conf file to be:
+
+```
+Listen 127.0.0.1:80
+
+<IfModule ssl_module>
+	Listen 127.0.0.1:443
+</IfModule>
+
+<IfModule mod_gnutls.c>
+	Listen 127.0.0.1:443
+</IfModule>
+```
+
   1. Copy the files into the desired web root directory, and configure your webserver to serve them.
   2. mysql> CREATE DATABASE pentdb;
   2. mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON pentdb.* to '\<username\>'@'localhost' IDENTIFIED BY '\<password\>';

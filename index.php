@@ -452,19 +452,31 @@ function display_serviceslist_page( $session_id, $ip ) {
 
 	// display a list of services available to test
 	$service_list = '';
+	$discoveries = '';
 	while ( $service = db_fetch_array( $service_recs ) ) {
 
 			// port zero is the HOST record; skip that
 		// if ( $service['port'] == 0 ) {
 		// 	continue;
 		// }
+
 		$panel = build_service_status_display( $session_id, $ip, $service['service'], $service['port'] );
 		$service_list .= $panel."\n";
+
+		// get any discoveries and add them to our list
+		$discoveries .= read_discoveries( $session_id, $ip, $service['service'], $service['port'] );
+
 	}
 
 	if ( $service_list ) {
 		$service_list = "<h2>Select service to test:</h2>\n" . $service_list;
 		$service_list .= "\n".'<p class="clear"></p><p>&nbsp;</p>'."\n";
+	}
+
+	if ( $discoveries ) {
+		$discoveries = "<h3>Discoveries:</h3>\n" 
+			. '<div class="discoveries-section">'. $discoveries . "</div>";
+		$discoveries .= "\n".'<p class="clear"></p><p>&nbsp;</p>'."\n";
 	}
 
 	// display a create test form
@@ -500,8 +512,9 @@ function display_serviceslist_page( $session_id, $ip ) {
 
 	$quicklink_add_service = '<div class="quicklink"><a href="#add-service-form">Add a service</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a></div>'."\n";
 
-	$mypage = $service_list 
-		. $quicklink_add_service 
+	$mypage = $quicklink_add_service 
+		. $service_list 
+		. $discoveries
 		. $host_form 
 		. $myform 
 		. get_add_service_form() 

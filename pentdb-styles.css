@@ -155,6 +155,16 @@ summary.ip-link {
   pointer-events: none;
 }
 
+/* this fixes the jump-to (anchor) alignment on all the various places */
+form::before { 
+  display: block; 
+  content: " "; 
+  margin-top: -100px; 
+  height: 100px; 
+  visibility: hidden; 
+  pointer-events: none;
+}
+
 /* wrapper for each test in the list of port tests */
 .test {
 	/*margin: 40 10 20;*/
@@ -596,4 +606,8 @@ a.link-button:hover {
 }
 .tests-table th a {
 	color: #111;
+}
+
+.discoveries-section {
+	margin-left: 40px;
 }

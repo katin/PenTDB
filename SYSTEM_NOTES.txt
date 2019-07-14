@@ -2,13 +2,29 @@ SYSTEM_NOTES.txt
 ----------------
 System notes for the PenTDB pentest tracking tool.
 
+  07-Jul-2019 - something was hosing up Firefox on Kali using PenTDB... I'd go to refresh a page or click on a link and it would just spin. Not sure if it was networking, maria-db, Firefox, apache2, or something else. One new factor was the logest watchfile so far: a good run of smb-scan1 script. I'm hoping the html-encode of watch files helps.
+
 
 TODO LIST
 ---------
+[_] add html-encode for watch files displays
+[x] add display of any non-blank "Discovered" fields (all tests) on host page
+    [x] add jump-link to the discovery with the test auto-expanded
+[_] add info_desc field to porttest to hold tips, setup info, or task description
+[_] implement display watchfile on vuln page
+[_] add button to switch from BINARY to DEPTH statustype, and DEPTH to BINARY
+[_] fix grouping of records (set TITLE at front) of host in-line status summary
+[_] Add "UNSTABLE" (worked but unstable) status to Vulns
+[_] Add watchfile(s) fields to add-host form (with presets from config file)
+[_] Document how to add/uses tests for Exfiltration and other non-port specific things (port 1)
+[_] Figure out how to document/support privilege escalation -- more test port 1's?
+[_] Add some kind of "working storage pad" -- see LAB3 notes for Joe in KeepNote
+[x] Add additional watchfile fields to host record on dev box (where did they go?)
+    [_] export new fresh copy of basic db?
 
-
-[_] add function to "make template" from a test set from a service page
-
+[_] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
+    [_] Add scrolling display / chooser to add individual tests to a port
+    
 [_] add new record type 'template' that will be the parent id for tests in that set
 [_] add new field 'template' to porttest to group tests into a template (w/o limits on port# and service name) -- only for template side; this doesn't go over to the testinstance table
 [_] add template filter to maintenance master table
@@ -18,8 +34,7 @@ TODO LIST
 
 [_] add export of host - JSON?
 
-[_] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
-    [_] Add scrolling display / chooser to add individual tests to a port
+[_] It'd be nice to have an msfvenom test that could auto-gen the command options and track what you tried and what works... maybe with a watchfile of the payload for easy copy-paste into custom exploits
 
 [_] ADD TEST SETS:
     [_] buffer overflow
@@ -37,10 +52,13 @@ TODO LIST
 
 [_] change $vuln parm in URL to recid so it is better for objectives, too
 
-[_] add caching of vars in pentdb_get_page_vars()
+[_] add caching of vars in pentdb_get_page_vars() ?
 
 [_] add login point w/creds storage. 
 Similar fields to a testinstance, and can have multiple tests per login point (with templates...), but, can't really use the current testinstance record because there could be multiple logins on the same port and protocol... Hmmm, unless we had multiple login protocols, like login1, login2, login3, login4, and login5... then all those could be on the same port.
+
+[_] maybe add a timer function? Or a field that can record total time worked on.
+
 
 [_] add data export: session or host (ip), CSV export of the database (for post-test saving).
 
@@ -50,6 +68,12 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] add indicator for TITLE records to the in-line host indicators display on the session page
+[x] add function to "make template" from a test set from a service page
+[x] add fold-out host status indicators on session page
+[x] add points display on sessions page
+[x] add active-indicators in-line display for hosts on session page
+[x] add host status display with color-coding on sessions page
 [x] add hostname display to the ip list page (host select page)
 [x] add quicklinks to top of service page to add vuln, add objective, and add test
 [x] add irid display somewhere on each test block - maybe with a copy button for a mysql command to modify the record title

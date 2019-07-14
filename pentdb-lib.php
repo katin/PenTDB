@@ -163,7 +163,7 @@ function get_watchfile_display( $ip, $filename ) {
 	$output = '';
 
 	$output .= '<div class="display-watchfile"><details><summary>'.$filename.' ('.strlen($thefile).' bytes)</summary>'."\n";
-	$output .= '<pre>'.$thefile.'</pre>'."\n";
+	$output .= '<pre>'.htmlentities($thefile).'</pre>'."\n";
 	$output .= '</details></div>'."\n";
 
 	return $output;
@@ -1275,13 +1275,14 @@ function get_service_list( $session_id, $ip ) {
 		return false;
 	}
 
-// diebug("HALLO",true);
-
 	while ( $rec = db_fetch_array( $service_recs) ) {
 		// for now, dont' show service zero 
 		if ( empty($rec['service'])) {
 			continue;
 		}
+
+		// [_] TODO: resolve the allow zero port... currently disallowed (here)
+		//				but the add form allows it to be added to the database
 		if ( $rec['port'] == 0) {
 			continue;
 		}
@@ -1289,6 +1290,37 @@ function get_service_list( $session_id, $ip ) {
 	}
 
 	return $servicelist;
+}
+
+// read_discoveries
+//
+// Given a session, ip, service, and port,
+//   read all the discovered fields, collect them, and return them
+//   or NULL if there are none (all are empty)
+
+function read_discoveries( $session_id, $ip, $service, $port ) {
+
+	$rec_handle = read_service_records( $session_id, $ip, $service, $port );
+	$discoveries = '';
+	while ( $rec = db_fetch_array($rec_handle) ) {
+		if ( !empty($rec['discovered']) ) {
+			$data = array(
+			    'session_id' => $session_id,
+			    'ip' => $ip,
+			    'service' => $service,
+			    'port' => $port,
+			    'expand' => $rec['irid']
+			);
+			$notation = $rec['service'].' '.$rec['port'].' / '.$rec['title'];
+			$parms = http_build_query($data, '', '&');
+			$link = '<a title="'.$notation
+				.'" href="index.php?'.$parms."#discovered-form-".$rec['irid'].'">';
+			$discoveries .= '<div class="discovery-item">'.$link . "[->]</a> &nbsp; "
+				. htmlentities($rec['discovered']) . "</div>\n";
+		}
+
+	}
+	return $discoveries;
 }
 
 
@@ -1376,15 +1408,13 @@ function build_service_status_display( $session_id, $ip, $service, $port, $filte
 // build_host_spots
 //
 // for the session overview page, we only want to see host squares
-//	for in-progress and flagged tests.
+//	for title (overall service status), in-progress and flagged tests in-line with the host name and status.
 
 function ptdb_build_host_spots( $session_id, $ip_address ) {
 //plugh
 	$servicelist = get_service_list( $session_id, $ip_address );
 
-// diebug( $servicelist, true, "servicelist ".$ip_address);
-
-	$filters = array( 'status' => 'IN-PROGRESS', 'flags' => '*');
+	$filters = array( 'status' => 'IN-PROGRESS', 'flags' => '*', 'rectype' => 'TITLE' );
 	foreach( $servicelist as $service ) {
 		$output .= build_service_status_display( $session_id, $ip_address, $service['service'], $service['port'], $filters, FALSE );
 	}
