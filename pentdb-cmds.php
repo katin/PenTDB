@@ -174,6 +174,15 @@ pentdb_top_msg('PROCESSED CMD '.$mycmd);
 			return true;
 			break;
 
+		case 'update-info':
+			$up_q = "UPDATE {testinstance} set info='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['info'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Info update query failed. [ERR-870]";
+				die();
+			}
+			return true;
+			break;
 
 		case 'update-notes':
 			$up_q = "UPDATE {testinstance} set notes='%s' WHERE irid='%d'";
@@ -189,7 +198,7 @@ pentdb_top_msg('PROCESSED CMD '.$mycmd);
 			$up_q = "UPDATE {testinstance} set discovered='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['discovered'], $_GET['recid']);
 			if ( !$up_result ) {
-				"Discovered update query failed. [ERR-889]";
+				"Discovered update query failed. [ERR-871]";
 				die();
 			}
 			return true;
@@ -199,7 +208,7 @@ pentdb_top_msg('PROCESSED CMD '.$mycmd);
 			$up_q = "UPDATE {testinstance} set raw_result='%s' WHERE irid='%d'";
 			$up_result = db_query($up_q, $_GET['raw-result'], $_GET['recid']);
 			if ( !$up_result ) {
-				"Raw-result update query failed. [ERR-890]";
+				"Raw-result update query failed. [ERR-872]";
 				die();
 			}
 			return true;
@@ -242,10 +251,6 @@ pentdb_top_msg('PROCESSED CMD '.$mycmd);
 
 		case 'save-as-template':
 			ptdb_testset_to_template();
-			break;
-
-		case 'pasta':
-			die('pasta!');
 			break;
 
 		case 'set-stype-binary':

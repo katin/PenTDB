@@ -473,8 +473,8 @@ function pentdb_add_service( $the_ip, $the_session, $port, $service ) {
 		}
 
 		// Create the instance record
-		$instance_q = "INSERT into {testinstance} (session_id, ip_address, pass_depth, port, service, rectype, statustype, title, cmd, process_result_cmd, order_weight)"
-			. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+		$instance_q = "INSERT into {testinstance} (session_id, ip_address, pass_depth, port, service, rectype, statustype, title, info, cmd, process_result_cmd, order_weight)"
+			. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
 		$result = db_query( $instance_q,
 			$session_id,
 			$ip,
@@ -484,6 +484,7 @@ function pentdb_add_service( $the_ip, $the_session, $port, $service ) {
 			$template['rectype'],
 			$template['statustype'],
 			fill_varset( $template['title'], $ip, $port),
+			$template['info'],
 			$template['cmd'],
 			$template['process_result_cmd'],
 			$template['order_weight']
@@ -733,8 +734,8 @@ function ptdb_testset_to_template() {
 	$error_count = 0;
 	$record_count = 0;
 	while ( $test = db_fetch_array( $test_recs ) ) {
-		$copy_q = "INSERT INTO {porttest} (port, service, rectype, statustype, title, cmd, process_result_cmd, watch_file, pass_depth, order_weight) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
-		$copy_result = db_query( $copy_q, $test['port'], $test['service'], $test['rectype'], $test['statustype'], $test['title'], $test['cmd'], $test['process_result_cmd'], $test['watch_file'], $test['pass_depth'], $test['order_weight'] );
+		$copy_q = "INSERT INTO {porttest} (port, service, rectype, statustype, title, info, cmd, process_result_cmd, watch_file, pass_depth, order_weight) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+		$copy_result = db_query( $copy_q, $test['port'], $test['service'], $test['rectype'], $test['statustype'], $test['title'], $test['info'], $test['cmd'], $test['process_result_cmd'], $test['watch_file'], $test['pass_depth'], $test['order_weight'] );
 		if ( !$copy_result ) {
 			pentdb_log_error("Error copying test to porttest table [ERR-1138]");
 			$error_count++;
@@ -2488,6 +2489,33 @@ function get_watchfile_form( $recid, $field_contents = NULL ) {
 	return $myform;
 }
 
+function get_info_form( $recid, $info ) {
+	$vars = pentdb_get_page_vars();
+
+	$myform = '
+		<div class="inlineform"><FORM class="info-form" action="index.php#test-'.$recid.'" method="GET" id="info-form-'.$recid.'">
+
+		<LABEL for="notes_form">Info: </LABEL><br/>
+		<textarea wrap="soft" cols="80" rows="3" name="info" id ="info">'.$info.'</textarea><br/>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-info"></INPUT>
+		<INPUT type="submit" value="Update Info"></INPUT>
+		</FORM></div>
+
+	';
+
+		// <textarea rows="4" cols="50" name="notes" form="notes-form">'.$notes.'</textarea>
+
+
+	return $myform;
+}
 
 function get_notes_form( $recid, $notes ) {
 	$vars = pentdb_get_page_vars();

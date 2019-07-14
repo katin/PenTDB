@@ -433,10 +433,10 @@ function get_new_test_form( $title = "Add a test template" ) {
 		<INPUT type="text" name="watch_file" id="watch_file"></INPUT><br/>
 
 		<LABEL for="pass_depth">Pass depth: </LABEL>
-		<INPUT type="text" name="pass_depth" id="pass_depth"></INPUT><br/>
+		<INPUT type="text" name="pass_depth" id="pass_depth" value="1"></INPUT><br/>
 
 		<LABEL for="order_weight">Order Weight: </LABEL>
-		<INPUT type="text" name="order_weight" id="order_weight"></INPUT><br/>
+		<INPUT type="text" name="order_weight" id="order_weight" value="1"></INPUT><br/>
 
 		<INPUT type="hidden" name="fcmd" value="new-test"></INPUT>
 		<INPUT type="submit" value="Add a test"></INPUT>
@@ -493,6 +493,12 @@ function get_test_datum_form( $fieldname, $value, $pitid ) {
 
 function pentdb_add_test() {
 	$vars = pentdb_get_tests_vars();
+
+	// pre-emptively fix rapid-entered TITLE records
+	if ( $_GET['rectype'] == 'TITLE' ) {
+		$_GET['pass_depth'] = 0;
+		$_GET['order_weight'] = 0;
+	}
 
 	// Create the instance record
 	$test_q = "INSERT into {porttest} (port, service, rectype, statustype, title, info, cmd, process_result_cmd, watch_file, pass_depth, order_weight)"

@@ -375,6 +375,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 		$buttons .= '</div>'."\n";
 
+		$info_form = get_info_form( $test['irid'], $test['info'] );
 		$notes_form = get_notes_form( $test['irid'], $test['notes'] );
 		$discovered_form = get_discovered_form( $test['irid'], $test['discovered'] );
 		$raw_result_form = get_raw_result_form( $test['irid'], $test['raw_result'] );
@@ -416,7 +417,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			// . '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['process_result_cmd']))).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "\n";
 
-		$test_list .= $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display . $discovered_form . $raw_result_form;
+		$test_list .= $info_form . $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display . $discovered_form . $raw_result_form;
 		$test_list .= '</'.$details.'>'."\n";
 		$test_list .= '</div>'."\n";	// close test-wrapper
 

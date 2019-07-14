@@ -11,6 +11,8 @@ TODO LIST
 [_] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
     [_] Add scrolling display / chooser to add individual tests to a port
 
+[_] Make info field a text area so CR's work and can be edited (in template maintenance).
+
 [_] fix grouping of records (set TITLE at front) of host in-line status summary
 [_] Document how to add/uses tests for Exfiltration and other non-port specific things (port 1)
 [_] Figure out how to document/support privilege escalation -- more test port 1's?

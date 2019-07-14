@@ -537,7 +537,7 @@ input, select {
     margin-left: 200px;*/
 }
 
-.notes-form, .discovered-form, .raw-result-form, .taform {
+.notes-form, .discovered-form, .raw-result-form, .taform, .info-form {
 	margin-left: 40px;
     padding-right: 40px;
     text-align: left;
@@ -549,7 +549,7 @@ input, select {
 	margin-bottom: 10px;
 }
 .notes-form textarea, .host textarea, .objective textarea, .vuln textarea,
-.discovered-form textarea, .raw-result-form textarea, .taform textarea {
+.discovered-form textarea, .raw-result-form textarea, .taform textarea, .info-form textarea {
 	background-color: #222;
 	color: #ddd;
 	border-color: #555;
