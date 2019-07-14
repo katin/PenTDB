@@ -420,6 +420,9 @@ function get_new_test_form( $title = "Add a test template" ) {
 			<OPTION value="NONE">NONE</OPTION>
 		</SELECT><br/>
 
+		<LABEL for="command">Info: </LABEL>
+		<INPUT type="text" name="info" id = "info"></INPUT><br/>
+
 		<LABEL for="command">Cmd: </LABEL>
 		<INPUT type="text" name="cmd" id = "cmd"></INPUT><br/>
 
@@ -492,14 +495,15 @@ function pentdb_add_test() {
 	$vars = pentdb_get_tests_vars();
 
 	// Create the instance record
-	$test_q = "INSERT into {porttest} (port, service, rectype, statustype, title, cmd, process_result_cmd, watch_file, pass_depth, order_weight)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+	$test_q = "INSERT into {porttest} (port, service, rectype, statustype, title, info, cmd, process_result_cmd, watch_file, pass_depth, order_weight)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
 	$result = db_query( $test_q,
 		$_GET['port'],
 		$_GET['service'],
 		$_GET['rectype'],
 		$_GET['statustype'],
 		$_GET['title'],
+		$_GET['info'],
 		$_GET['cmd'],
 		$_GET['process_result_cmd'],
 		$_GET['watch_file'],
@@ -559,7 +563,7 @@ function pentdb_update_test() {
 
 
 function pentdb_get_valid_test_fields() {
-	$form_fields = array( 'port', 'rectype', 'statustype', 'service', 'title',
+	$form_fields = array( 'port', 'rectype', 'statustype', 'service', 'title', 'info',
 		'cmd', 'process_result_cmd', 'watch_file', 'order_weight', 'pass_depth'
 	);
 

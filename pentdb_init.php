@@ -345,6 +345,7 @@ CREATE TABLE `porttest` (
   `statustype` varchar(16) NOT NULL DEFAULT '',
   `service` varchar(127) NOT NULL DEFAULT '',
   `title` varchar(127) NOT NULL DEFAULT '',
+  `info` longtext,
   `cmd` longtext,
   `process_result_cmd` longtext,
   `watch_file` varchar(64) NOT NULL DEFAULT '',
@@ -400,6 +401,12 @@ $schema['porttest'] = array(
       'not null' => TRUE,
       'default' => '',
       'description' => 'Item title.',
+    ),
+    'info' => array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'size' => 'big',
+      'description' => 'Information, description, or tips for the test, tool, or process.',
     ),
     'cmd' => array(
       'type' => 'text',
