@@ -369,8 +369,8 @@ function pentdb_add_host() {
 	$session_id = pentdb_clean($_GET['session_id']);
 
 	// Create the host record
-	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd, points)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d)";
+	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd, watch_file,watch_file2,watch_file3,points)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d)";
 	$result = db_query( $host_q,
 		$session_id,
 		$_GET['ip_address'],
@@ -384,6 +384,9 @@ function pentdb_add_host() {
 		$_GET['status'],
 		$_GET['cmd'],
 		$_GET['process_result_cmd'],
+		$_GET['watchfile'],
+		$_GET['watchfile2'],
+		$_GET['watchfile3'],
 		$_GET['points']
 	);
 
@@ -1315,7 +1318,7 @@ function read_discoveries( $session_id, $ip, $service, $port ) {
 			$parms = http_build_query($data, '', '&');
 			$link = '<a title="'.$notation
 				.'" href="index.php?'.$parms."#discovered-form-".$rec['irid'].'">';
-			$discoveries .= '<div class="discovery-item">'.$link . "[->]</a> &nbsp; "
+			$discoveries .= '<div class="discoveries-item">'.$link . "[->]</a> &nbsp; "
 				. htmlentities($rec['discovered']) . "</div>\n";
 		}
 
@@ -1730,6 +1733,10 @@ function get_vuln_status_color( $status, $flags = NULL ) {
 			$status_color = 'vuln-eliminated';
 			break;
 
+		case 'UNSTABLE':
+			$status_color = 'vuln-unstable';
+			break;
+
 		default:
 			break;
 	}
@@ -1826,7 +1833,7 @@ function get_depth_status_button( $status, $rec_id ) {
 		';
 	}
 
-	$button_form .= pentdb_get_reset_status_form( $vars, $rec_id );
+	// $button_form .= pentdb_get_reset_status_form( $vars, $rec_id );
 
 	return $button_form;
 }
@@ -2141,6 +2148,15 @@ function get_add_host_form( $title = "Add a host" ) {
 		<LABEL for="process_result_cmd">Process result cmd: </LABEL>
 		<INPUT type="text" name="process_result_cmd" id="process_result_cmd" value="'.DEFAULT_HOST_PRORESULT_CMD.'"></INPUT><br/>
 
+		<LABEL for="points">Watch file 1: </LABEL>
+		<INPUT type="text" name="watchfile" id = "watchfile" value="'.DEFAULT_HOST_WATCHFILE_1.'"></INPUT><br/>
+
+		<LABEL for="points">Watch file 2: </LABEL>
+		<INPUT type="text" name="watchfile2" id = "watchfile2" value="'.DEFAULT_HOST_WATCHFILE_2.'"></INPUT><br/>
+
+		<LABEL for="points">Watch file 3: </LABEL>
+		<INPUT type="text" name="watchfile3" id = "watchfile3" value="'.DEFAULT_HOST_WATCHFILE_3.'"></INPUT><br/>
+
 		<LABEL for="points">Points: </LABEL>
 		<INPUT type="text" name="points" id = "points"></INPUT><br/>
 
@@ -2272,6 +2288,7 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 			<OPTION '.($value=="POSSIBLE" ? 'SELECTED ' : '').'value="POSSIBLE">POSSIBLE</OPTION>
 			<OPTION '.($value=="MATCH" ? 'SELECTED ' : '').'value="MATCH">MATCH</OPTION>
 			<OPTION '.($value=="NEG" ? 'SELECTED ' : '').'value="NEG">FAILED! (NEG)</OPTION>
+			<OPTION '.($value=="UNSTABLE" ? 'SELECTED ' : '').'value="UNSTABLE">UNSTABLE</OPTION>
 			<OPTION '.($value=="POS" ? 'SELECTED ' : '').'value="POS">WORKED! (POS)</OPTION>
 		</SELECT><br/>';
 	}
@@ -2281,6 +2298,11 @@ function get_add_vuln_datum_form( $name, $value, $recid ) {
 		$data = '		<LABEL for="'.$name.$recid.'_form">'.$name.': </LABEL><br/>
 		<textarea wrap="soft" cols="80" rows="8" name="'.$name.'" id ="'.$name.$recid.'">'.$value.'</textarea><br/>';
 		$ta_form = ' taform';
+	}
+
+	// add fold-out display of watch_file, if there is one
+	if ( $name == "watch_file" ) {
+		$data .= get_watchfile_display( $vars['ip'], $value );
 	}
 
 	$myform = '

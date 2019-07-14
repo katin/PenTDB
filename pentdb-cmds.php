@@ -9,7 +9,9 @@
 
 function ptdb_process_cmd ( $mycmd ) {
 
-// pentdb_top_msg('PROCESSED CMD '.$mycmd);
+pentdb_top_msg('PROCESSED CMD '.$mycmd);
+
+// diebug($mycmd,true,"bleh");
 
 	switch( $mycmd ) {
 
@@ -240,6 +242,30 @@ function ptdb_process_cmd ( $mycmd ) {
 
 		case 'save-as-template':
 			ptdb_testset_to_template();
+			break;
+
+		case 'pasta':
+			die('pasta!');
+			break;
+
+		case 'set-stype-binary':
+			$up_q = "UPDATE {testinstance} set statustype='%s',status='' WHERE irid='%d'";
+			$up_result = db_query($up_q, "BINARY", $_GET['recid']);
+			if ( !$up_result ) {
+				"Raw-result update query failed. [ERR-861]";
+				die();
+			}
+			return true;
+			break;
+
+		case 'set-stype-depth':
+			$up_q = "UPDATE {testinstance} set statustype='%s',status='' WHERE irid='%d'";
+			$up_result = db_query($up_q, "DEPTH", $_GET['recid']);
+			if ( !$up_result ) {
+				"Raw-result update query failed. [ERR-862]";
+				die();
+			}
+			return true;
 			break;
 
 		default:

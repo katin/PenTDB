@@ -41,6 +41,25 @@ a.hover-link:hover, #top a.hover-link:hover {
 	line-height: 0.9em
 }
 
+h2 {
+/*    font-size: 1.25em;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    margin-block-end: 0.25em;*/
+    font-size: 1.1em;
+    font-family: "Courier New", Courier, monospace;
+    margin-block-end: 0.55em;
+    color: #3b3;
+}
+h3 {
+/*    font-size: 1.1em;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    margin-block-end: 0.25em;*/
+	font-size: 1em;
+    font-family: "Courier New", Courier, monospace;
+    margin-block-end: 0.55em;
+    color: #3b3;
+}
+
 #top {
 	position: fixed;
 	top: 0;
@@ -163,6 +182,10 @@ form::before {
   height: 100px; 
   visibility: hidden; 
   pointer-events: none;
+}
+/* but then we need to fix things in the forms to "lower" */
+.button-block {
+	padding-top: 100px;
 }
 
 /* wrapper for each test in the list of port tests */
@@ -346,6 +369,13 @@ button.cmd-copy {
 .host-spots {
     display: inline-block;
 }
+.host-info {
+	font-family: Courier, monospace;
+	font-size: 0.85em;
+	padding-bottom: 10px;
+	margin-left: 20px;
+	font-style: italic;
+}
 
 .vulns-links-bar {
 	margin-left: 90px;
@@ -362,7 +392,9 @@ button.cmd-copy {
 	margin-left: 20px;
 	width: 180px;
     text-align: right;
+    color: #3c3;
 }
+
 .service-vuln-status .indicator {
 	/*margin-left: 220px;*/
 	margin-right: 5px;
@@ -414,6 +446,10 @@ summary.ip-link .indicator {
 	content: "X";
 	line-height: 1.3em;
 }
+.vuln-unstable {
+	background-color: #f84;
+	color: red;
+}
 .vuln-unlikely {
 	background-color: #44A;
 }
@@ -440,7 +476,9 @@ summary.ip-link .indicator {
 
 
 .bigform {
-	margin-top: 20px;
+	/*margin-top: 20px;*/
+	border-bottom: 1px solid #555;
+    padding-bottom: 10px;
 }
 .bigform label {
 	width: 200px;
@@ -562,6 +600,8 @@ a.link-button:hover {
 	font-size: 0.8em;
 	padding-right: 10px;
 	text-decoration: none;
+	letter-spacing: -0.5px;
+    color: #999;
 }
 .quicklink a:hover {
 	text-decoration: underline;
@@ -610,4 +650,7 @@ a.link-button:hover {
 
 .discoveries-section {
 	margin-left: 40px;
+}
+.discoveries-item {
+	/*margin-left: 20px;*/
 }

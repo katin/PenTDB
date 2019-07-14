@@ -7,15 +7,13 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[_] add html-encode for watch files displays
-[x] add display of any non-blank "Discovered" fields (all tests) on host page
-    [x] add jump-link to the discovery with the test auto-expanded
+[x] Add watchfile(s) fields to add-host form (with presets from config file)
+
 [_] add info_desc field to porttest to hold tips, setup info, or task description
-[_] implement display watchfile on vuln page
-[_] add button to switch from BINARY to DEPTH statustype, and DEPTH to BINARY
+[x] implement display watchfile on vuln page
+
 [_] fix grouping of records (set TITLE at front) of host in-line status summary
-[_] Add "UNSTABLE" (worked but unstable) status to Vulns
-[_] Add watchfile(s) fields to add-host form (with presets from config file)
+[x] Add "UNSTABLE" (worked but unstable) status to Vulns
 [_] Document how to add/uses tests for Exfiltration and other non-port specific things (port 1)
 [_] Figure out how to document/support privilege escalation -- more test port 1's?
 [_] Add some kind of "working storage pad" -- see LAB3 notes for Joe in KeepNote
@@ -28,8 +26,9 @@ TODO LIST
 [_] add new record type 'template' that will be the parent id for tests in that set
 [_] add new field 'template' to porttest to group tests into a template (w/o limits on port# and service name) -- only for template side; this doesn't go over to the testinstance table
 [_] add template filter to maintenance master table
+[_] FIX CONSISTENCY - sometimes using rec_id as form parm and other times using recid! *Why?*
 
-[_] Add config-per-environment (multiple machines in one config file, auto-switch)
+[x] Add config-per-environment (multiple machines in one config file, auto-switch)
 [_] fix data path
 
 [_] add export of host - JSON?
@@ -59,7 +58,6 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 [_] maybe add a timer function? Or a field that can record total time worked on.
 
-
 [_] add data export: session or host (ip), CSV export of the database (for post-test saving).
 
 [_] add a "vuln score" number that we can display: an expression of how many factors (out of 10?) match the target and match a working vuln. Add this display to the hover-title of the vulns status line.
@@ -68,6 +66,11 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] add button to switch from BINARY to DEPTH statustype, and DEPTH to BINARY
+[x] remove extra reset button on test status button sets
+[x] add html-encode for watch files displays
+[x] add display of any non-blank "Discovered" fields (all tests) on host page
+    [x] add jump-link to the discovery with the test auto-expanded
 [x] add indicator for TITLE records to the in-line host indicators display on the session page
 [x] add function to "make template" from a test set from a service page
 [x] add fold-out host status indicators on session page

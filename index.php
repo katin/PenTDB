@@ -267,6 +267,7 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 	unset($_GET['vuln']);		// [_] *** TODO: Figure out a better way to do vuln display page
 
 	$tests_recs = ptdb_get_test_set( $session_id, $ip, $service, $port );
+	$org_service = $service;		// this is a hack for the MakeDepth/MakeBinary button-forms
 
 	// display a list of tests for this service
 	$test_list = '';
@@ -345,8 +346,30 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			$buttons .= get_binary_status_button( $test['status'], $test['irid'] )
 					. get_depth_status_button( $test['status'], $test['irid'] );
 		}
-			// add a simple copy-cmd button with irid displayed and a mysql mod record cmd
-		#plugh
+
+		// add a button to swtich from BINARY to DEPTH statustypes
+		if ( $test['statustype'] == 'DEPTH' ) {
+			$fcmd = 'set-stype-binary';
+			$button_name = 'MakeBinary';
+		} else {
+			$fcmd = 'set-stype-depth';
+			$button_name = 'MakeDepth';	
+		}
+		// $button_name = 'pasta';
+		$org_service = ($service ? $service : $test['service']);
+		$buttons .= '
+		<div><FORM class="statusform" action="index.php#test-'.$test['irid'].'" method="GET">
+			<INPUT type="hidden" name="session_id" value="'.$session_id.'"></INPUT>
+			<INPUT type="hidden" name="ip" value="'.$ip.'"></INPUT>
+			<INPUT type="hidden" name="service" value="'.$org_service.'"></INPUT>
+			<INPUT type="hidden" name="port" value="'.$port.'"></INPUT>
+			<INPUT type="hidden" name="fcmd" value="'.$fcmd.'"></INPUT>
+			<INPUT type="hidden" name="recid" value="'.$test['irid'].'"></INPUT>
+			<INPUT type="submit" value="'.$button_name.'"></INPUT>
+			<INPUT type="hidden" name="safe" value="check"></INPUT>
+		</FORM></div>';
+
+		// add a simple copy-cmd button with irid displayed and a mysql mod record cmd
 		$qmysqlid = "qsql-".$test['irid'];
 		$buttons .= '<INPUT class="hideme" type="text" id="'.$qmysqlid.'" value="UPDATE testinstance set title=\'newtitle\' WHERE irid='.$test['irid'].';"></INPUT><button class="sql-copy" onclick="ptdb_copytext(\''.$qmysqlid.'\')">rid:'.$test['irid'].'</button>';
 
@@ -469,13 +492,26 @@ function display_serviceslist_page( $session_id, $ip ) {
 	}
 
 	if ( $service_list ) {
-		$service_list = "<h2>Select service to test:</h2>\n" . $service_list;
+		$points_display = '';
+		if ( !empty($host_rec['points']) ) {
+			$points_display = ' &nbsp;<em>('. $host_rec['points'].' pts)</em>';
+		}
+		$host_info = '<div class="host-info">'
+			. $host_rec['platform'].' '
+			. $host_rec['cpu_arch'].' '
+			. $host_rec['os_version'].' ' 
+			. $host_rec['patch_version'].' '
+			. ($host_rec['service_pack'] ? "SERVICE PACK " . $host_rec['service_pack'] : '') . '</div>';
+		$service_list = "<h2>Host: ".$host_rec['name'].' / '
+			. $host_rec['ip_address'] 
+			. $points_display
+			. "</h2>\n" . $host_info . $service_list;
 		$service_list .= "\n".'<p class="clear"></p><p>&nbsp;</p>'."\n";
 	}
 
 	if ( $discoveries ) {
-		$discoveries = "<h3>Discoveries:</h3>\n" 
-			. '<div class="discoveries-section">'. $discoveries . "</div>";
+		$discoveries = 
+			'<div class="discoveries-section"><h3>Discoveries:</h3>'. $discoveries . "</div>";
 		$discoveries .= "\n".'<p class="clear"></p><p>&nbsp;</p>'."\n";
 	}
 
