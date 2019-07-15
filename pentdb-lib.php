@@ -1094,6 +1094,13 @@ function pentdb_get_page_vars() {
 	if ( isset($_GET['vuln']) ) {
 		$vars['vuln'] = pentdb_clean( $_GET['vuln'] );
 	}
+	if ( isset($_GET['pass']) ) {
+		if ( is_numeric($_GET['pass']) ) {
+			$vars['pass'] = pentdb_clean( $_GET['pass'] );
+		} else {
+			pentdb_log_error("Dropped 'pass' param because it is not numeric. [ERR-123]");
+		}
+	}
 	return $vars;
 }
 
@@ -1839,6 +1846,9 @@ function get_depth_status_button( $status, $rec_id ) {
 	return $button_form;
 }
 
+// create_port_record
+//
+// Add a new test to the current test set via GET form
 
 function create_port_record() {
 	// YES IT'S INSECURE -- DON'T PROCESS FORMS LIKE THIS!
@@ -1869,11 +1879,43 @@ function create_port_record() {
 
 	$newp_result = db_query( $newp_q );
 	if ( !$newp_result ) {
-		pentdb_log_error ('<div>Insert failed. [ERR-486]</div>');
+		pentdb_log_error ('Insert failed. [ERR-486]');
 		return false;
 	}
 	return true;
+}
 
+
+// copy_port_record
+//
+// Copy a test from the porttest table (pitid specified)
+//  to the current test set.
+
+function copy_port_record() {
+
+	$org_q = "SELECT * FROM {porttest} WHERE pitid=%d";
+	$org_result = db_query( $org_q, $_GET['tid']);
+	if ( !$org_result ) {
+		pentdb_log_error ('Read of original test failed, pitid '.$_GET['tid'].'. [ERR-286]');
+		return false;
+	}
+
+	$src = db_fetch_array( $org_result );
+	$vars = pentdb_get_page_vars();
+
+	if ( isset($vars['pass']) ) {
+		$src['pass_depth'] = $vars['pass'];		// assign it to the desired pass level
+		$src['order_weight'] = 99;				// and place it at the end of that level
+	}
+
+	$newp_q = "INSERT into {testinstance} (session_id, ip_address, service, port, rectype, statustype, title, info, cmd, process_result_cmd, watch_file, pass_depth, order_weight) VALUES ('%s', '%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d, %d)";
+
+	$newp_result = db_query( $newp_q, $vars['session_id'], $vars['ip'], $vars['service'], $vars['port'], $src['rectype'], $src['statustype'], $src['title'], $src['info'], $src['cmd'], $src['process_result_cmd'], $src['watch_file'], $src['pass_depth'], $src['order_weight'] );
+	if ( !$newp_result ) {
+		pentdb_log_error ('Insert failed. [ERR-287]');
+		return false;
+	}
+	return true;
 }
 
 
@@ -1897,11 +1939,13 @@ function jump_to_latest_test() {
 	header('Location: http://'.$_SERVER['SERVER_NAME'].'/'.$url);
 }
 
+
 //////////////////////////////////////////////////////////
 //														//
 //   					 FORMS    						//	
 //														//
 //////////////////////////////////////////////////////////
+
 
 function get_add_objective_form( $title = "Add an objective" ) {
 	$vars = pentdb_get_page_vars();
@@ -2074,9 +2118,66 @@ function get_add_test_form( $title = "Add a test" ) {
 	';
 	$bigform = "<h2>".$title."</h2>\n" . $bigform;
 
-		// <INPUT type="hidden" name="port" value="'.$port.'"></INPUT>
+	// add an expandable for to add individual tests from the template pool
+	$bigform .= '<details><summary class="test-form-title status-empty">Copy a test</summary>'."\n"
+		. get_alltests_form()
+		. "</details>\n";
 
 	return $bigform;
+}
+
+
+function get_alltests_form() {
+	$vars = pentdb_get_page_vars();
+
+	$alltests_q = "SELECT * FROM {porttest} ORDER BY service,pass_depth,order_weight";
+	$alltests_recs = db_query( $alltests_q );
+
+	$test_list = '';
+	$test_list .= '<table class="tests-table extra-space">'."\n";
+	$test_list .= "<tr>" 
+		. '<th>service</th>'
+		. '<th>port</th>'
+		. '<th>info</th>'
+		. "<th>actions</th>"
+		. "</tr>\n";
+
+	$even = false;
+	$base_link = 'index.php'
+		. '?session_id=' . $vars['session_id']
+		. '&ip=' . $vars['ip']
+		. '&service=' . $vars['service']
+		. '&port=' . $vars['port']
+		. '&fcmd=copy-port';
+
+	while ( $test = db_fetch_array( $alltests_recs ) ) {
+		if ( $even ) {
+			$row_class = " even";
+			$even = false;
+		} else {
+			$row_class = " odd";
+			$even = true;
+		}
+		$test_list .= '<tr class="'.$row_class.'">'."\n";
+		$test_list .= "<td>".$test['service']."</td>\n";
+		$test_list .= "<td>".$test['port']."</td>\n";
+		$test_list .= "<td>"
+			. '<span class="test-table-title">' . $test['title'] . "</span><br/>"
+			. '<span class="test-table-subitem">' . $test['cmd'] . "<br/>"
+			. '<span class="test-table-subitem">' . $test['process_result_cmd']
+			. "</td>\n";
+		$test_list .= '<td>'
+			. '<a class="test-table-link" href="'.$base_link.'&pass=1&tid='.$test["pitid"].'">copyPass1</a><br/>'
+			. '<a class="test-table-link" href="'.$base_link.'&pass=2&tid='.$test["pitid"].'">copyPass2</a><br/>'
+			. '<a class="test-table-link" href="'.$base_link.'&pass=3&tid='.$test["pitid"].'">copyPass3</a>'
+			. ' </td>'."\n";
+		$test_list .= "</tr>\n";
+	}
+
+	$test_list .= '</table>'."\n";
+
+	return $test_list;
+
 }
 
 

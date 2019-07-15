@@ -210,7 +210,27 @@ form::before {
 	padding-left: 10px;
 	padding-top: 5px;
 }
-
+.test-table-title {
+	font-weight: bold;
+}
+.test-table-subitem {
+	padding-left: 10px;
+	color: #999;
+}
+.tests-table.extra-space td {
+	padding: 5px;
+}
+.test-form-title {
+    font-size: 1.1em;
+    font-family: "Courier New", Courier, monospace;
+    /*margin-block-end: 0.55em;*/
+    color: #3b3;
+	margin-bottom: 5px;
+	background-color: #585858;
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
 .status-empty {
 	/*background-color: #722;*/
 	background-color: #111;

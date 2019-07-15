@@ -228,16 +228,31 @@ pentdb_top_msg('PROCESSED CMD '.$mycmd);
 
 		case 'new-port':	// aka  add-test  or  new-test
 			if ( !isset($_GET['service']) ) {
-				pentdb_log_error('"Service label" cannot be empty when adding a new service');
+				pentdb_log_error('"service" param cannot be empty when adding a new service');
 				unset($_GET['fcmd']);
 				break;
 			}
-			if ( empty($_GET['service']) ) {
-				pentdb_log_error('"Service label" cannot be empty when adding a new service');
+			if ( empty($_GET['port']) ) {
+				pentdb_log_error('"port" param cannot be empty when adding a new service');
 				unset($_GET['fcmd']);
 				break;
 			}
 			create_port_record();
+			jump_to_latest_test();
+			break;
+
+		case 'copy-port':
+			if ( !isset($_GET['service']) ) {
+				pentdb_log_error('"service" param cannot be empty when adding a new service');
+				unset($_GET['fcmd']);
+				break;
+			}
+			if ( empty($_GET['port']) ) {
+				pentdb_log_error('"port" param cannot be empty when adding a new service');
+				unset($_GET['fcmd']);
+				break;
+			}
+			copy_port_record();
 			jump_to_latest_test();
 			break;
 
