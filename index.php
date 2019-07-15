@@ -226,7 +226,7 @@ function display_iplist_page( $session_id ) {
 	//	create a new session.
 
 function display_sessions() {
-	$sess_q = "SELECT DISTINCT session_id FROM {sessions}";
+	$sess_q = "SELECT * FROM {sessions} GROUP BY session_id ORDER BY created DESC,session_id";
 	try {
 		$sess_recs = db_query( $sess_q );
 		if ( !$sess_recs ) {
@@ -242,10 +242,14 @@ function display_sessions() {
 	// display a list of sessions available to test
 	$sess_list = '';
 	while ( $session = db_fetch_array( $sess_recs ) ) {
-		$sess_list .= '<div><a href="index.php?session_id='.$session['session_id'].'">'.$session['session_id'].'</a></div>'."\n";
+		$date = date("Y-M-d", strtotime($session['created']) );
+		$sess_list .= '<div><a href="index.php?session_id='.$session['session_id'].'">'.$session['session_id'].'</a> &nbsp; <span class="session-date">('.$date.')</span></div>'."\n";
 	}
 	if ( $sess_list ) {
-		$sess_list = "<h2>Select a test session:</h2>\n" . $sess_list;
+		$sess_list = "<h2>Select a test session:</h2>\n" 
+		. '<div class="session-list">'
+		. $sess_list
+		. "</div>\n";
 		$sess_list .= "\n<p></p>";
 	}
 

@@ -94,6 +94,15 @@ h3 {
 #top .bluetext {
 	color: #5fa7d2;
 }
+.session-list {
+	margin-left: 40px;
+	line-height: 1.5em;
+}
+.session-date {
+	font-size: 0.8em;
+	color: #888;
+	font-style: italic;
+}
 
 .bold {
 	font-weight: bold;
