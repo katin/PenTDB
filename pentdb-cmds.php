@@ -9,9 +9,7 @@
 
 function ptdb_process_cmd ( $mycmd ) {
 
-pentdb_top_msg('PROCESSED CMD '.$mycmd);
-
-// diebug($mycmd,true,"bleh");
+// pentdb_top_msg('PROCESSED CMD '.$mycmd);
 
 	switch( $mycmd ) {
 

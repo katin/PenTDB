@@ -366,6 +366,16 @@ function pentdb_add_ip( $ip, $session, $hostname ) {
 
 function pentdb_add_host() {
 
+	// check for presence of required fields
+	if ( !isset($_GET['ip_address']) ) {
+		pentdb_log_error('ip address is required to add a new host. [ERR-601]');
+		return false;
+	}
+	if ( empty($_GET['ip_address']) ) {
+		pentdb_log_error('ip address is required to add a new host. [ERR-601]');
+		return false;
+	}
+
 	$session_id = pentdb_clean($_GET['session_id']);
 
 	// Create the host record
@@ -1235,8 +1245,8 @@ function ptdb_get_session_hosts( $session_id ) {
 
 function ptdb_get_session_points( $session_id ) {
 
-	// don't bother to query for an empty session
-	if ( empty($session_id ) ) {
+	// don't bother to query for an empty session or if we're adding a host
+	if ( empty($session_id ) || $_GET['fcmd'] == 'add-host' ) {
 		return false;
 	}
 	$my_session = pentdb_clean( $session_id );

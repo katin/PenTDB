@@ -7,9 +7,6 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[x] add "view [service]" and "view [port]" buttons to edit test in template maintenance.
-[_] Make info field a text area so CR's work and can be edited (in template maintenance).
-[x] fix template maintenance form for process-cmd (and cmd?) - htmlentities()
 [_] fix form submit for new host: if IP is empty, don't add the record (display error)
 
 [_] fix grouping of records (set TITLE at front) of host in-line status summary
@@ -66,6 +63,9 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] add "view [service]" and "view [port]" buttons to edit test in template maintenance.
+[x] Make info field a text area so CR's work and can be edited (in template maintenance).
+[x] fix template maintenance form for process-cmd (and cmd?) - htmlentities()
 [x] add info_desc field to porttest to hold tips, setup info, or task description
 [x] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
     [x] Add scrolling display / chooser to add individual tests to a port
