@@ -594,6 +594,29 @@ input, select {
     width:         calc(100% - 85px);
 }
 
+#add-test-form textarea 
+, .inlineform.test textarea
+ {
+	background-color: #444;
+	color: #ddd;
+	border-color: #555;
+	vertical-align: top;
+	width: 50%;
+}
+.inlineform.test textarea, .inlineform.test select {
+	width: 69%;
+}
+
+#test-service-filter select, #test-port-filter select {
+	width: 12em;
+}
+
+#test-service-filter label, #test-port-filter label {
+	width: 100px;
+	display:inline-block;
+	text-align: right;
+}
+
 .delete-confirm-form {
 	padding: 20px;
 }
@@ -653,8 +676,8 @@ a.link-button:hover {
 .tests-table {
 	margin: 20px;
 	text-align: left;
-    font-family: Courier, monospace;
-    font-size: 0.8em;
+    font-family: Times New Roman, monospace;
+    /*font-size: 1em;*/
     border-spacing: 1px;
 }
 

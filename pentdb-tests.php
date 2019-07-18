@@ -214,14 +214,16 @@ display_tests_page( $mypage );
 // display filter form & indicators
 //
 
-function display_data_filter_form() {
+function display_data_filter_form( $service = NULL, $port = NULL ) {
+
+// die('service: '.$service );
 
 	$myform = '
 	<div class="filter-data-form">
-	<FORM action="pentdb-tests.php" method="GET">
+	<FORM id="test-service-filter" action="pentdb-tests.php" method="GET">
 	<LABEL for="service-filter">service:</LABEL>
 	<SELECT name="service" id="service-filter">
-	'.implode(tests_get_service_options()).'
+	'.implode(tests_get_service_options( $service )).'
 	</SELECT>
 	<INPUT type="submit" value="Show"></INPUT>
 	</FORM></div>
@@ -229,10 +231,10 @@ function display_data_filter_form() {
 
 	$myform .= '
 	<div class="filter-data-form">
-	<FORM action="pentdb-tests.php" method="GET">
+	<FORM id="test-port-filter" action="pentdb-tests.php" method="GET">
 	<LABEL for="port-filter"> &nbsp; &nbsp; port:</LABEL>
 	<SELECT name="port" id="port-filter">
-	'.implode(tests_get_port_options()).'
+	'.implode(tests_get_port_options( $port )).'
 	</SELECT>
 	<INPUT type="submit" value="Show"></INPUT>
 	</FORM></div>
@@ -246,15 +248,24 @@ function display_data_filter_form() {
 }
 
 
+// tests_get_service_options
+//
+// Create a set of SELECT OPTIONs from the database
+// OPTIONAL: specify the default-selected item with the $service parm
+// (Otherwise it takes the default selection from the URL page parms)
 
-
-function tests_get_service_options() {
+function tests_get_service_options( $service_default = NULL ) {
 
 	$service_selected = NULL;
 	if ( isset($_GET['service']) ) {
 		$service_selected = pentdb_clean($_GET['service']);
 	}
+	if ( !empty($service_default) ) {
+		$service_selected = $service_default;
+	}
 	$servicelist = array();
+
+// die('selected: '.$service_selected);
 
 	$service_q = "SELECT service FROM {porttest} GROUP BY service ORDER BY service";
 
@@ -279,11 +290,20 @@ function tests_get_service_options() {
 }
 
 
-function tests_get_port_options() {
+// tests_get_port_options
+//
+// Create a set of SELECT OPTIONs from the database
+// OPTIONAL: specify the default-selected item with the $port parm
+// (Otherwise it takes the default selection from the URL page parms)
+
+function tests_get_port_options( $port_default = NULL ) {
 
 	$port_selected = NULL;
 	if ( isset($_GET['port']) ) {
 		$port_selected = pentdb_clean($_GET['port']);
+	}
+	if ( !empty($port_default) ) {
+		$port_selected = $port_default;
 	}
 	$portlist = array();
 
@@ -375,6 +395,9 @@ function display_tid_page( $tid ) {
 
 	$test = db_fetch_array( $test_rec );
 
+	// display quick-display buttons
+	$output = display_data_filter_form( $test['service'], $test['port'] );
+
 	// display the test info
 	// $output = '<div class="bigform">'."\n";
 	foreach ($test as $fieldname => $value) {
@@ -421,7 +444,7 @@ function get_new_test_form( $title = "Add a test template" ) {
 		</SELECT><br/>
 
 		<LABEL for="command">Info: </LABEL>
-		<INPUT type="text" name="info" id = "info"></INPUT><br/>
+		<textarea wrap="soft" cols="80" rows="3" name="info" id ="info"></textarea><br/>
 
 		<LABEL for="command">Cmd: </LABEL>
 		<INPUT type="text" name="cmd" id = "cmd"></INPUT><br/>
@@ -456,7 +479,12 @@ function get_test_datum_form( $fieldname, $value, $pitid ) {
 	}
 
 	$data = '		<LABEL for="'.$fieldname.'">'.$fieldname.': </LABEL>
-		<INPUT type="text" name="'.$fieldname.'" id ="'.$fieldname.'" value="'.$value.'"></INPUT>';
+		<INPUT type="text" name="'.$fieldname.'" id ="'.$fieldname.'" value="'.htmlentities($value).'"></INPUT>';
+
+	if ( $fieldname == 'info' ) {
+		$data = '				<LABEL for="command">Info: </LABEL>
+		<textarea wrap="soft" cols="80" rows="3" name="info" id ="info">'.$value.'</textarea><br/>';
+	}
 
 	if ( $fieldname == 'rectype' ) {
 		$data = '		<LABEL for="rectype">rectype: </LABEL>

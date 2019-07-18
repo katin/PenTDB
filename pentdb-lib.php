@@ -1869,7 +1869,7 @@ function create_port_record() {
 			$key = 'cmd';
 		}
 		$fields .= ($comma ? ',' : '').$key;
-		$values .= ($comma ? ',' : '').'"'.addslashes($value).'"';
+		$values .= ($comma ? ',' : '').'"'.$value.'"';		// addslashes() here?
 		$comma = true;
 	}
 	$fields .= ') ';

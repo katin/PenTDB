@@ -7,11 +7,10 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
-[_] add info_desc field to porttest to hold tips, setup info, or task description
-[_] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
-    [_] Add scrolling display / chooser to add individual tests to a port
-
+[x] add "view [service]" and "view [port]" buttons to edit test in template maintenance.
 [_] Make info field a text area so CR's work and can be edited (in template maintenance).
+[x] fix template maintenance form for process-cmd (and cmd?) - htmlentities()
+[_] fix form submit for new host: if IP is empty, don't add the record (display error)
 
 [_] fix grouping of records (set TITLE at front) of host in-line status summary
 [_] Document how to add/uses tests for Exfiltration and other non-port specific things (port 1)
@@ -20,11 +19,10 @@ TODO LIST
 [x] Add additional watchfile fields to host record on dev box (where did they go?)
     [_] export new fresh copy of basic db?
 
-
 [_] add new record type 'template' that will be the parent id for tests in that set
 [_] add new field 'template' to porttest to group tests into a template (w/o limits on port# and service name) -- only for template side; this doesn't go over to the testinstance table
 [_] add template filter to maintenance master table
-[_] FIX CONSISTENCY - sometimes using rec_id as form parm and other times using recid! *Why?*
+[_] FIX CONSISTENCY - sometimes using rec_id as form parm and other times using recid. *Why?*
 
 [x] Add config-per-environment (multiple machines in one config file, auto-switch)
 [_] fix data path
@@ -53,6 +51,10 @@ TODO LIST
 
 [_] add login point w/creds storage. 
 Similar fields to a testinstance, and can have multiple tests per login point (with templates...), but, can't really use the current testinstance record because there could be multiple logins on the same port and protocol... Hmmm, unless we had multiple login protocols, like login1, login2, login3, login4, and login5... then all those could be on the same port.
+  [_] creds database with all usernames, NTML hashes, passwords, etc. found
+  [_] output function that writes all known and suspected usernames to a file for tools
+  [_] ditto for passwords data file (e.g., passes-session_id.txt)
+  [_] add fill-in parms that fill in the user and password files for tool cmd lines
 
 [_] maybe add a timer function? Or a field that can record total time worked on.
 
@@ -64,10 +66,12 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] add info_desc field to porttest to hold tips, setup info, or task description
+[x] Add individual tests (e.g. Deploy WAR file) -- maybe they all are 0,0 in pass,weight
+    [x] Add scrolling display / chooser to add individual tests to a port
 [x] implement display watchfile on vuln page
 [x] Add "UNSTABLE" (worked but unstable) status to Vulns
 [x] Add watchfile(s) fields to add-host form (with presets from config file)
-
 [x] add button to switch from BINARY to DEPTH statustype, and DEPTH to BINARY
 [x] remove extra reset button on test status button sets
 [x] add html-encode for watch files displays
@@ -103,9 +107,7 @@ DONE LIST
 [x] add jump-to and expand to service page test display for newly added test
 [x] add multiple watch files for host
 [x] add auto-expand for any anchor-point requested by click
-
 [X] add auto-import of data from exploit-db.com vuln URLs (in add vuln routine) :D
-
 [x] Add host record data display and update form
     [x] OS, version, SP, architecture, etc. fields to match vulns qualifications
     [x] add lessons learned field?
@@ -114,17 +116,12 @@ DONE LIST
     [x] Notes
 [x] Refactor all display pages code to use host record
 [x] Remove HOST record type from .dat files (porttest data)
-
 [x] Add Objectives w/display and edit
-
 [x] add display of watch file
     [x] add display and update of watch_file field
     [x] add expandable field display of the watch_file with content present indicator
-
 [x] remove XML parser
-
 [x] copy button for cmd lines on host record
-
 [-] add test for presence of the PHPDoc module; skip using XML parser if absent.
     (use string search instead of the XML Doc for those functions).
 
