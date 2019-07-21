@@ -8,9 +8,7 @@ System notes for the PenTDB pentest tracking tool.
 TODO LIST
 ---------
 [_] rename vulns to exploits throughout the system? Or, have both?
-[x] Add the "add vuln" form to the bottom of the vuln detail display page, for multiple quick adds
-[x] Add a notice if the vuln local web page cache for exploit-db.com isn't present on the drive 
-[x] Fix local caching of exploit pages when trailing slash is present
+[x] fix tailing-slash auto-processing of vuln - add warning for a blank .html file present
 
 [_] fix grouping of records (set TITLE at front) of host in-line status summary
 [_] Document how to add/uses tests for Exfiltration and other non-port specific things (port 1)
@@ -71,6 +69,9 @@ Similar fields to a testinstance, and can have multiple tests per login point (w
 
 DONE LIST
 ---------
+[x] Add the "add vuln" form to the bottom of the vuln detail display page, for multiple quick adds
+[x] Add a notice if the vuln local web page cache for exploit-db.com isn't present on the drive 
+[x] Fix local caching of exploit pages when trailing slash is present
 [x] fix form submit for new host: if IP is empty, don't add the record (display error)
 [x] add "view [service]" and "view [port]" buttons to edit test in template maintenance.
 [x] Make info field a text area so CR's work and can be edited (in template maintenance).

@@ -1006,6 +1006,16 @@ function pentdb_fetch_cached_page( $url ) {
 global $webpages_cache_path;
 global $base_path;
 
+
+	// warn if we have the file ".html" present in the cache - it can mess things up
+	if ( is_file($base_path.$webpages_cache_path.'.html') ) {
+		pentdb_top_msg("NOTE: Check your vuln titles & IDs - '.html' file is present in cache. [NOTE-3000]");
+	}
+
+	// remove any trailing slash
+	if ( substr($url, -1) == "/" ) {
+		$url = substr($url, 0, strlen($url)-1);
+	}
 	$page_id = substr($url, strrpos($url, '/')+1).'.html';
 	$filepath = $base_path.$webpages_cache_path.$page_id;
 
