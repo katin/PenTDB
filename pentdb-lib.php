@@ -1022,8 +1022,20 @@ global $webpages_cache_path;
 global $base_path;
 
 	// get the page / vuln id
+	$url = urldecode($url);		// decode URL chars passed in GET URL
+
+	// remove any trailing slash
+	if ( substr($url, -1) == "/" ) {
+		$url = substr($url, 0, strlen($url)-1);
+	}
+
 	$page_id = substr($url, strrpos($url, '/')+1).'.html';
 	$filepath = $base_path.$webpages_cache_path.$page_id;
+
+	if ( !is_dir($base_path.$webpages_cache_path) ) {
+		pentdb_top_msg("Skipped caching exploit page, path does not exist: ".$base_path.$webpages_cache_path." [NOTE-1067]");
+		return false;
+	}
 
 	// check to see if it exists in our directory already
 	if ( file_exists( $filepath ) && !$overwrite ) {
@@ -1035,6 +1047,8 @@ global $base_path;
 	$status = file_put_contents ( $filepath, $page_source ); 
 	if ( $status ) {
 		pentdb_top_msg("Cached file locally: ".$filepath);
+	} else {
+		pentdb_top_msg("Local caching of exploit web page failed: ".$filepath." [NOTE-1066]");
 	}
 	return $status;
 }
@@ -1337,7 +1351,7 @@ function read_discoveries( $session_id, $ip, $service, $port ) {
 			$link = '<a title="'.$notation
 				.'" href="index.php?'.$parms."#discovered-form-".$rec['irid'].'">';
 			$discoveries .= '<div class="discoveries-item">'.$link . "[->]</a> &nbsp; "
-				. htmlentities($rec['discovered']) . "</div>\n";
+				. nl2br(htmlentities($rec['discovered'])) . "</div>\n";
 		}
 
 	}

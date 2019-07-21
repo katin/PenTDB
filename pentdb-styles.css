@@ -113,6 +113,9 @@ h3 {
 .bottom-space {
 	height: 40px;
 }
+.top-space {
+	padding-top: 5px;
+}
 
 #page {
 	position: absolute;
@@ -702,7 +705,21 @@ a.link-button:hover {
 
 .discoveries-section {
 	margin-left: 40px;
+	font-size: 12pt;
 }
 .discoveries-item {
-	/*margin-left: 20px;*/
+    padding-bottom: 10px;
+    line-height: 1.2em;
+    font-family: Courier, monospace;
+    text-indent: 20px each-line;
+    padding-left: 4em;
+}
+.discoveries-item a {
+	margin-left: -4em;
+}
+
+.top-notes {
+	padding-bottom: 10px;
+	/*font-size: 1em;*/
+	font-style: italic;
 }

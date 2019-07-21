@@ -120,6 +120,9 @@ function display_vuln_page( $session_id, $ip, $vuln_id ) {
 		$output .= "\n".'<p class="clear">. </p>'."\n";
 	}
 
+	$quick_add_form = get_add_vuln_form();
+	$output .= "<hr>\n" . $quick_add_form;
+
 	display_page( $output );
 }
 

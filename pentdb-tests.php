@@ -241,7 +241,7 @@ function display_data_filter_form( $service = NULL, $port = NULL ) {
 	';
 
 	if ( isset($_GET['service']) || isset($_GET['port']) ) {
-		$myform .= '<div class="quicklink"><a href="pentdb-tests.php">SHOW ALL RECORDS</a></div>'."\n";
+		$myform .= '<div class="quicklink top-space spacer"><a href="pentdb-tests.php">SHOW ALL RECORDS</a></div>'."\n";
 	}
 
 	return $myform;
@@ -415,6 +415,9 @@ function display_tid_page( $tid ) {
 
 function get_new_test_form( $title = "Add a test template" ) {
 	$vars = pentdb_get_tests_vars();
+
+	$top_notes = '<div class="top-notes">Temporary convention: use rare ports for individual (free-floating) tests: port 1 = reconnisane and osint; 2 = general tools, cracking, etc.; 3 = exfiltration and cleanup; 4 = pivots and lateral movement.</div>';
+
 	$bigform = '
 		<div class="bigform"><FORM action="pentdb-tests.php" method="GET" id="add-test-form">
 
@@ -465,7 +468,7 @@ function get_new_test_form( $title = "Add a test template" ) {
 		<INPUT type="submit" value="Add a test"></INPUT>
 		</FORM></div>
 	';
-	$bigform = "<h2>".$title."</h2>\n" . $bigform;
+	$bigform = "<h2>".$title."</h2>\n" . $top_notes . $bigform;
 
 		// <INPUT type="hidden" name="port" value="'.$port.'"></INPUT>
 
