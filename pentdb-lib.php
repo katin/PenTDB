@@ -379,8 +379,8 @@ function pentdb_add_host() {
 	$session_id = pentdb_clean($_GET['session_id']);
 
 	// Create the host record
-	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd, watch_file,watch_file2,watch_file3,points)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d)";
+	$host_q = "INSERT into {host} (session_id, ip_address, name, platform, os_version, patch_version, cpu_arch, core_count, service_pack, status, cmd, process_result_cmd, watch_file, watch_file2, watch_file3, points)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s','%s','%s',%d)";
 	$result = db_query( $host_q,
 		$session_id,
 		$_GET['ip_address'],
@@ -394,14 +394,14 @@ function pentdb_add_host() {
 		$_GET['status'],
 		$_GET['cmd'],
 		$_GET['process_result_cmd'],
-		$_GET['watchfile'],
-		$_GET['watchfile2'],
-		$_GET['watchfile3'],
+		$_GET['watch_file'],
+		$_GET['watch_file2'],
+		$_GET['watch_file3'],
 		$_GET['points']
 	);
 
 	if ( !$result ) {
-		pentdb_log_error("Error adding host record ".$_GET['ip_address']." [ERR-3021]");
+		pentdb_log_error("Error adding host record ".$_GET['ip_address']." [ERR-3021]"." mysql_error no: ".db_error().'<div>'.mysqli_error().'</div>'.'<div>_GET<pre>'.print_r($_GET,true).'</pre></div>');
 		return;
 	}
 
@@ -2285,13 +2285,13 @@ function get_add_host_form( $title = "Add a host" ) {
 		<INPUT type="text" name="process_result_cmd" id="process_result_cmd" value="'.DEFAULT_HOST_PRORESULT_CMD.'"></INPUT><br/>
 
 		<LABEL for="points">Watch file 1: </LABEL>
-		<INPUT type="text" name="watchfile" id = "watchfile" value="'.DEFAULT_HOST_WATCHFILE_1.'"></INPUT><br/>
+		<INPUT type="text" name="watch_file" id = "watch_file" value="'.DEFAULT_HOST_WATCHFILE_1.'"></INPUT><br/>
 
 		<LABEL for="points">Watch file 2: </LABEL>
-		<INPUT type="text" name="watchfile2" id = "watchfile2" value="'.DEFAULT_HOST_WATCHFILE_2.'"></INPUT><br/>
+		<INPUT type="text" name="watch_file2" id = "watch_file2" value="'.DEFAULT_HOST_WATCHFILE_2.'"></INPUT><br/>
 
 		<LABEL for="points">Watch file 3: </LABEL>
-		<INPUT type="text" name="watchfile3" id = "watchfile3" value="'.DEFAULT_HOST_WATCHFILE_3.'"></INPUT><br/>
+		<INPUT type="text" name="watch_file3" id = "watch_file3" value="'.DEFAULT_HOST_WATCHFILE_3.'"></INPUT><br/>
 
 		<LABEL for="points">Points: </LABEL>
 		<INPUT type="text" name="points" id = "points"></INPUT><br/>

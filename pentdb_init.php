@@ -224,7 +224,7 @@ $schema['host'] = array(
       'default' => '',
       'description' => 'Item title.',
     ),
-    'port' => array(
+    'points' => array(
       'type' => 'int',
       'unsigned' => FALSE,
       'not null' => TRUE,

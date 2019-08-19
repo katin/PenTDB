@@ -1,0 +1,15 @@
+# PenTDB site
+# 190816 sample file
+
+<Directory /root/Documents/PenTDB/public_html>
+    AllowOverride All
+    Require all granted
+</Directory>
+
+<VirtualHost *:80>
+    ServerName pentdb.kali.local
+    DocumentRoot /root/Documents/PenTDB/public_html
+    ErrorLog /root/Documents/PenTDB/logs/error_log
+    CustomLog /root/Documents/PenTDB/logs/access_log common
+</VirtualHost>
+
