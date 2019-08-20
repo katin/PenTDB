@@ -31,6 +31,9 @@ You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt
   4. $ cd \<webroot\> && chmod u+x load-templates.sh && ./load-templates.sh
   6. Application is ready for use; browse to the site, e.g. http://pentdb.local:411
  
+ ### Tuning
+ For faster creation of PenTDB sessions, you can set the values in the pentdb-config.php file to match your personal directory structure. 
+ 
  ### Caveats
 **Rapid hack**
 
