@@ -2,9 +2,7 @@
 //
 // PenTracker Settings and Configuration
 //
-
 // 190621 KBI created
-
 //
 // some default values to save typing
 
@@ -12,7 +10,7 @@ $machine_id = gethostname();
 
 switch ( $machine_id ) {
 	
-	case 'G16-D9':
+	case 'G16-D9A':
 		define("DEFAULT_DATA_PATH",'/home/katin/Documents/hackthebox/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
@@ -26,7 +24,7 @@ switch ( $machine_id ) {
 		break;
 
 	case 'kali':
-		define("DEFAULT_DATA_PATH",'/root/Documents/PWK-Lab3/');
+		define("DEFAULT_DATA_PATH",'/root/Documents/htb/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
 		define("DEFAULT_HOST_CMD",'mktank $ip $hostname');
