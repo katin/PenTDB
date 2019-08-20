@@ -19,6 +19,7 @@ Listen :80
 Listen 127.0.0.1:411
 
 ```
+You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt, included in this repo.
 
   1. Copy the files into the desired web root directory, and configure your webserver to serve them.
   2. mysql> CREATE DATABASE pentdb;
@@ -26,9 +27,9 @@ Listen 127.0.0.1:411
   2. mysql> FLUSH PRIVILEGES;
   2. $ cp dru_db_settings-default.php dru_db_settings.php    # and put the database credentials in your settings file
   3. [optional] $ sudo vim /etc/hosts     # and enter a line for your preferred URL to access, e.g.  127.0.0.1  pentdb.local
-  3. Create the tables in the database by browsing to http://pentdb.local/pentdb_init.php
+  3. Create the tables in the database by browsing to http://pentdb.local:411/pentdb_init.php
   4. $ cd \<webroot\> && chmod u+x load-templates.sh && ./load-templates.sh
-  6. Application is ready for use; browse to the site, e.g. http://pentdb.local
+  6. Application is ready for use; browse to the site, e.g. http://pentdb.local:411
  
  ### Caveats
 **Rapid hack**
