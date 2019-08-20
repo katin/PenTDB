@@ -1,12 +1,14 @@
 # PenTDB site
 # 190816 sample file
+# 
+# ALSO, remember to add "Listen 127.0.0.1:411" to /etc/apache2/ports.conf
 
 <Directory /root/Documents/PenTDB/public_html>
     AllowOverride All
     Require all granted
 </Directory>
 
-<VirtualHost *:80>
+<VirtualHost *:411>
     ServerName pentdb.kali.local
     DocumentRoot /root/Documents/PenTDB/public_html
     ErrorLog /root/Documents/PenTDB/logs/error_log
