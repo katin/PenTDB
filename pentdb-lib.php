@@ -545,6 +545,7 @@ function pentdb_new_vuln() {
 
 	if ( !$result ) {
 		pentdb_log_error("Error adding vuln record ".$_GET['title']." [ERR-1021]");
+		return false;
 	}
 
 	pentdb_top_msg("Vuln added.");
@@ -2026,7 +2027,7 @@ function get_add_objective_form( $title = "Add an objective" ) {
 
 function pentdb_get_reset_status_form( $vars, $rec_id ) {
 
-
+	$button_form = '';
 	$button_form .= '
 		<div><FORM class="statusform" action="index.php#test-'.$rec_id.'" method="GET">
 			<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
