@@ -647,7 +647,7 @@ function pentdb_new_objective() {
 
 	// Create the vuln record
 	$obj_q = "INSERT into {objective} (session_id, ip_address, title, port, service, objective, status)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s')";
+		. " VALUES ('%s','%s','%s',%d,'%s','%s','%s')";
 	$result = db_query( $obj_q,
 		$session_id,
 		$ip,
@@ -662,6 +662,7 @@ function pentdb_new_objective() {
 
 	if ( !$result ) {
 		pentdb_log_error("Error adding objective record [ERR-1084]");
+		return false;
 	}
 
 	pentdb_top_msg("Objective added.");
@@ -1967,10 +1968,20 @@ function jump_to_latest_test() {
 	// read the current URL parms for the display page
 	$vars = pentdb_get_urlparms();
 
-	$url = "index.php?".$vars."&expand=".$last_test['irid']."#test-".$last_test['irid'];
+	$url = "/index.php?".$vars."&expand=".$last_test['irid']."#test-".$last_test['irid'];
 
 	// go there
-	header('Location: http://'.$_SERVER['SERVER_NAME'].'/'.$url);
+	        if (!empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) == 'on' || $_SERVER['HTTPS'] == '1')) {
+            $scheme = 'https';
+        } else {
+            $scheme = 'http';
+	}
+	if (!in_array($_SERVER['SERVER_PORT'], [80, 443])) {
+            $jumpport = ":$_SERVER[SERVER_PORT]";
+        } else {
+            $jumpport = '';
+        }
+	header('Location: '.$scheme.'://'.$_SERVER['SERVER_NAME'].$jumpport.'/'.$url);
 }
 
 
