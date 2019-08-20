@@ -5,7 +5,7 @@ This is set of custom web forms and data displays that help track tests and resu
 
 PenTDB is for those people who don't want to spend brain cycles organizing and re-reading large amounts of detailed data about pentesting progress for multiple hosts under time pressure in **text files** and **free-form notes**... when tracking data bits quickly are what computers are for! Now you can apply that brain juice to figuring out the puzzles and problems instead. PenTDB may also be good for training purposes.
 
-You can run PenTDB on your host machine, or on your Kali machine. If running on Kali, I recommend using an odd port, for example 411, to keep common web ports open for pentesting purposes. 
+You can run PenTDB on your host machine, or on your Kali machine. If running on Kali, I recommend using an odd port, for example 411, to keep common web ports open for pentesting purposes. If you wish to use the handy WatchFiles feature, PenTDB must be running on your Kali machine.
 
 ### Requirements
 This is designed to be run on Kali Linux. Web server (e.g. apache) and database (e.g. MariaDB) are required, as is PHP.
