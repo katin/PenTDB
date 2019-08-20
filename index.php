@@ -541,7 +541,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 	}
 
 	$myform = '
-		<div><FORM action="index.php" method="GET">
+		<div><FORM id="quick-add-service" action="index.php" method="GET">
 		<SELECT name="service">
 	'.$test_list.'
 		</SELECT>
@@ -554,7 +554,7 @@ function display_serviceslist_page( $session_id, $ip ) {
 		</FORM></div>
 	';
 
-	$quicklink_add_service = '<div class="quicklink"><a href="#add-service-form">Add a service</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a></div>'."\n";
+	$quicklink_add_service = '<div class="quicklink"><a href="#quick-add-service">Add a service</a> <a href="#add-objective-form">Add an objective</a> <a href="#add-vuln-form">Add a vuln</a></div>'."\n";
 
 	$mypage = $quicklink_add_service 
 		. $service_list 
