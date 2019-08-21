@@ -17,7 +17,6 @@ You can keep apache2 listening ONLY to the local host by changing the /etc/apach
 ```
 Listen :80
 Listen 127.0.0.1:411
-
 ```
 You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt, included in this repo.
 
@@ -36,8 +35,8 @@ You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt
 ### Troubleshooting
 **Symptom: WATCH FILES aren't working**
 Make sure the directory holding your data files is accessible by the web server (typically user www-data), e.g.:
-  '''$ chown -R :www-data /root/Documents/hackthebox'''
- 
+```$ chown -R :www-data /root/Documents/hackthebox
+```
  
 ### Caveats
 **Rapid hack**
