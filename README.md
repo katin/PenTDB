@@ -35,7 +35,8 @@ You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt
 ### Troubleshooting
 **Symptom: WATCH FILES aren't working**
 Make sure the directory holding your data files is accessible by the web server (typically user www-data), e.g.:
-```$ chown -R :www-data /root/Documents/hackthebox
+```
+    $ chown -R :www-data /root/Documents/hackthebox
 ```
  
 ### Caveats
