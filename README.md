@@ -30,10 +30,16 @@ You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt
   3. [optional] $ sudo vim /etc/hosts     # and enter a line for your preferred URL to access, e.g.  127.0.0.1  pentdb.local
   6. Application is ready for use; browse to the site, e.g. http://pentdb.local:411
  
- ### Tuning
+### Tuning
  For faster creation of PenTDB sessions, you can set the values in the pentdb-config.php file to match your personal directory structure. 
  
- ### Caveats
+### Troubleshooting
+**Symptom: WATCH FILES aren't working**
+Make sure the directory holding your data files is accessible by the web server (typically user www-data), e.g.:
+  '''$ chown -R :www-data /root/Documents/hackthebox'''
+ 
+ 
+### Caveats
 **Rapid hack**
 
 This tool was thrown together quickly as an experiment, and is NOT a good example of PHP coding nor good database design. It has proven useful enough to justify development of a Version 2, which will include a clean DB design from scratch and will be written in Python as an exercise and learning project.
