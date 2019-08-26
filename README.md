@@ -25,7 +25,7 @@ You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt
       * PenTDB/logs
       * PenTDB/html
       * PenTDB/exploit-db-pages
-  1. Copy the PenTDB repository files into the desired web root directory (e.g., PenTDB/public_html), and configure your webserver to serve them.
+  1. Copy the PenTDB repository files into the desired web root directory (e.g., PenTDB/html), and configure your webserver to serve them.
   2. Launch mysql, e.g., $ mysql -uroot
   2. mysql> CREATE DATABASE pentdb;
   2. mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON pentdb.* to '\<username\>'@'localhost' IDENTIFIED BY '\<password\>';
