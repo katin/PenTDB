@@ -20,7 +20,13 @@ Listen 127.0.0.1:411
 ```
 You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt, included in this repo.
 
-  1. Copy the files into the desired web root directory, and configure your webserver to serve them.
+  1. Create a set of directories:
+      * PenTDB
+      * PenTDB/logs
+      * PenTDB/html
+      * PenTDB/exploit-db-pages
+  1. Copy the PenTDB repository files into the desired web root directory (e.g., PenTDB/public_html), and configure your webserver to serve them.
+  2. Launch mysql, e.g., $ mysql -uroot
   2. mysql> CREATE DATABASE pentdb;
   2. mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON pentdb.* to '\<username\>'@'localhost' IDENTIFIED BY '\<password\>';
   2. mysql> FLUSH PRIVILEGES;
@@ -38,7 +44,11 @@ Make sure the directory holding your data files is accessible by the web server 
 ```
     $ chown -R :www-data /root/Documents/hackthebox
 ```
- 
+
+### Missing Features
+
+Be advised that this version has no method of taking screenshots, storing screenshots, or viewing screenshots. You'll probably want to figure out how you are going to manage and organize screenshots to make them easy for yourself.
+
 ### Caveats
 **Rapid hack**
 
