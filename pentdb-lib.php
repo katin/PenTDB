@@ -195,8 +195,9 @@ global $top_message;
 ?>
 <HTML>
 <HEAD>
-  <link rel="stylesheet" type = "text/css" href = "pentdb-styles.css" />
-  <script src="pentdb.js"></script>
+  <TITLE>PenTDB (main)</TITLE>
+  <LINK rel="stylesheet" type = "text/css" href = "pentdb-styles.css" />
+  <SCRIPT src="pentdb.js"></SCRIPT>
 </HEAD>
 
 <BODY>

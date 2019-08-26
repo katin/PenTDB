@@ -483,6 +483,7 @@ CREATE TABLE `testinstance` (
   `title` varchar(127) NOT NULL DEFAULT '',
   `cmd` longtext,
   `process_result_cmd` longtext,
+  `info` longtext,
   `watch_file` varchar(64) NOT NULL DEFAULT '',
   `status` varchar(16) NOT NULL DEFAULT '',
   `order_weight` tinyint(4) NOT NULL DEFAULT '0',
@@ -585,6 +586,12 @@ $schema['testinstance'] = array(
       'not null' => FALSE,
       'size' => 'big',
       'description' => 'The cmd or script to run to process the raw result',
+    ),
+    'info' => array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'size' => 'big',
+      'description' => 'Information, description, or tips for the test, tool, or process.',
     ),
     'watch_file' => array(
       'type' => 'varchar',
