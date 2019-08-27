@@ -5,7 +5,7 @@ This is set of custom web forms and data displays that help track tests and resu
 
 PenTDB is for those people who don't want to spend brain cycles organizing and re-reading large amounts of detailed data about pentesting progress for multiple hosts under time pressure in **text files** and **free-form notes**... when tracking data bits quickly are what computers are for! Now you can apply that brain juice to figuring out the puzzles and problems instead. PenTDB may also be good for training purposes.
 
-You can run PenTDB on your host machine, or on your Kali machine. If running on Kali, I recommend using an odd port, for example 411, to keep common web ports open for pentesting purposes. If you wish to use the handy WatchFiles feature, PenTDB must be running on your Kali machine.
+You can run PenTDB on your host machine, or on your Kali machine. If running on Kali, I recommend using an odd port, for example 411, to keep common web ports open for pentesting purposes. If you wish to use the handy WatchFiles feature, PenTDB **must** be running on your Kali machine.
 
 ### Requirements
 This is designed to be run on Kali Linux. Web server (e.g. apache) and database (e.g. MariaDB) are required, as is PHP.
@@ -20,20 +20,38 @@ Listen 127.0.0.1:411
 ```
 You can find an example apache 2.4 site.conf file in the file sample_a2_conf.txt, included in this repo.
 
-  1. Create a set of directories:
-      * PenTDB
-      * PenTDB/logs
-      * PenTDB/html
-      * PenTDB/exploit-db-pages
-  1. Copy the PenTDB repository files into the desired web root directory (e.g., PenTDB/html), and configure your webserver to serve them.
-  2. Launch mysql, e.g., $ mysql -uroot
-  2. mysql> CREATE DATABASE pentdb;
-  2. mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON pentdb.* to '\<username\>'@'localhost' IDENTIFIED BY '\<password\>';
-  2. mysql> FLUSH PRIVILEGES;
-  2. $ sudo mysql -uroot pentdb < pentdb_db_init.sql
-  2. $ cp dru_db_settings-default.php dru_db_settings.php    # and put the database credentials in your settings file
-  3. [optional] $ sudo vim /etc/hosts     # and enter a line for your preferred URL to access, e.g.  127.0.0.1  pentdb.local
-  6. Application is ready for use; browse to the site, e.g. http://pentdb.local:411
+1. Create a set of directories:
+  * $ mkdir PenTDB
+  * $ mkdir PenTDB/logs
+  * $ mkdir PenTDB/exploit-db-pages
+2. Clone the PenTDB repository files into the PenTDB directory and rename it to "html":
+  * $ cd PenTDB
+  * $ git clone https://github.com/katin/PenTDB.git
+  * $ mv PenTDB html
+3. Configure your webserver to serve the files at PenTDB/html
+  * there is an example apache 2.4 .conf file included: sample_a2_conf.txt
+  * $ cd /etc/apache2/sites-available
+  * $ cp /your-path/PenTDB/html/sample_a2_conf.txt pentdb.conf
+  * edit /etc/apache2/sites-available/pentdb.conf, and set the paths to match your paths
+  * $ a2ensite pentdb.conf
+  * edit /etc/apache2/ports.conf   to include   Listen 127.0.0.1:411
+  * edit /etc/hosts to include:      127.0.0.1    pentdb.kali.local
+  * $ service apache2 start   # or service apache2 restart     # if it was already running
+4. Create, configure, and load the database
+  * Launch mysql if needed and log in 
+  * $ service mysql start      # no need to restart if already running
+  * $ mysql -uroot
+  * mysql> CREATE DATABASE pentdb;
+  * mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON pentdb.* to '<username>'@'localhost' IDENTIFIED BY '<password>';
+  * mysql> FLUSH PRIVILEGES;
+  * mysql> exit
+  * $ mysql -uroot pentdb < /root/.../PenTDB/html/pentdb_db_init.sql
+5. Create and customize settings file
+  * $ cd /root/.../PenTDB/html/dru_dblib-v1.0
+  * $ cp dru_db_settings-default.php dru_db_settings.php 
+  * edit dru_db_settings.php and add your database credentials and db name
+  * Optional: set your preferred data path in PenTDB/html/pentdb-config.php
+6. Application is ready for use; browse to the site, e.g. http://pentdb.kali.local:411
  
 ### Tuning
  For faster creation of PenTDB sessions, you can set the values in the pentdb-config.php file to match your personal directory structure. 
