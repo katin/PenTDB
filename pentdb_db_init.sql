@@ -182,6 +182,7 @@ CREATE TABLE `testinstance` (
   `cmd` longtext,
   `process_result_cmd` longtext,
   `watch_file` varchar(64) NOT NULL DEFAULT '',
+  `info` longtext,
   `status` varchar(16) NOT NULL DEFAULT '',
   `order_weight` tinyint(4) NOT NULL DEFAULT '0',
   `raw_result` longtext,
