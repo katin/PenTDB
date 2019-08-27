@@ -1,6 +1,8 @@
 # PenTDB
 Pentesting Tracker application with HTML Interface
 
+**NEW:** Installation Walk-thru video: https://www.youtube.com/watch?v=N9m67Qk8Af4
+
 This is set of custom web forms and data displays that help track tests and results, IPs and ports under test, and vulns processed while pentesting. **Basically, this is a replacement for apps like KeepNote, and specialized for pentesting.**
 
 PenTDB is for those people who don't want to spend brain cycles organizing and re-reading large amounts of detailed data about pentesting progress for multiple hosts under time pressure in **text files** and **free-form notes**... when tracking data bits quickly are what computers are for! Now you can apply that brain juice to figuring out the puzzles and problems instead. PenTDB may also be good for training purposes.
