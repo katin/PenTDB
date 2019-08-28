@@ -7,6 +7,7 @@ System notes for the PenTDB pentest tracking tool.
 
 TODO LIST
 ---------
+[_] Require 'service label' field ('service') when submitting add service form
 [_] Add file check for settings file and issue warning message (or install instructions?) if missing. Mostly for new installs.
 [_] rename vulns to exploits throughout the system? Or, have both?
 [x] fix tailing-slash auto-processing of vuln - add warning for a blank .html file present
