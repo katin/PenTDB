@@ -68,10 +68,15 @@ Make sure the directory holding your data files is accessible by the web server 
 ```
     $ chown -R :www-data /root/Documents/hackthebox
 ```
-
 ### Missing Features
 
 Be advised that this version has no method of taking screenshots, storing screenshots, or viewing screenshots. You'll probably want to figure out how you are going to manage and organize screenshots to make them easy for yourself.
+
+### Road Map
+Adding these features is on the road map for continued development:
+* export/import of test templates and service test sets, so the community can share testing sets
+* creds tracking and easy creation of files for using found credentials with tools like hydra
+* vuln scoring to rank found exploits from best-match to least
 
 ### Caveats
 **Rapid hack**
