@@ -12,7 +12,9 @@ You can run PenTDB on your host machine, or on your Kali machine. If running on 
 ### Requirements
 This is designed to be run on Kali Linux. Web server (e.g. apache) and database (e.g. MariaDB) are required, as is PHP.
 If you want to use the exploit-auto-populate feature, you'll need curl for PHP, e.g., something like:
+   ```
    $ apt install php7.3-curl
+   ```
 
 ### Installation
 **NOTE: DO NOT expose this web app to the Internet! It is insecure and for local use only. DO NOT INSTALL ON A WEB HOSTING SERVICE OR CLOUD SERVER.** *You have been warned.*
