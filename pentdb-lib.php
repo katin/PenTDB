@@ -531,7 +531,7 @@ function pentdb_new_vuln() {
 
 	// Create the vuln record
 	$vuln_q = "INSERT into {vuln} (session_id, ip_address, title, port, service, url, code_language, status, order_weight)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+		. " VALUES ('%s','%s','%s',%d,'%s','%s','%s','%s',%d)";
 	$result = db_query( $vuln_q,
 		$session_id,
 		$ip,
@@ -539,7 +539,7 @@ function pentdb_new_vuln() {
 		$port,
 		$service,
 		$_GET['url'],
-		$_GET['code_laguage'],
+		$_GET['code_language'],
 		$_GET['status'],
 		$template['order_weight']
 	);
@@ -586,8 +586,13 @@ function pentdb_update_vuln() {
 	if ( !isset($_GET[$fname]) ) {
 		pentdb_log_error("Missing field data parm '".$fname."' in update_vuln(). [MSG-4107]");
 		return false;
+	} 
+	if ( $fname == 'title' ) {
+		if ( strlen($_GET[$fname]) > 255 ) {
+			$_GET[$fname] = substr($_GET[$fname],0,254);    # trim for field length
+		}
 	}
-
+	
 	// update db
 
 	$vuln_q = "UPDATE vuln SET ".$fname."='%s' WHERE vid=".$vars['vuln'];
@@ -866,7 +871,7 @@ global $webpages_cache_path;
 	$searchlength = 600;
 	$type = pentdb_search_source( $page_source, $searchkey, $endmark, $searchlength );
 	if ( $type ) {
-		$data['title'] = $type;
+		$data['title'] = substr($type,0,254);   # trim for field length
 	}
 
 	// get verified status

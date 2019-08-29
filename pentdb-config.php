@@ -24,7 +24,7 @@ switch ( $machine_id ) {
 		break;
 
 	case 'kali':
-		define("DEFAULT_DATA_PATH",'/root/Pentesting/');
+		define("DEFAULT_DATA_PATH",'/root/Pentesting/htb/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
 		define("DEFAULT_HOST_CMD",'mktank $ip $hostname');
