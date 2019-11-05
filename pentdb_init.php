@@ -261,6 +261,8 @@ CREATE TABLE `sessions` (
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `session_id` varchar(96) NOT NULL DEFAULT '',
   `data_path` varchar(255) NOT NULL DEFAULT '',
+  `fieldguide_path` varchar(255) NOT NULL  DEFAULT '',
+  `cmd_path` varchar(255) NOT NULL DEFAULT '',
   `api_url` varchar(127) NOT NULL DEFAULT '',
   PRIMARY KEY (`sid`),
   KEY `main` (`session_id`)
@@ -297,6 +299,13 @@ $schema['sessions'] = array(
       'not null' => TRUE,
       'default' => '',
       'description' => 'Data path for tanks and data on local machine',
+    ),
+    'fieldguide_path' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Fieldguide files path for display of notes',
     ),
     'cmd_path' => array(
       'type' => 'varchar',
@@ -349,6 +358,7 @@ CREATE TABLE `porttest` (
   `cmd` longtext,
   `process_result_cmd` longtext,
   `watch_file` varchar(64) NOT NULL DEFAULT '',
+  `fieldguide_file` varchar(127) NOT NULL DEFAULT '',
   `pass_depth` tinyint(4) NOT NULL DEFAULT '0',
   `order_weight` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`pitid`),
@@ -427,6 +437,13 @@ $schema['porttest'] = array(
       'default' => '',
       'description' => 'Log or status file to display if present.',
     ),
+    'fieldguide_file' => array(
+      'type' => 'varchar',
+      'length' => 127,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'File to click-expand display for reference.',
+    ),
     'pass_depth' => array(
       'type' => 'int',
       'not null' => TRUE,
@@ -484,6 +501,7 @@ CREATE TABLE `testinstance` (
   `cmd` longtext,
   `process_result_cmd` longtext,
   `watch_file` varchar(64) NOT NULL DEFAULT '',
+  `fieldguide_file` varchar(127) NOT NULL DEFAULT '',
   `status` varchar(16) NOT NULL DEFAULT '',
   `order_weight` tinyint(4) NOT NULL DEFAULT '0',
   `raw_result` longtext,
@@ -592,6 +610,13 @@ $schema['testinstance'] = array(
       'not null' => TRUE,
       'default' => '',
       'description' => 'Log or status file to display if present.',
+    ),
+    'fieldguide_file' => array(
+      'type' => 'varchar',
+      'length' => 127,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'File to click-expand display for reference.',
     ),
     'status' => array(
       'type' => 'varchar',

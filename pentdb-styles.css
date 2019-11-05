@@ -668,7 +668,7 @@ a.link-button:hover {
 	content: ' ]';
 }
 
-.display-watchfile {
+.display-watchfile, .display-fieldguidefile {
     margin-left: 140px;
     font-size: 0.8em;
     background-color: #222;

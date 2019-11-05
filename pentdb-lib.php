@@ -110,7 +110,7 @@ function pentdb_get_session_path() {
 
 // get_cmd_path
 //
-// Read the session record and return the data path set
+// Read the session record and return the cmd path
 
 function pentdb_get_cmd_path() {
 	$session_id = pentdb_clean( $_GET['session_id'] );
@@ -118,6 +118,20 @@ function pentdb_get_cmd_path() {
 	$session_rec = db_fetch_array( db_query( $path_q, $session_id ) );
 	if ( $session_rec ) {
 		return $session_rec['cmd_path'];
+	}
+
+}
+
+// get_fieldguide_path
+//
+// Read the session record and return the fieldguide path
+
+function pentdb_get_fieldguide_path() {
+	$session_id = pentdb_clean( $_GET['session_id'] );
+	$path_q = "SELECT * FROM {sessions} where session_id='%s'";
+	$session_rec = db_fetch_array( db_query( $path_q, $session_id ) );
+	if ( $session_rec ) {
+		return $session_rec['fieldguide_path'];
 	}
 
 }
@@ -170,6 +184,57 @@ function get_watchfile_display( $ip, $filename ) {
 }
 
 
+// get_watchfile
+//
+// Returns the file contents if present;
+//   or false if the file doesn't exit.
+//
+
+function pentdb_get_fieldguide( $ip, $filename ) {
+
+	$base_path = pentdb_get_fieldguide_path();
+	// if ( $myip = pentdb_validate_ip($ip) ) {
+	// 	$full_path = $base_path . $myip . "/" . $filename;
+	// } else {
+	// 	pentdb_log_error("Apparent invalid IP address in get_fieldguide. ERR-2231");
+	// 	return false;
+	// }
+
+	$full_path = $base_path . $filename;
+
+pentdb_log_error("fullpath:".$full_path);
+
+	if ( file_exists($full_path) ) {
+		$contents = file_get_contents($full_path);
+		return $contents;
+	}
+
+	return false;
+}
+
+
+// get_fieldguide_display
+// 
+// Return HTML expandable-section of the fieldguide (if it is present),
+//   or NULL if the file doesn't exist.
+//
+
+function get_fieldguide_display( $ip, $filename ) {
+
+	$thefile = pentdb_get_fieldguide( $ip, $filename );
+	if ( !$thefile ) {
+		return NULL;
+	}
+
+	$output = '';
+
+	$output .= '<div class="display-fieldguidefile"><details><summary>'.$filename.' ('.strlen($thefile).' bytes)</summary>'."\n";
+	$output .= '<pre>'.htmlentities($thefile).'</pre>'."\n";
+	$output .= '</details></div>'."\n";
+
+	return $output;
+}
+
 
 // display_page
 //
@@ -195,8 +260,9 @@ global $top_message;
 ?>
 <HTML>
 <HEAD>
-  <link rel="stylesheet" type = "text/css" href = "pentdb-styles.css" />
-  <script src="pentdb.js"></script>
+  <TITLE>PenTDB (main)</TITLE>
+  <LINK rel="stylesheet" type = "text/css" href = "pentdb-styles.css" />
+  <SCRIPT src="pentdb.js"></SCRIPT>
 </HEAD>
 
 <BODY>
@@ -331,12 +397,12 @@ function pentdb_create_session( $name ) {
 	$session = pentdb_clean( $name );
 		// [_] *** TODO: sanitize data_path
 	$data_path = $_GET['dir'];		// don't pentdb_clean() this; it removes the slashes!
+	$fieldguide_path = $_GET['fieldguide'];
 	$cmd_path = $_GET['cmd_path'];		// don't pentdb_clean() this; it removes the slashes!
-	$addsess_q = "INSERT into sessions (session_id,data_path,cmd_path) VALUES ('%s','%s','%s')";
-	$addsess_result = db_query( $addsess_q, $session, $data_path, $cmd_path);
+	$addsess_q = "INSERT into sessions (session_id,data_path,fieldguide_path,cmd_path) VALUES ('%s','%s','%s','%s')";
+	$addsess_result = db_query( $addsess_q, $session, $data_path, $fieldguide_path, $cmd_path);
 	if ( !$addsess_result ) {
-		echo '<div>Query failed.</div>';
-		echo "<div></pre>".print_r($addsess_result,true)."</pre></div>";
+		pentdb_log_error('Create session failed. [ERR-101] '.print_r($addsess_result,true));
 		return false;
 	}
 
@@ -352,8 +418,7 @@ function pentdb_add_ip( $ip, $session, $hostname ) {
 	$addip_q = "INSERT into {testinstance} (session_id,ip_address,rectype,title) VALUES ('%s','%s','HOST','%s')";
 	$addip_result = db_query( $addip_q, $session, $ip, 'HOST '.$hostname);
 	if ( !$addip_result ) {
-		echo '<div>Query failed.</div>';
-		echo "<div></pre>".print_r($addip_result,true)."</pre></div>";
+		pentdb_log_error('Add IP failed. [ERR-102]'.print_r($addip_result,true));
 		return false;
 	}
 	return $ip;
@@ -538,13 +603,14 @@ function pentdb_new_vuln() {
 		$port,
 		$service,
 		$_GET['url'],
-		$_GET['code_laguage'],
+		$_GET['code_language'],
 		$_GET['status'],
 		$template['order_weight']
 	);
 
 	if ( !$result ) {
 		pentdb_log_error("Error adding vuln record ".$_GET['title']." [ERR-1021]");
+		// [_] TODO: chain to the host screen here; just returning false gives errors
 		return false;
 	}
 
@@ -2232,6 +2298,8 @@ function get_session_form( $title = "Add a session") {
 		<div class="bigform"><FORM action="index.php" method="GET">
 			<LABEL for="session_name">Session name: </LABEL>
 			<INPUT type="text" name="idname" id="session_name"></INPUT><br/>
+			<LABEL for="dir">Fieldguide path: </LABEL>
+			<INPUT type="text" name="fieldguide" id="fieldguide" value="'.DEFAULT_FIELDGUIDE_PATH.'"></INPUT> (Include trailing slash)<br/>
 			<LABEL for="dir">Data (tanks) path: </LABEL>
 			<INPUT type="text" name="dir" id="dir" value="'.DEFAULT_DATA_PATH.'"></INPUT> (Include trailing slash)<br/>
 			<LABEL for="cmd_path">Scripts cmd path: </LABEL>
@@ -2635,6 +2703,31 @@ function get_watchfile_form( $recid, $field_contents = NULL ) {
 
 	return $myform;
 }
+
+
+function get_fieldguide_form( $recid, $field_contents = NULL ) {
+	$vars = pentdb_get_page_vars();
+	$myform = '
+		<div class="inlineform"><FORM action="index.php#test-'.$recid.'" method="GET">
+
+		<LABEL for="watch_file">Fieldguide file: </LABEL>
+		<INPUT type="text" name="fieldguide_file" id="fieldguide_file" value="'.$field_contents.'"></INPUT>
+
+		<INPUT type="hidden" name="recid" value="'.$recid.'"></INPUT>
+
+		<INPUT type="hidden" name="service" value="'.$vars['service'].'"></INPUT>
+		<INPUT type="hidden" name="session_id" value="'.$vars['session_id'].'"></INPUT>
+		<INPUT type="hidden" name="port" value="'.$vars['port'].'"></INPUT>
+		<INPUT type="hidden" name="ip" value="'.$vars['ip'].'"></INPUT>
+
+		<INPUT type="hidden" name="fcmd" value="update-fieldguidefile"></INPUT>
+		<INPUT type="submit" value="Update Fieldguide file"></INPUT>
+		</FORM></div>
+	';
+
+	return $myform;
+}
+
 
 function get_info_form( $recid, $info ) {
 	$vars = pentdb_get_page_vars();

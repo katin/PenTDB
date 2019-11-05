@@ -458,6 +458,9 @@ function get_new_test_form( $title = "Add a test template" ) {
 		<LABEL for="watch_file">Watch file: </LABEL>
 		<INPUT type="text" name="watch_file" id="watch_file"></INPUT><br/>
 
+		<LABEL for="fieldguide_file">Fieldguide file(s): </LABEL>
+		<INPUT type="text" name="fieldguide_file" id="fieldguide_file"></INPUT><br/>
+
 		<LABEL for="pass_depth">Pass depth: </LABEL>
 		<INPUT type="text" name="pass_depth" id="pass_depth" value="1"></INPUT><br/>
 
@@ -532,8 +535,8 @@ function pentdb_add_test() {
 	}
 
 	// Create the instance record
-	$test_q = "INSERT into {porttest} (port, service, rectype, statustype, title, info, cmd, process_result_cmd, watch_file, pass_depth, order_weight)"
-		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+	$test_q = "INSERT into {porttest} (port, service, rectype, statustype, title, info, cmd, process_result_cmd, watch_file, fieldguide_file, pass_depth, order_weight)"
+		. " VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')";
 	$result = db_query( $test_q,
 		$_GET['port'],
 		$_GET['service'],
@@ -544,6 +547,7 @@ function pentdb_add_test() {
 		$_GET['cmd'],
 		$_GET['process_result_cmd'],
 		$_GET['watch_file'],
+		$_GET['fieldguide_file'],
 		$_GET['pass_depth'],
 		$_GET['order_weight']
 	);
@@ -601,7 +605,7 @@ function pentdb_update_test() {
 
 function pentdb_get_valid_test_fields() {
 	$form_fields = array( 'port', 'rectype', 'statustype', 'service', 'title', 'info',
-		'cmd', 'process_result_cmd', 'watch_file', 'order_weight', 'pass_depth'
+		'cmd', 'process_result_cmd', 'watch_file', 'fieldguide_file', 'order_weight', 'pass_depth'
 	);
 
 	return $form_fields;

@@ -17,11 +17,8 @@ function ptdb_process_cmd ( $mycmd ) {
 			$success = pentdb_create_session( $_GET['idname'] );
 			if ( $success ) {
 				$_GET['session_id'] = $success;
-				break;
-			} else {
-				echo "<div>Create session failed.</div>";
-				break;
 			}
+			break;
 
 		case 'add-host':
 			$the_session = $_GET['session_id'];		// TODO: sanitize session
@@ -167,6 +164,16 @@ function ptdb_process_cmd ( $mycmd ) {
 			$up_result = db_query($up_q, $_GET['watch_file'], $_GET['recid']);
 			if ( !$up_result ) {
 				"Watch file update query failed. [ERR-889]";
+				die();
+			}
+			return true;
+			break;
+
+		case 'update-fieldguidefile':
+			$up_q = "UPDATE {testinstance} set fieldguide_file='%s' WHERE irid='%d'";
+			$up_result = db_query($up_q, $_GET['fieldguide_file'], $_GET['recid']);
+			if ( !$up_result ) {
+				"Watch file update query failed. [ERR-890]";
 				die();
 			}
 			return true;

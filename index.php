@@ -382,6 +382,9 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 
 		$buttons .= '</div>'."\n";
 
+		$fieldguide_form = get_fieldguide_form( $test['irid'], $test['fieldguide_file'] );
+		$fieldguide_display = get_fieldguide_display( $ip, $test['fieldguide_file'] );
+
 		$info_form = get_info_form( $test['irid'], $test['info'] );
 		$notes_form = get_notes_form( $test['irid'], $test['notes'] );
 		$discovered_form = get_discovered_form( $test['irid'], $test['discovered'] );
@@ -423,6 +426,8 @@ function display_service_page( $session_id, $ip, $service, $port ) {
 			.  get_add_processcmd_form( $test['irid'], fill_varset(str_replace('"', '&quot;',$test['process_result_cmd'])) )
 			// . '<div class="test-process">PROCESS: <input class="cmd-text" type="text" value="'.addslashes(fill_varset(str_replace('"', '&quot;',$test['process_result_cmd']))).'" id="P'.$lineid.'"><button class="cmd-copy" onclick="ptdb_copytext(\'P'.$lineid.'\')">Copy</button></div>'
 			. "\n";
+
+		$test_list .= $fieldguide_form . $fieldguide_display;
 
 		$test_list .= $info_form . $notes_form . $banner_form . $flags_form . $watchfile_form . $watchfile_display . $discovered_form . $raw_result_form;
 		$test_list .= '</'.$details.'>'."\n";

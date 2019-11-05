@@ -12,6 +12,7 @@ switch ( $machine_id ) {
 	
 	case 'G16-D9A':
 		define("DEFAULT_DATA_PATH",'/home/katin/Documents/hackthebox/');
+		define("DEFAULT_FIELDGUIDE_PATH",'/home/katin/Documents/PenTestFieldGuide/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
 		define("DEFAULT_HOST_CMD",'mktank $ip $hostname');
@@ -25,6 +26,7 @@ switch ( $machine_id ) {
 
 	case 'kali':
 		define("DEFAULT_DATA_PATH",'/root/Documents/htb/');
+		define("DEFAULT_FIELDGUIDE_PATH",'/root/Documents/PenTestFieldGuide/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
 		define("DEFAULT_HOST_CMD",'mktank $ip $hostname');
@@ -38,6 +40,7 @@ switch ( $machine_id ) {
 
 	default:
 		define("DEFAULT_DATA_PATH",'/data-dir/Documents/test-area/');
+		define("DEFAULT_FIELDGUIDE_PATH",'/data-dir/PenTestFieldGuide/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
 		define("DEFAULT_HOST_CMD",'mktank $ip $hostname');
