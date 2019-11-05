@@ -10,8 +10,8 @@ $machine_id = gethostname();
 
 switch ( $machine_id ) {
 	
-	case 'G16-D9A':
-		define("DEFAULT_DATA_PATH",'/home/katin/Documents/hackthebox/');
+	case 'my-machine-name':
+		define("DEFAULT_DATA_PATH",'/home/myuser/Pentesting/');
 		define("DEFAULT_FIELDGUIDE_PATH",'/home/katin/Documents/PenTestFieldGuide/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
@@ -25,7 +25,7 @@ switch ( $machine_id ) {
 		break;
 
 	case 'kali':
-		define("DEFAULT_DATA_PATH",'/root/Documents/htb/');
+		define("DEFAULT_DATA_PATH",'/root/Pentesting/htb/');
 		define("DEFAULT_FIELDGUIDE_PATH",'/root/Documents/PenTestFieldGuide/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
