@@ -12,7 +12,7 @@ switch ( $machine_id ) {
 	
 	case 'my-machine-name':
 		define("DEFAULT_DATA_PATH",'/home/myuser/Pentesting/');
-		define("DEFAULT_FIELDGUIDE_PATH",'/home/katin/Documents/PenTestFieldGuide/');
+		define("DEFAULT_FIELDGUIDE_PATH",'/home/myuser/Documents/PenTestFieldGuide/');
 		define("DEFAULT_CMD_PATH",'/root/Documents/bin/');
 
 		define("DEFAULT_HOST_CMD",'mktank $ip $hostname');
