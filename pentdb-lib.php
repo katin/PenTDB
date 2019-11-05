@@ -221,16 +221,23 @@ pentdb_log_error("fullpath:".$full_path);
 
 function get_fieldguide_display( $ip, $filename ) {
 
-	$thefile = pentdb_get_fieldguide( $ip, $filename );
-	if ( !$thefile ) {
-		return NULL;
-	}
+
+	$files = explode( ',', $filename );
 
 	$output = '';
 
-	$output .= '<div class="display-fieldguidefile"><details><summary>'.$filename.' ('.strlen($thefile).' bytes)</summary>'."\n";
-	$output .= '<pre>'.htmlentities($thefile).'</pre>'."\n";
-	$output .= '</details></div>'."\n";
+	foreach( $files as $file ) {
+		$thefile = pentdb_get_fieldguide( $ip, trim($file) );
+		if ( !$thefile ) {
+			return NULL;
+		}
+
+		$output .= '<div class="display-fieldguidefile"><details><summary>'.trim($file).' ('.strlen($thefile).' bytes)</summary>'."\n";
+		$output .= '<pre>'.htmlentities($thefile).'</pre>'."\n";
+		$output .= '</details></div>'."\n";
+	}
+
+
 
 	return $output;
 }
