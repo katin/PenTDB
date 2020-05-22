@@ -2,3 +2,13 @@
 [Wed May 20 09:26:49.596655 2020] [php7:error] [pid 1423] [client 127.0.0.1:50770] PHP Fatal error:  require_once(): Failed opening required 'dru_dblib-v1.0/dru_db_settings.php' (include_path='.:/usr/share/php') in /home/kali/PenTDB/html/index.php on line 12
 [Wed May 20 09:49:43.694520 2020] [php7:warn] [pid 1425] [client 127.0.0.1:50798] PHP Warning:  require_once(dru_dblib-v1.0/dru_db_settings.php): failed to open stream: No such file or directory in /home/kali/PenTDB/html/index.php on line 12
 [Wed May 20 09:49:43.694587 2020] [php7:error] [pid 1425] [client 127.0.0.1:50798] PHP Fatal error:  require_once(): Failed opening required 'dru_dblib-v1.0/dru_db_settings.php' (include_path='.:/usr/share/php') in /home/kali/PenTDB/html/index.php on line 12
+[Fri May 22 11:38:56.134405 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: session_id in /home/kali/PenTDB/html/pentdb-lib.php on line 102
+[Fri May 22 11:38:56.135529 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: session_id in /home/kali/PenTDB/html/pentdb-lib.php on line 282
+[Fri May 22 11:38:56.135570 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: session_id in /home/kali/PenTDB/html/pentdb-lib.php on line 294
+[Fri May 22 11:38:56.135589 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: ip in /home/kali/PenTDB/html/pentdb-lib.php on line 294
+[Fri May 22 11:38:56.135610 2020] [php7:warn] [pid 10260] [client 127.0.0.1:51024] PHP Warning:  Invalid argument supplied for foreach() in /home/kali/PenTDB/html/pentdb-lib.php on line 302
+[Fri May 22 11:38:56.135630 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: session_id in /home/kali/PenTDB/html/pentdb-lib.php on line 312
+[Fri May 22 11:38:56.135644 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: ip in /home/kali/PenTDB/html/pentdb-lib.php on line 312
+[Fri May 22 11:38:56.137038 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: session_id in /home/kali/PenTDB/html/pentdb-lib.php on line 314
+[Fri May 22 11:38:56.137049 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined index: ip in /home/kali/PenTDB/html/pentdb-lib.php on line 314
+[Fri May 22 11:39:00.229882 2020] [php7:notice] [pid 10260] [client 127.0.0.1:51024] PHP Notice:  Undefined variable: test_list in /home/kali/PenTDB/html/pentdb-tests.php on line 164, referer: http://pentdb.kali.local:411/
