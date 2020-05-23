@@ -1,0 +1,118 @@
+#!/bin/bash
+# Installer script for PenTDB by Katin
+# https://github.com/katin/PenTDB
+
+echo "Installing PenTDB, the PenTesting Database by Katin"
+echo "    ____           __________  ____ "
+echo "   / __ \___  ____/_  __/ __ \/ __ )"
+echo "  / /_/ / _ \/ __ \/ / / / / / __  |"
+echo " / ____/  __/ / / / / / /_/ / /_/ / "
+echo "/_/    \___/_/ /_/_/ /_____/_____/  "
+echo " "
+echo "The Pentesting Power Tool: It's Noisey and Cuts Thru Walls"
+echo " "
+echo "Installing PenTDB for Apache2 and MySQL/MariaDB..."
+echo " "
+
+WEBSERVER="apache2"
+DATABASE="mysql"
+
+# check for prerequistites
+WEBSRV_CHECK=`whereis $WEBSERVER | cut -f2 -d' '`
+if [ $WEBSRV_CHECK == "$WEBSERVER:" ]
+then
+  echo "ERROR 101: Web server (apache2) is required for operation and installation script."
+  echo "                       *** Installation cancelled ***"
+  exit 1
+fi
+DB_CHECK=`whereis $DATABASE | cut -f2 -d' '`
+if [ $DB_CHECK == "$DATABASE:" ]
+then
+  echo "ERROR 102: Database server MySQL or MariaDB is required for operation and installation script."
+  echo "                       *** Installation cancelled ***"
+  exit 1
+fi
+
+# CONFIGURE APACHE2 for PENTDB
+# Copy the apache config file for the PenTDB website into /etc/apache2/sites-available,
+# configure it for the current user (e.g., kali), update ports.conf, and restart apache.
+# All require sudo, but do not run this file as sudo -- that will put the wrong directory into the .conf file.
+# 200518 KBI created
+
+set -x
+
+CONF_FILE="/etc/apache2/sites-available/pentdb.conf"
+HOME_USER=$USER
+
+# tell apache about our website
+sudo cp a2_pentdb_template.conf $CONF_FILE
+sudo sed -i "s/home_user/$USER/g" $CONF_FILE
+
+# enable the site
+sudo a2ensite pentdb
+
+# set our site to localhost access only
+# if the file doesn't have our port listen already
+if grep -q "Listen 127.0.0.1:411" /etc/apache2/ports.conf; 
+then
+  # do nothing - we already have the listen in place
+  sleep 1
+else
+  sudo cp /etc/apache2/ports.conf /etc/apache2/ports.conf.bak
+  sudo sed -i 's/Listen 80/Listen 80\nListen 127.0.0.1:411/g' /etc/apache2/ports.conf
+fi
+
+# restart apache for changes to take effect
+sudo service apache2 restart
+
+# add our hostname to local hosts file
+if grep -q "pentdb.kali.local" /etc/hosts;
+then
+  # do nothing - we already have a host alias in place
+  sleep 1
+else 
+  sudo cp /etc/hosts /etc/hosts.bak
+  sed "/# The following/ i 127.0.0.1    pentdb.kali.local\n" /etc/hosts | sudo tee /etc/hosts
+fi
+echo "...apache and local host configuration completed."
+
+# Configure and import the mysql database for PenTDB
+# 200521 KBI created
+
+# variables and dependencies
+DBLIB_LOC="dru_dblib-v1.0/"
+DB_SETTINGS_FILE="dru_db_settings"
+DB_SETTINGS_FULL="html/$DBLIB_LOC$DB_SETTINGS_FILE"
+
+# create our user, password, and db name
+USER="u$RANDOM"
+PWD=$(openssl rand -base64 8)
+DBNAME="pentdb_$RANDOM"
+
+# create and import the database
+# (currently, there is no check to make sure mysql is running)
+sudo mysql -e "create database $DBNAME;"
+sudo mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON $DBNAME.* TO '$USER'@localhost IDENTIFIED BY '$PWD';"
+if [ -e "./pentdb_preferred.sql" ]
+then
+  sudo mysql $DBNAME < ./pentdb_preferred.sql
+else
+  sudo mysql $DBNAME < pentdb_db_init.sql
+fi
+
+# update the settings file
+# backup the current settings file if one exists
+if [ -e "$DB_SETTINGS_FULL.php" ]
+then
+  NOW=$(date +"%Y%m%d-%H%M%S")
+  mv $DB_SETTINGS_FULL.php $DB_SETTINGS_FULL-$NOW.php
+fi
+# echo "cmd: $DB_SETTINGS_FULL-default.php $DB_SETTINGS_FULL.php"
+cp $DB_SETTINGS_FULL-default.php $DB_SETTINGS_FULL.php
+echo "\$db_url = 'mysqli://$USER:$PWD@localhost/$DBNAME';" >> $DB_SETTINGS_FULL.php
+
+echo "mysql database configuration and data import completed."
+echo " "
+echo "PenTDB Installation completed."
+
+
