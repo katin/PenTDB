@@ -1,0 +1,24 @@
+TO UNINSTALL PENTDB:
+Follow these steps:
+
+1) Disable and remove apache site file.
+  # a2dissite pentdb.com
+  # sudo rm /etc/apache2/sites-available/pentdb.conf
+
+2) Remove the "Listen 127.0.0.1:411" line from /etc/apache2/ports.conf
+
+3) Remove the "127.0.0.1   pentdb.kali.local" line from /etc/hosts
+
+4) DROP database(s) from mysql (named pentdb_nnnn).
+   Perhaps you'd like to export your data first?
+   If the db contains results and tests for a pentesting client, be sure to encrypt or destroy the data.
+
+5) Delete database users (format is unnnn).
+   mysql> DELETE from db WHERE Db='pentdb_nnnn';
+   mysql> DELETE FROM user WHERE User='unnnn';
+
+6) remove the PenTDB directory.
+   # rm -rf /path/to/PenTDB
+
+If you ran the installer multiple times, there will be multiple pentdb databases and users in mysql.
+
