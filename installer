@@ -118,7 +118,7 @@ if [ -e "$DB_SETTINGS_FULL.php" ]
 then
   echo "  Backing up current settings file..."
   NOW=$(date +"%Y%m%d-%H%M%S")
-  mv $DB_SETTINGS_FULL.php $DB_SETTINGS_FULL-$NOW.php
+  mv $DB_SETTINGS_FULL.php $DB_SETTINGS_FULL_bkup-$NOW.php
 fi
 # echo "cmd: $DB_SETTINGS_FULL-default.php $DB_SETTINGS_FULL.php"
 cp $DB_SETTINGS_FULL-default.php $DB_SETTINGS_FULL.php
